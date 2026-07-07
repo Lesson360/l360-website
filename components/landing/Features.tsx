@@ -58,7 +58,7 @@ export function Features() {
       {/* 3D Heart Icon & Dashed Line Container */}
       <div className="max-w-6xl mx-auto relative px-4 z-10">
         {/* The 3D Heart */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-24 z-20">
+        <div className="absolute left-1/2 -translate-x-1/2 -top-32 z-20">
           <div className="relative w-36 h-36">
             <Image
               src="https://cdn.magicpatterns.com/uploads/2ezoB2Bf1GYqz5rkVubuYW/image_2.png"
@@ -71,15 +71,15 @@ export function Features() {
         </div>
 
         {/* Curved dotted line background */}
-        <div className="hidden md:block absolute -top-24 left-0 w-full h-32 z-0">
+        <div className="hidden md:block absolute -top-32 left-0 w-full h-40 z-0">
           <svg
             width="100%"
             height="100%"
-            viewBox="0 0 1000 128"
+            viewBox="0 0 1000 160"
             preserveAspectRatio="none"
           >
             <path
-              d="M 166,96 Q 500,0 834,96"
+              d="M 166,128 Q 500,-16 834,128"
               fill="none"
               stroke="#FF4800"
               strokeWidth="6"
@@ -129,37 +129,26 @@ export function Features() {
 
       {/* Bottom Clouds & Sun Decoration */}
       <div className="absolute bottom-0 left-0 w-full h-48 pointer-events-none z-0 overflow-hidden">
-        {/* Sun (Pure SVG) */}
-        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-44 sm:w-60 h-28 sm:h-36 z-10">
-          <svg viewBox="0 0 200 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Symmetrical Sun Rays */}
-            <g stroke="#FF8A00" strokeWidth="3" strokeLinejoin="round" fill="#FFE43A">
-              {/* Ray 1 */}
-              <path d="M 25,120 L 15,95 L 45,105 Z" />
-              {/* Ray 2 */}
-              <path d="M 45,105 L 40,75 L 70,90 Z" />
-              {/* Ray 3 */}
-              <path d="M 70,90 L 75,55 L 100,80 Z" />
-              {/* Ray 4 */}
-              <path d="M 100,80 L 110,50 L 130,80 Z" />
-              {/* Ray 5 */}
-              <path d="M 130,80 L 145,55 L 160,90 Z" />
-              {/* Ray 6 */}
-              <path d="M 160,90 L 180,75 L 185,105 Z" />
-              {/* Ray 7 */}
-              <path d="M 185,105 L 205,95 L 195,120 Z" />
-            </g>
-            {/* Sun Core */}
-            <circle cx="100" cy="115" r="50" fill="#FFE43A" stroke="#FF8A00" strokeWidth="3" />
-            {/* Sun Highlight Inner */}
-            <path d="M 60,100 A 42 42 0 0 1 140,100" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" opacity="0.7" />
-          </svg>
+        {/* Sun Image */}
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-44 sm:w-60 h-28 sm:h-36 z-10 mix-blend-multiply">
+          <Image
+            src="/sun.png"
+            alt="Sun Decoration"
+            width={240}
+            height={120}
+            className="w-full h-auto object-contain"
+          />
         </div>
 
-        {/* Clouds (Pure SVG Cloud Layer) */}
-        <svg viewBox="0 0 1440 180" className="absolute bottom-0 left-0 w-full h-24 sm:h-32 z-20" fill="white" preserveAspectRatio="none">
-          <path d="M0,180 L1440,180 L1440,85 C1380,55 1300,55 1240,85 C1180,45 1080,45 1020,85 C940,55 840,55 780,95 C720,55 620,55 560,95 C500,55 400,55 340,85 C280,45 180,45 120,85 C60,55 0,65 0,105 Z" />
-        </svg>
+        {/* Clouds Image */}
+        <div className="absolute bottom-0 left-0 w-full h-24 sm:h-32 z-20 overflow-hidden mix-blend-screen">
+          <Image
+            src="/cloud.png"
+            alt="Clouds Transition"
+            fill
+            className="object-cover object-bottom"
+          />
+        </div>
       </div>
     </section>
   );

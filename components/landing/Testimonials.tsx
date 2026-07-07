@@ -117,7 +117,7 @@ export function Testimonials() {
 
         {/* View All button */}
         <div className="flex justify-center mt-12 mb-6">
-          <button className="relative bg-brand-orange text-white border-4 border-[#2d284b] rounded-[24px] px-16 py-4 text-xl sm:text-2xl font-black font-comic shadow-[0_8px_0_0_#2d284b] active:shadow-[0_0px_0_0_#2d284b] active:translate-y-[8px] hover:translate-y-[2px] hover:shadow-[0_6px_0_0_#2d284b] transition-all focus:outline-none w-full sm:w-auto max-w-md">
+          <button className="relative bg-brand-orange text-white border-4 border-[#2d284b] rounded-[24px] px-16 py-4 text-xl sm:text-2xl font-black font-comic shadow-[0_8px_0_0_#2d284b] active:shadow-[0_0px_0_0_#2d284b] active:translate-y-[8px] hover:translate-y-[2px] hover:shadow-[0_6px_0_0_#2d284b] transition-all focus:outline-none w-full max-w-md">
             View All
           </button>
         </div>
