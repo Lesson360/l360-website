@@ -7,10 +7,10 @@ import { useAuth } from '@/lib/hooks/useAuth';
 
 export function Header() {
     const { user, logout } = useAuth();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    
 
     return (
-        <header className="w-full bg-[#fdeadd] px-6 py-4 flex justify-between items-center border-b border-orange-200">
+        <header className="w-full bg-brand-peach px-6 py-4 md:px-12 lg:px-16 flex justify-between items-center border-b border-brand-orange/20">
             <div className="flex items-center">
                 <Link href="/">
                     <Image
@@ -23,7 +23,7 @@ export function Header() {
                     />
                 </Link>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
                 {user ? (
                     <>
                         <span className="text-gray-800 font-semibold hidden sm:inline">
@@ -31,7 +31,7 @@ export function Header() {
                         </span>
                         <button
                             onClick={logout}
-                            className="text-gray-800 font-semibold hover:text-orange-600 transition-colors px-4 py-2"
+                            className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-4 py-2"
                         >
                             Logout
                         </button>
@@ -40,13 +40,13 @@ export function Header() {
                     <>
                         <Link
                             href="/login"
-                            className="text-gray-800 font-semibold hover:text-orange-600 transition-colors px-4 py-2"
+                            className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-2 py-2"
                         >
                             Login
                         </Link>
                         <Link
                             href="/signup"
-                            className="border border-orange-400 text-gray-800 font-semibold px-6 py-2 rounded-lg hover:bg-orange-50 transition-colors"
+                            className="border border-brand-orange text-gray-800 font-semibold px-6 py-2 rounded-md hover:bg-brand-orange/5 transition-colors"
                         >
                             Sign Up
                         </Link>

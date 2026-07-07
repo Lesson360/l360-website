@@ -31,27 +31,29 @@ export function Testimonials() {
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#cfe8ff] py-16 sm:py-20 px-4">
       <div className="max-w-6xl mx-auto relative z-10">
-        <h2 className="text-3xl sm:text-4xl font-bold text-[#ec5a13] font-display text-center leading-tight mb-14 flex flex-wrap justify-center items-center gap-x-3 gap-y-2">
-          <span>Check Out What</span>
-          <span className="relative inline-block">
-            <span
-              className="relative z-10 font-black"
-              style={{
-                WebkitTextStroke: '6px #2d284b',
-                paintOrder: 'stroke fill',
-                color: '#ec5a13',
-              }}
-            >
-              Guardians
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-orange font-comic text-center leading-tight mb-16">
+          <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2">
+            <span>Check Out What</span>
+            <span className="relative inline-block">
+              <span
+                className="relative z-10 font-black"
+                style={{
+                  WebkitTextStroke: '6px #2d284b',
+                  paintOrder: 'stroke fill',
+                  color: '#FF4800',
+                }}
+              >
+                Guardians
+              </span>
+              <span className="absolute left-0 top-0 z-20 font-black text-brand-orange">
+                Guardians
+              </span>
             </span>
-            <span className="absolute left-0 top-0 z-20 font-black text-[#ec5a13]">
-              Guardians
-            </span>
-          </span>
-          <span className="w-full text-center">Are Saying.</span>
+          </div>
+          <div className="mt-2">Are Saying.</div>
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
           {TESTIMONIALS.map((t, i) => (
             <motion.div
               key={i}
@@ -73,28 +75,26 @@ export function Testimonials() {
               }}
               className="flex flex-col"
             >
-              <div className="bg-[#efe1f7] border border-[#d9b8ec] rounded-2xl p-6 relative flex-1">
-                <span
-                  aria-hidden="true"
-                  className="text-5xl leading-none text-[#8b5cf6] font-serif"
-                >
-                  &#8220;
-                </span>
-                <p className="text-sm text-gray-600 leading-relaxed -mt-3">
+              {/* Quote box */}
+              <div className="bg-[#efe1f7] border-4 border-[#ffa9d5] rounded-[28px] p-6 pt-10 relative flex-1">
+                <div className="absolute -top-5 left-6 bg-[#863e9b] text-white w-12 h-10 flex items-center justify-center rounded-xl font-sans text-4xl leading-none pt-2 font-black select-none shadow-sm">
+                  “
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed font-sans font-medium">
                   {t.quote}
                 </p>
               </div>
-              <div className="flex items-center gap-3 border border-gray-200 bg-white rounded-xl p-3 mt-4">
-                <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0 flex items-center justify-center">
-                  <span className="text-gray-600 font-semibold text-sm">
-                    {t.name.charAt(0)}
-                  </span>
+
+              {/* Profile Details box */}
+              <div className="flex items-center gap-4 border-4 border-brand-orange bg-[#eaf5ff] rounded-[20px] p-4 mt-6 relative z-10">
+                <div className="w-12 h-12 rounded-full bg-gray-300 shrink-0 flex items-center justify-center text-gray-600 font-semibold text-base">
+                  {t.name.charAt(0)}
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-800 text-sm">
+                <div className="flex flex-col">
+                  <p className="font-bold text-[#2d284b] text-base font-comic">
                     {t.name}
                   </p>
-                  <p className="text-xs text-gray-500">{t.role}</p>
+                  <p className="text-sm text-gray-500 font-sans">{t.role}</p>
                 </div>
               </div>
             </motion.div>
@@ -102,40 +102,46 @@ export function Testimonials() {
         </div>
 
         {/* Pagination dots */}
-        <div className="flex justify-center items-center gap-2 mt-10">
+        <div className="flex justify-center items-center gap-3 mt-12">
           {[0, 1, 2].map((i) => (
             <button
               key={i}
               aria-label={`Go to testimonial group ${i + 1}`}
               onClick={() => setPage(i)}
-              className={`h-2 rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 ${
-                page === i ? 'w-6 bg-gray-700' : 'w-2 bg-gray-400'
+              className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none ${
+                page === i ? 'w-8 bg-[#2d284b]' : 'w-2.5 bg-[#2d284b]/40 hover:bg-[#2d284b]/60'
               }`}
             />
           ))}
         </div>
 
         {/* View All button */}
-        <div className="flex justify-center mt-8">
-          <button className="bg-[#ec5a13] hover:bg-[#d94e0a] transition-colors text-white text-lg font-semibold px-16 py-3.5 rounded-xl border-2 border-[#2d284b] shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 w-full sm:w-auto max-w-md">
+        <div className="flex justify-center mt-12 mb-6">
+          <button className="relative bg-brand-orange text-white border-4 border-[#2d284b] rounded-[24px] px-16 py-4 text-xl sm:text-2xl font-black font-comic shadow-[0_8px_0_0_#2d284b] active:shadow-[0_0px_0_0_#2d284b] active:translate-y-[8px] hover:translate-y-[2px] hover:shadow-[0_6px_0_0_#2d284b] transition-all focus:outline-none w-full max-w-md">
             View All
           </button>
         </div>
       </div>
 
       {/* Mascot decorations */}
-      <span
-        aria-hidden="true"
-        className="hidden lg:block absolute bottom-4 left-6 text-6xl select-none"
-      >
-        🐘
-      </span>
-      <span
-        aria-hidden="true"
-        className="hidden lg:block absolute bottom-4 right-6 text-6xl select-none"
-      >
-        🦖
-      </span>
+      <div className="hidden md:block absolute bottom-0 left-0 w-36 sm:w-44 md:w-56 lg:w-64 h-auto pointer-events-none z-0 mix-blend-multiply">
+        <Image
+          src="/elephant.jpg"
+          alt="Elephant Mascot"
+          width={256}
+          height={256}
+          className="w-full h-auto object-contain"
+        />
+      </div>
+      <div className="hidden md:block absolute bottom-0 right-0 w-36 sm:w-44 md:w-56 lg:w-64 h-auto pointer-events-none z-0 mix-blend-multiply">
+        <Image
+          src="/dinosaur.jpg"
+          alt="Dinosaur Mascot"
+          width={256}
+          height={256}
+          className="w-full h-auto object-contain"
+        />
+      </div>
     </section>
   );
 }

@@ -5,9 +5,9 @@
 @tailwind utilities;
 
 :root {
-  --brand-orange: #ec5a13;
-  --brand-orange-deep: #d94e0a;
-  --brand-peach: #fdeadd;
+  --brand-orange: #FF4800;
+  --brand-orange-deep: #D83D00;
+  --brand-peach: #FFEEE4;
 }
 
 html,

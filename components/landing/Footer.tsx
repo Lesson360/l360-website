@@ -84,7 +84,7 @@ export function Footer() {
                     </li>
                 </ul>
 
-                <h2 className="text-[#ec5a13] font-bold text-xl mb-4">Socials</h2>
+                <h2 className="text-brand-orange font-bold text-xl mb-4">Socials</h2>
                 <ul className="flex items-center gap-5">
                     {SOCIALS.map(({ Icon, label, href }) => (
                         <li key={label}>

@@ -10,12 +10,13 @@ module.exports = {
       fontFamily: {
         sans: ['Poppins', 'system-ui', 'sans-serif'],
         display: ['Poppins', 'system-ui', 'sans-serif'],
+        comic: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
       },
       colors: {
         brand: {
-          orange: '#ec5a13',
-          'orange-deep': '#d94e0a',
-          peach: '#fdeadd',
+          orange: '#FF4800',
+          'orange-deep': '#D83D00',
+          peach: '#FFEEE4',
         },
       },
     },
