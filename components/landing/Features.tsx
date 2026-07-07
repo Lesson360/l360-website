@@ -7,7 +7,7 @@ const FEATURES = [
   {
     title: 'All Pre School\nTopics In\n1 App',
     description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae.',
+      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
     bgColor: 'bg-[#2d284b]',
     textColor: 'text-white',
     borderColor: 'border-[#2d284b]',
@@ -15,15 +15,15 @@ const FEATURES = [
   {
     title: 'Fun And\nEducational\nWorksheet',
     description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae.',
+      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
     bgColor: 'bg-brand-orange',
     textColor: 'text-white',
-    borderColor: 'border-[#2d284b]',
+    borderColor: 'border-[#FF4800]',
   },
   {
     title: 'Activity Based On\nProgress With\nLesson360',
     description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae.',
+      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
     bgColor: 'bg-[#5468ff]',
     textColor: 'text-white',
     borderColor: 'border-[#2d284b]',
@@ -32,10 +32,10 @@ const FEATURES = [
 
 export function Features() {
   return (
-    <section className="relative w-full bg-gradient-to-b from-white via-brand-peach/20 to-brand-peach/60 py-20 overflow-hidden font-sans">
+    <section className="relative w-full bg-gradient-to-b from-[#FFFFFF] to-[#FFCBCB] pt-20 overflow-hidden font-sans">
       {/* Header Section */}
-      <div className="text-center mb-36 relative z-10 font-comic">
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-brand-orange flex flex-wrap justify-center items-center gap-x-4 gap-y-2">
+      <div className="text-center mb-44 relative z-10 font-comic">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl  text-brand-orange flex flex-wrap justify-center items-center gap-x-4 gap-y-2">
           <span>Why Do</span>
           <span className="relative inline-block mx-1">
             <span
@@ -58,7 +58,7 @@ export function Features() {
       {/* 3D Heart Icon & Dashed Line Container */}
       <div className="max-w-6xl mx-auto relative px-4 z-10">
         {/* The 3D Heart */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-32 z-20">
+        <div className="absolute left-1/2 -translate-x-1/2 -top-40 z-20">
           <div className="relative w-36 h-36">
             <Image
               src="https://cdn.magicpatterns.com/uploads/2ezoB2Bf1GYqz5rkVubuYW/image_2.png"
@@ -70,25 +70,10 @@ export function Features() {
           </div>
         </div>
 
-        {/* Curved dotted line background */}
-        <div className="hidden md:block absolute -top-32 left-0 w-full h-40 z-0">
-          <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 1000 160"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M 166,128 Q 500,-16 834,128"
-              fill="none"
-              stroke="#FF4800"
-              strokeWidth="6"
-              strokeDasharray="0 20"
-              strokeLinecap="round"
-              opacity="0.8"
-            />
-          </svg>
+        <div className='border-2 border-dotted border-[#FF6C6C] rounded-full absolute top-16 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-80'>
+
         </div>
+
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10">
@@ -116,7 +101,7 @@ export function Features() {
               }}
               className={`${card.bgColor} ${card.textColor} border-4 ${card.borderColor} rounded-[36px] p-8 shadow-xl flex flex-col items-center text-center`}
             >
-              <h3 className="text-2xl md:text-3xl font-bold font-comic mb-6 whitespace-pre-line leading-tight">
+              <h3 className="text-2xl md:text-3xl font-comic mb-6 whitespace-pre-line leading-tight">
                 {card.title}
               </h3>
               <p className="text-sm text-white/80 leading-relaxed">
@@ -128,25 +113,35 @@ export function Features() {
       </div>
 
       {/* Bottom Clouds & Sun Decoration */}
-      <div className="absolute bottom-0 left-0 w-full h-48 pointer-events-none z-0 overflow-hidden">
+      <div className="flex mt-20 items-end w-full">
+        <div className=" w-[56%] ">
+          <Image
+            src="/cloud.png"
+            alt="Clouds Transition"
+            width={240}
+            height={120}
+            className="w-full h-full "
+          />
+        </div>
         {/* Sun Image */}
-        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-44 sm:w-60 h-28 sm:h-36 z-10 mix-blend-multiply">
+        <div className="w-[20%] -z-4 -ml-20">
           <Image
             src="/sun.png"
             alt="Sun Decoration"
             width={240}
             height={120}
-            className="w-full h-auto object-contain"
+            className="  h-auto"
           />
         </div>
 
         {/* Clouds Image */}
-        <div className="absolute bottom-0 left-0 w-full h-24 sm:h-32 z-20 overflow-hidden mix-blend-screen">
+        <div className="w-[53%]">
           <Image
             src="/cloud.png"
             alt="Clouds Transition"
-            fill
-            className="object-cover object-bottom"
+            width={240}
+            height={120}
+            className="w-full h-full"
           />
         </div>
       </div>
