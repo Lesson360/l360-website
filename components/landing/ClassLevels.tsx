@@ -13,7 +13,7 @@ const LEVELS = [
     },
     {
         label: 'Nursery',
-        pill: 'bg-[#ec5a13]',
+        pill: 'bg-brand-orange',
         offset: 'lg:translate-y-10',
         src: 'https://cdn.magicpatterns.com/uploads/9Ddh6focP4VQ49xZ6nHwAt/image_15.jpg',
         alt: 'Child in a purple uniform writing at a classroom desk',
@@ -46,7 +46,7 @@ function Decorations() {
             >
                 <path
                     d="M120 420 C 60 200, 360 120, 420 180 C 500 260, 560 360, 660 360 C 800 360, 880 200, 900 120"
-                    stroke="#ec5a13"
+                    stroke="#FF4800"
                     strokeWidth="2"
                     strokeDasharray="6,8"
                     opacity="0.7"
@@ -85,7 +85,7 @@ function Decorations() {
             >
                 <path
                     d="M21 12a9 9 0 1 1-9-9"
-                    stroke="#ec5a13"
+                    stroke="#FF4800"
                     strokeWidth="4"
                     strokeLinecap="round"
                 />
@@ -98,7 +98,7 @@ export function ClassLevels() {
     return (
         <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#fdf6dd] to-[#fbeeb0] py-16 sm:py-20 px-4">
             <div className="text-center mb-14 relative z-10">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#ec5a13] font-display leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-orange font-comic leading-tight">
                     Inclusive Of All
                     <br />
                     Class Level

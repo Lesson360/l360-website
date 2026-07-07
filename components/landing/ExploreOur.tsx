@@ -93,7 +93,7 @@ function InfoCard({
                 </p>
                 <Link
                     href="/login"
-                    className="inline-block bg-[#ec5a13] hover:bg-[#d94e0a] transition-colors text-white font-semibold px-7 py-2.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
+                    className="inline-block bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-semibold px-7 py-2.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
                 >
                     Learn More
                 </Link>
@@ -111,7 +111,7 @@ export function ExploreOur() {
     return (
         <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#d6ecff] py-16 sm:py-20 px-4">
             <div className="max-w-5xl mx-auto">
-                <h2 className="text-3xl sm:text-4xl font-bold text-center text-[#ec5a13] font-display mb-6">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-brand-orange font-comic mb-6">
                     Explore Our
                 </h2>
 
@@ -128,8 +128,8 @@ export function ExploreOur() {
                                 aria-selected={active === tab}
                                 onClick={() => setActive(tab)}
                                 className={`text-lg sm:text-xl font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 rounded px-1 ${active === tab
-                                        ? 'text-[#ec5a13]'
-                                        : 'text-[#ec5a13]/60 hover:text-[#ec5a13]'
+                                        ? 'text-brand-orange'
+                                        : 'text-brand-orange/60 hover:text-brand-orange'
                                     }`}
                             >
                                 {tab}
