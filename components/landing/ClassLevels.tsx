@@ -25,6 +25,7 @@ const LEVELS = [
         src: 'https://cdn.magicpatterns.com/uploads/giWkwqAoz6nbvnueyJfqFr/image_18.jpg',
         alt: 'Smiling primary school boy wearing a backpack',
     },
+    
     {
         label: 'Secondary',
         pill: 'bg-[#e8634a]',
