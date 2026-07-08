@@ -7,28 +7,28 @@ const LEVELS = [
     {
         label: 'Early Years',
         pill: 'bg-[#5468ff] ',
-        offset: '-translate-y-12',
+        offset: 'lg:-translate-y-20 translate-y-0',
         src: 'https://cdn.magicpatterns.com/uploads/v87HBCLoybc7wQnRSx9m8n/image_14.jpg',
         alt: 'Young child smiling in a colorful striped sweater',
     },
     {
         label: 'Nursery',
         pill: 'bg-brand-orange',
-        offset: 'lg:translate-y-10',
+        offset: 'translate-y-0',
         src: 'https://cdn.magicpatterns.com/uploads/giWkwqAoz6nbvnueyJfqFr/image_18.jpg',
         alt: 'Child in a purple uniform writing at a classroom desk',
     },
     {
         label: 'Primary',
         pill: 'bg-[#2F2444]',
-        offset: 'lg:translate-y-20',
+        offset: 'lg:translate-y-20 translate-y-0',
         src: 'https://cdn.magicpatterns.com/uploads/9Ddh6focP4VQ49xZ6nHwAt/image_15.jpg',
         alt: 'Smiling primary school boy wearing a backpack',
     },
     {
         label: 'Secondary',
         pill: 'bg-[#e8634a]',
-        offset: 'lg:-translate-y-4',
+        offset: 'translate-y-0',
         src: '/secondary-student.jpg',
         alt: 'Smiling secondary school student',
     },
@@ -54,7 +54,7 @@ function Decorations() {
             </svg>
             {/* green star */}
             <svg
-                className="absolute top-10 right-24 w-9 h-9"
+                className="absolute top-0 right-24 w-9 h-9"
                 viewBox="0 0 24 24"
                 fill="#2ecc71"
             >
@@ -62,16 +62,16 @@ function Decorations() {
             </svg>
             {/* magenta arrow */}
             <svg
-                className="absolute top-14 right-12 w-7 h-7"
+                className="absolute top-0 right-12 w-7 h-7"
                 viewBox="0 0 24 24"
                 fill="#e91e8c"
             >
                 <path d="M4 4 L20 12 L4 20 Z" />
             </svg>
             {/* red square + teal arrow bottom-left */}
-            <span className="absolute bottom-16 left-4 w-7 h-7 bg-[#ff3b3b] rounded-sm" />
+            <span className="absolute bottom-0 left-4 w-7 h-7 bg-[#ff3b3b] rounded-sm" />
             <svg
-                className="absolute bottom-14 left-14 w-7 h-7"
+                className="absolute bottom-0 left-14 w-16 h-16"
                 viewBox="0 0 24 24"
                 fill="#19c2c2"
             >
@@ -79,13 +79,13 @@ function Decorations() {
             </svg>
             {/* orange spinner arc */}
             <svg
-                className="absolute bottom-8 left-1/2 w-9 h-9"
+                className="absolute -bottom-20 left-1/3 w-24 h-24"
                 viewBox="0 0 24 24"
                 fill="none"
             >
                 <path
                     d="M21 12a9 9 0 1 1-9-9"
-                    stroke="#FF4800"
+                    stroke="#FFA600"
                     strokeWidth="4"
                     strokeLinecap="round"
                 />
@@ -96,7 +96,7 @@ function Decorations() {
 
 export function ClassLevels() {
     return (
-        <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#ffffff] to-[#FFF9C4] py-16 sm:py-20 px-4">
+        <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#ffffff] to-[#FFF9C4] py-16 sm:py-20 px-4 md:pb-28">
             <div className="text-center mb-14 relative z-10">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl text-brand-orange font-comic leading-tight">
                     Inclusive Of All
@@ -111,7 +111,7 @@ export function ClassLevels() {
             <div className="relative max-w-5xl mx-auto">
                 <Decorations />
 
-                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-5 items-start">
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-5 items-start md:mb-32 mb:mt-24 -z-4">
                     {LEVELS.map((lvl, i) => (
                         <motion.div
                             key={lvl.label}
@@ -131,23 +131,25 @@ export function ClassLevels() {
                                 duration: 0.5,
                                 delay: i * 0.12,
                             }}
-                            className={`relative rounded-2xl overflow-hidden shadow-lg ${lvl.offset}`}
+                            className="relative w-full"
                         >
-                            <div className="aspect-[3/4] relative">
-                                <Image
-                                    src={lvl.src}
-                                    alt={lvl.alt}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                                />
-                            </div>
-                            <div
-                                className={`${lvl.pill} px-6 py-4 text-center`}
-                            >
-                                <span className="text-white font-semibold whitespace-nowrap">
-                                    {lvl.label}
-                                </span>
+                            <div className={`relative rounded-2xl overflow-hidden shadow-lg transform transition-transform duration-300 ${lvl.offset}`}>
+                                <div className="aspect-[3/4] relative">
+                                    <Image
+                                        src={lvl.src}
+                                        alt={lvl.alt}
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                    />
+                                </div>
+                                <div
+                                    className={`${lvl.pill} px-6 py-4 text-center`}
+                                >
+                                    <span className="text-white font-semibold whitespace-nowrap">
+                                        {lvl.label}
+                                    </span>
+                                </div>
                             </div>
                         </motion.div>
                     ))}
