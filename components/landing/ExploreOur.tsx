@@ -3,6 +3,7 @@
 import { useState, Fragment } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const TABS = ['Videos', 'Quizzes', 'Exams'] as const;
 
@@ -27,14 +28,20 @@ function ConcentricRings() {
             aria-hidden="true"
             className="flex items-center gap-3 sm:gap-5 shrink-0"
         >
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#9be7a8] flex items-center justify-center">
-                <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-white" />
+            <div className='bg-[#C7FFDC] h-16 w-16 sm:h-24 sm:w-24 rounded-full flex items-center justify-center'>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#9be7a8] flex items-center justify-center">
+                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-white" />
+                </div>
             </div>
-            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-[#9be7a8] flex items-center justify-center">
-                <div className="w-7 h-7 sm:w-11 sm:h-11 rounded-full bg-white" />
+            <div className='bg-[#C7FFDC] h-24 w-24 sm:h-36 sm:w-36 rounded-full flex items-center justify-center'>
+                <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-[#9be7a8] flex items-center justify-center">
+                    <div className="w-7 h-7 sm:w-11 sm:h-11 rounded-full bg-white" />
+                </div>
             </div>
-            <div className="w-24 h-24 sm:w-36 sm:h-36 rounded-full bg-[#9be7a8] flex items-center justify-center">
-                <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-white" />
+            <div className='bg-[#C7FFDC] h-36 w-36 sm:h-48 sm:w-48 rounded-full flex items-center justify-center'>
+                <div className="w-24 h-24 sm:w-36 sm:h-36 rounded-full bg-[#9be7a8] flex items-center justify-center">
+                    <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-white" />
+                </div>
             </div>
         </div>
     );
@@ -93,9 +100,15 @@ function InfoCard({
                 </p>
                 <Link
                     href="/login"
-                    className="inline-block bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-semibold px-7 py-2.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
+                    className="inline-block relative w-full max-w-[340px] group"
                 >
-                    Learn More
+                    {/* White rotated background - behind everything */}
+                    <span className='absolute inset-0 bg-white rounded-xl transition-transform duration-300 rotate-3 group-hover:rotate-0'></span>
+
+                    {/* Orange button on top */}
+                    <span className="inline-block w-full bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-semibold px-7 py-2.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 relative font-comic text-center">
+                        Learn More
+                    </span>
                 </Link>
             </div>
             <div className="flex justify-center sm:justify-end w-full sm:w-auto">
@@ -128,8 +141,8 @@ export function ExploreOur() {
                                 aria-selected={active === tab}
                                 onClick={() => setActive(tab)}
                                 className={`text-lg sm:text-xl font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 rounded px-1 ${active === tab
-                                        ? 'text-brand-orange'
-                                        : 'text-brand-orange/60 hover:text-brand-orange'
+                                    ? 'text-brand-orange'
+                                    : 'text-brand-orange/60 hover:text-brand-orange'
                                     }`}
                             >
                                 {tab}
@@ -150,7 +163,7 @@ export function ExploreOur() {
                     <InfoCard
                         title="Exam"
                         body="Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibul"
-                        graphic={<GradCap />}
+                        graphic={<Image alt='Graduation cap on books' width={300} height={350} src='/graduate-cap.jpg' />}
                     />
                 </div>
             </div>

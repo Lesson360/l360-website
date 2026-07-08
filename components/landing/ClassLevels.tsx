@@ -6,8 +6,8 @@ import Image from 'next/image';
 const LEVELS = [
     {
         label: 'Early Years',
-        pill: 'bg-[#5468ff]',
-        offset: 'lg:-translate-y-6',
+        pill: 'bg-[#5468ff] ',
+        offset: '-translate-y-12',
         src: 'https://cdn.magicpatterns.com/uploads/v87HBCLoybc7wQnRSx9m8n/image_14.jpg',
         alt: 'Young child smiling in a colorful striped sweater',
     },
@@ -15,14 +15,14 @@ const LEVELS = [
         label: 'Nursery',
         pill: 'bg-brand-orange',
         offset: 'lg:translate-y-10',
-        src: 'https://cdn.magicpatterns.com/uploads/9Ddh6focP4VQ49xZ6nHwAt/image_15.jpg',
+        src: 'https://cdn.magicpatterns.com/uploads/giWkwqAoz6nbvnueyJfqFr/image_18.jpg',
         alt: 'Child in a purple uniform writing at a classroom desk',
     },
     {
         label: 'Primary',
-        pill: 'bg-[#2d284b]',
+        pill: 'bg-[#2F2444]',
         offset: 'lg:translate-y-20',
-        src: 'https://cdn.magicpatterns.com/uploads/giWkwqAoz6nbvnueyJfqFr/image_18.jpg',
+        src: 'https://cdn.magicpatterns.com/uploads/9Ddh6focP4VQ49xZ6nHwAt/image_15.jpg',
         alt: 'Smiling primary school boy wearing a backpack',
     },
     
@@ -30,7 +30,7 @@ const LEVELS = [
         label: 'Secondary',
         pill: 'bg-[#e8634a]',
         offset: 'lg:-translate-y-4',
-        src: 'https://images.unsplash.com/photo-1610484826967-09c5720778c7?auto=format&fit=crop&w=600&q=80',
+        src: '/secondary-student.jpg',
         alt: 'Smiling secondary school student',
     },
 ];
@@ -97,9 +97,9 @@ function Decorations() {
 
 export function ClassLevels() {
     return (
-        <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#fdf6dd] to-[#fbeeb0] py-16 sm:py-20 px-4">
+        <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#ffffff] to-[#FFF9C4] py-16 sm:py-20 px-4">
             <div className="text-center mb-14 relative z-10">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-orange font-comic leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl text-brand-orange font-comic leading-tight">
                     Inclusive Of All
                     <br />
                     Class Level
@@ -144,7 +144,7 @@ export function ClassLevels() {
                                 />
                             </div>
                             <div
-                                className={`${lvl.pill} absolute bottom-3 left-1/2 -translate-x-1/2 px-6 py-2 rounded-lg shadow-md`}
+                                className={`${lvl.pill} px-6 py-4 text-center`}
                             >
                                 <span className="text-white font-semibold whitespace-nowrap">
                                     {lvl.label}
