@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
   --brand-orange: #FF4800;
@@ -13,12 +13,16 @@
 html,
 body {
   height: 100%;
-  font-family: 'Poppins', system-ui, sans-serif;
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
   color: #1a1a1a;
 }
 
 .font-display {
-  font-family: 'Poppins', system-ui, sans-serif;
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+}
+
+.font-hero {
+  font-family: "Poppins", Arial, Helvetica, sans-serif;
 }
 
 /* Custom scrollbar */
@@ -44,4 +48,10 @@ body {
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+.site-shell {
+  width: min(90%, 1600px);
+  margin-left: auto;
+  margin-right: auto;
 }

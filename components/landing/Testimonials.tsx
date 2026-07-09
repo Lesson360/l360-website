@@ -1,28 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Quote } from 'lucide-react';
 
 const TESTIMONIALS = [
   {
     quote:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis Elementum In Odio. Diam In Justo Neque Arcu',
+      'Lesson360 makes it easier for my child to revisit lessons after school without needing me to explain everything from the beginning again.',
     name: 'Aisha Mohammed',
-    role: 'Kids Mom',
+    role: 'Guardian',
   },
   {
     quote:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis Elementum In Odio. Diam In Justo Neque Arcu',
+      'I like that the videos, worksheets, and simple checks all support the same topic. It makes learning feel organised instead of scattered.',
     name: 'Daniel Mackenzy',
-    role: 'Kids Dad',
+    role: 'Guardian',
   },
   {
     quote:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis Elementum In Odio. Diam In Justo Neque Arcu',
+      'What stands out for me is how easy it is to choose the right level and keep my child on a steady learning routine every week.',
     name: 'Sarah Emmanuel',
-    role: 'Kids Mom',
+    role: 'Guardian',
   },
 ];
 
@@ -31,7 +29,7 @@ export function Testimonials() {
 
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#cfe8ff] py-16 sm:py-20 px-4">
-      <div className="max-w-6xl mx-auto relative z-10 mb-40">
+      <div className="site-shell relative z-10 mb-40">
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-orange font-comic text-center leading-tight mb-16">
           <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2">
             <span>Check Out What</span>
@@ -56,24 +54,8 @@ export function Testimonials() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
           {TESTIMONIALS.map((t, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{
-                opacity: 0,
-                y: 40,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: true,
-                margin: '-80px',
-              }}
-              transition={{
-                duration: 0.5,
-                delay: i * 0.15,
-              }}
               className="flex flex-col"
             >
               {/* Quote box */}
@@ -96,7 +78,7 @@ export function Testimonials() {
                   <p className="text-sm text-gray-500 font-sans">{t.role}</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 

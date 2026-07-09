@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react';
 
-export default function PublicLayout({
+export default function AuthLayout({
     children,
 }: {
     children: ReactNode;
 }) {
     return (
         <div className="min-h-screen bg-white">
-            <div className="flex min-h-screen flex-col">
-                {children}
-            </div>
+            {children}
         </div>
     );
 }

@@ -8,8 +8,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'system-ui', 'sans-serif'],
-        display: ['Poppins', 'system-ui', 'sans-serif'],
+        sans: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
+        display: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
         comic: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
       },
       colors: {

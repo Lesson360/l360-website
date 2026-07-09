@@ -5,42 +5,23 @@ import {
     PhoneIcon,
     MapPinIcon,
     InstagramIcon,
-    TwitterIcon,
-    FacebookIcon,
-    YoutubeIcon,
 } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 const SOCIALS = [
     {
         Icon: InstagramIcon,
         label: 'Instagram',
-        href: '#',
-    },
-    {
-        Icon: TwitterIcon,
-        label: 'Twitter',
-        href: '#',
-    },
-    {
-        Icon: FacebookIcon,
-        label: 'Facebook',
-        href: '#',
-    },
-    {
-        Icon: YoutubeIcon,
-        label: 'YouTube',
-        href: '#',
+        href: 'https://www.instagram.com/lesson_360/',
     },
 ];
 
 export function Footer() {
     return (
         <footer className="relative w-full overflow-hidden bg-[#2d284b] text-white py-12 sm:py-16 px-6">
-            <div className="max-w-6xl mx-auto relative z-10">
+            <div className="site-shell relative z-10">
                 <Image
-                    src="https://cdn.magicpatterns.com/uploads/gCuHuVJSJspn2uVtMavkc6/l360-logo.png"
+                    src="/lesson360-logo.png"
                     alt="Lesson 360"
                     width={160}
                     height={40}
@@ -55,10 +36,10 @@ export function Footer() {
                             aria-hidden="true"
                         />
                         <a
-                            href="mailto:lesson360@gmail.com"
+                            href="mailto:info@lesson360.org"
                             className="text-white/90 hover:text-white transition-colors break-all"
                         >
-                            lesson360@gmail.com
+                            info@lesson360.org
                         </a>
                     </li>
                     <li className="flex items-center gap-3">
@@ -67,10 +48,10 @@ export function Footer() {
                             aria-hidden="true"
                         />
                         <a
-                            href="tel:+2349139135953"
+                            href="tel:+2348145448426"
                             className="text-white/90 hover:text-white transition-colors"
                         >
-                            +234 91 391 35 953
+                            +234 814 544 8426
                         </a>
                     </li>
                     <li className="flex items-start gap-3">
@@ -79,7 +60,7 @@ export function Footer() {
                             aria-hidden="true"
                         />
                         <span className="text-white/90">
-                            Lorem Ipsum Dolor Sit Amet Consectetur. Lectus
+                            LESSON360 ONLINE SCHOOL, OKOSISI AGUATA PHD STREET, OFF MOPOL BASE, AGU AWKA, AWKA SOUTH, ANAMBRA STATE, NIGERIA
                         </span>
                     </li>
                 </ul>
@@ -90,6 +71,8 @@ export function Footer() {
                         <li key={label}>
                             <a
                                 href={href}
+                                target="_blank"
+                                rel="noreferrer"
                                 aria-label={label}
                                 className="inline-flex w-9 h-9 items-center justify-center rounded-md hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
                             >

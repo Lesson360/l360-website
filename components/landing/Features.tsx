@@ -1,29 +1,28 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const FEATURES = [
   {
-    title: 'All Pre School\nTopics In\n1 App',
+    title: 'Video Lessons\nBy Class And\nSubject',
     description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
+      'Children can learn topic by topic with guided lessons arranged by level, class, and subject instead of jumping between random videos online.',
     bgColor: 'bg-[#2d284b]',
     textColor: 'text-white',
     borderColor: 'border-[#2d284b]',
   },
   {
-    title: 'Fun And\nEducational\nWorksheet',
+    title: 'Worksheets That\nMake Practice\nStick',
     description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
+      'Each lesson can be reinforced with printable activities and revision work that help children practise what they just watched at home.',
     bgColor: 'bg-brand-orange',
     textColor: 'text-white',
     borderColor: 'border-[#FF4800]',
   },
   {
-    title: 'Activity Based On\nProgress With\nLesson360',
+    title: 'Progress Support\nFor Learning At\nHome',
     description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
+      'Parents get a clearer way to keep study time consistent, revisit weak areas, and support children with learning that fits their level.',
     bgColor: 'bg-[#5468ff]',
     textColor: 'text-white',
     borderColor: 'border-[#2d284b]',
@@ -56,12 +55,12 @@ export function Features() {
       </div>
 
       {/* 3D Heart Icon & Dashed Line Container */}
-      <div className="max-w-6xl mx-auto relative px-4 z-10">
+      <div className="site-shell relative px-4 z-10">
         {/* The 3D Heart */}
         <div className="absolute left-1/2 -translate-x-1/2 -top-40 z-20">
           <div className="relative w-36 h-36">
             <Image
-              src="https://cdn.magicpatterns.com/uploads/2ezoB2Bf1GYqz5rkVubuYW/image_2.png"
+              src="/feature-heart.png"
               alt="Glossy red heart"
               width={144}
               height={144}
@@ -78,28 +77,9 @@ export function Features() {
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10">
           {FEATURES.map((card, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{
-                opacity: 0,
-                y: 50,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: true,
-                margin: '-100px',
-              }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.2,
-              }}
-              whileHover={{
-                y: -10,
-              }}
-              className={`${card.bgColor} ${card.textColor} border-4 ${card.borderColor} rounded-[36px] p-8 shadow-xl flex flex-col items-center text-center`}
+              className={`${card.bgColor} ${card.textColor} border-4 ${card.borderColor} rounded-[36px] p-8 shadow-xl flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2`}
             >
               <h3 className="text-2xl md:text-3xl font-comic mb-6 whitespace-pre-line leading-tight">
                 {card.title}
@@ -107,7 +87,7 @@ export function Features() {
               <p className="text-sm text-white/80 leading-relaxed">
                 {card.description}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
