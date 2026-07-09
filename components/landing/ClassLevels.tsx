@@ -1,28 +1,27 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const LEVELS = [
     {
         label: 'Early Years',
         pill: 'bg-[#5468ff] ',
-        offset: 'lg:-translate-y-20 translate-y-0',
-        src: 'https://cdn.magicpatterns.com/uploads/v87HBCLoybc7wQnRSx9m8n/image_14.jpg',
+        offset: '',
+        src: '/level-early-years.jpg',
         alt: 'Young child smiling in a colorful striped sweater',
     },
     {
         label: 'Nursery',
         pill: 'bg-brand-orange',
         offset: 'translate-y-0',
-        src: 'https://cdn.magicpatterns.com/uploads/giWkwqAoz6nbvnueyJfqFr/image_18.jpg',
+        src: '/level-nursery.jpg',
         alt: 'Child in a purple uniform writing at a classroom desk',
     },
     {
         label: 'Primary',
         pill: 'bg-[#2F2444]',
-        offset: 'lg:translate-y-20 translate-y-0',
-        src: 'https://cdn.magicpatterns.com/uploads/9Ddh6focP4VQ49xZ6nHwAt/image_15.jpg',
+        offset: '',
+        src: '/level-primary.jpg',
         alt: 'Smiling primary school boy wearing a backpack',
     },
     
@@ -97,41 +96,25 @@ function Decorations() {
 
 export function ClassLevels() {
     return (
-        <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#ffffff] to-[#FFF9C4] py-16 sm:py-20 px-4 md:pb-28">
-            <div className="text-center mb-14 relative z-10">
+        <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#ffffff] to-[#FFF9C4] px-4 py-16 sm:py-20">
+            <div className="relative z-10 mb-10 text-center sm:mb-12">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl text-brand-orange font-comic leading-tight">
-                    Inclusive Of All
+                    Support For Every
                     <br />
-                    Class Level
+                    Learning Level
                 </h2>
                 <p className="text-gray-600 mt-3 text-sm sm:text-base">
-                    Lorem Ipsum Dolor Sit Amet Consectetur. Lectus
+                    Lesson360 is structured for early years, nursery, primary, and secondary learners.
                 </p>
             </div>
 
-            <div className="relative max-w-5xl mx-auto">
+            <div className="site-shell relative">
                 <Decorations />
 
-                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-5 items-start md:mb-32 mb:mt-24 -z-4">
-                    {LEVELS.map((lvl, i) => (
-                        <motion.div
+                <div className="relative z-10 mt-8 grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+                    {LEVELS.map((lvl) => (
+                        <div
                             key={lvl.label}
-                            initial={{
-                                opacity: 0,
-                                y: 40,
-                            }}
-                            whileInView={{
-                                opacity: 1,
-                                y: 0,
-                            }}
-                            viewport={{
-                                once: true,
-                                margin: '-80px',
-                            }}
-                            transition={{
-                                duration: 0.5,
-                                delay: i * 0.12,
-                            }}
                             className="relative w-full"
                         >
                             <div className={`relative rounded-2xl overflow-hidden shadow-lg transform transition-transform duration-300 ${lvl.offset}`}>
@@ -152,7 +135,7 @@ export function ClassLevels() {
                                     </span>
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </div>

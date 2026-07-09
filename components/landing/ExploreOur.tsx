@@ -1,26 +1,48 @@
 'use client';
 
 import { useState, Fragment } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 
 const TABS = ['Videos', 'Quizzes', 'Exams'] as const;
-
-const fadeUp = {
-    initial: {
-        opacity: 0,
-        y: 40,
-    },
-    whileInView: {
-        opacity: 1,
-        y: 0,
-    },
-    viewport: {
-        once: true,
-        margin: '-80px',
-    },
-};
+const TAB_CONTENT = {
+    Videos: [
+        {
+            title: 'Video Lessons',
+            body: 'Topic-based video lessons help children learn at the right pace and replay difficult concepts when they need revision.',
+            graphic: <ConcentricRings />,
+        },
+        {
+            title: 'Class-Level Learning',
+            body: 'Lessons are arranged by stage and subject so families can find the right content faster and keep practice focused.',
+            graphic: <Image alt='Learning support visuals' width={300} height={350} src='/graduate-cap.jpg' />,
+        },
+    ],
+    Quizzes: [
+        {
+            title: 'Quick Checks',
+            body: 'Short quizzes help children confirm what they understood right after each lesson without making practice feel heavy.',
+            graphic: <ConcentricRings />,
+        },
+        {
+            title: 'Practice Support',
+            body: 'Simple follow-up tasks help parents spot weak areas early and keep children active with what they just learned.',
+            graphic: <Image alt='Graduation cap on books' width={300} height={350} src='/graduate-cap.jpg' />,
+        },
+    ],
+    Exams: [
+        {
+            title: 'Revision Support',
+            body: 'Older learners can use Lesson360 to revisit key topics, build confidence, and prepare more steadily for formal assessments.',
+            graphic: <ConcentricRings />,
+        },
+        {
+            title: 'Exam Readiness',
+            body: 'Focused study materials help families create a repeatable revision habit instead of waiting until the last minute.',
+            graphic: <Image alt='Graduation cap on books' width={300} height={350} src='/graduate-cap.jpg' />,
+        },
+    ],
+} as const;
 
 function ConcentricRings() {
     return (
@@ -86,11 +108,7 @@ function InfoCard({
     graphic: React.ReactNode;
 }) {
     return (
-        <motion.div
-            {...fadeUp}
-            transition={{
-                duration: 0.5,
-            }}
+        <div
             className="bg-[#2d284b] text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-lg"
         >
             <div className="flex-1 w-full text-center sm:text-left">
@@ -114,7 +132,7 @@ function InfoCard({
             <div className="flex justify-center sm:justify-end w-full sm:w-auto">
                 {graphic}
             </div>
-        </motion.div>
+        </div>
     );
 }
 
@@ -123,7 +141,7 @@ export function ExploreOur() {
 
     return (
         <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#d6ecff] py-16 sm:py-20 px-4">
-            <div className="max-w-5xl mx-auto">
+            <div className="site-shell">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-brand-orange font-comic mb-6">
                     Explore Our
                 </h2>
@@ -155,16 +173,14 @@ export function ExploreOur() {
                 </div>
 
                 <div className="space-y-6 sm:space-y-8">
-                    <InfoCard
-                        title="Quizzes"
-                        body="Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibul"
-                        graphic={<ConcentricRings />}
-                    />
-                    <InfoCard
-                        title="Exam"
-                        body="Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibul"
-                        graphic={<Image alt='Graduation cap on books' width={300} height={350} src='/graduate-cap.jpg' />}
-                    />
+                    {TAB_CONTENT[active].map((item) => (
+                        <InfoCard
+                            key={item.title}
+                            title={item.title}
+                            body={item.body}
+                            graphic={item.graphic}
+                        />
+                    ))}
                 </div>
             </div>
         </section>
