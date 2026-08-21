@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
-        display: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
-        comic: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
+        sans: ['Monoglyphic', 'system-ui', 'sans-serif'],
+        display: ['Monoglyphic', 'system-ui', 'sans-serif'],
+        comic: ['Monoglyphic', 'Monoglyphic-Black', 'system-ui', 'sans-serif'],
       },
       colors: {
         brand: {
