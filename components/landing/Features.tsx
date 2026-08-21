@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const FEATURES = [
@@ -75,7 +74,7 @@ export function Features() {
         {/* Cards Grid - Identical Height for All 3 Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3  relative z-10">
           {FEATURES.map((card, index) => (
-            <motion.div
+            <div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}

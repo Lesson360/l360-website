@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { PlayIcon } from 'lucide-react';
 import Image from 'next/image';
 
@@ -67,34 +66,18 @@ export function VideoLibrary() {
 
     return (
         <section className="w-full overflow-hidden bg-[#cfe8ff] py-16 sm:py-20 px-4">
-            <div className="max-w-6xl mx-auto">
+            <div className="site-shell">
                 <h2 className="text-3xl sm:text-4xl font-bold text-center text-[#1a1a1a] mb-12">
                     Video Library
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                     {VIDEOS.map((v, i) => (
-                        <motion.div
+                        <div
                             key={i}
-                            initial={{
-                                opacity: 0,
-                                y: 40,
-                            }}
-                            whileInView={{
-                                opacity: 1,
-                                y: 0,
-                            }}
-                            viewport={{
-                                once: true,
-                                margin: '-80px',
-                            }}
-                            transition={{
-                                duration: 0.5,
-                                delay: i * 0.15,
-                            }}
                         >
                             <VideoCard {...v} />
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const TESTIMONIALS = [
@@ -119,7 +118,7 @@ export function Testimonials() {
               <div className="absolute -bottom-3.5 -right-2 bg-[#FFFF40] border border-black/20 text-[#1E1B3A] font-bold text-xs px-4 py-1.5 rounded-full shadow-sm whitespace-nowrap">
                 {t.name}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 

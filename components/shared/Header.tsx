@@ -29,46 +29,48 @@ export function Header() {
                     </Link>
                 </div>
 
-                {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center space-x-6">
-                    {user ? (
-                        <>
-                            <span className="text-gray-800 font-semibold">
-                                {user.fullName || user.email}
-                            </span>
-                            <button
-                                onClick={logout}
-                                className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-4 py-2"
-                            >
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link
-                                href="/login"
-                                className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-2 py-2"
-                            >
-                                Login
-                            </Link>
-                            <Link
-                                href="/signup"
-                                className="border border-brand-orange text-gray-800 font-semibold px-6 py-2 rounded-md hover:bg-brand-orange/5 transition-colors"
-                            >
-                                Sign Up
-                            </Link>
-                        </>
-                    )}
-                </div>
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center space-x-4">
+                        {user ? (
+                            <>
+                                <span className="text-gray-800 font-semibold">
+                                    {user.fullName || user.email}
+                                </span>
+                                <button
+                                    onClick={logout}
+                                    className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-4 py-2"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                            
+                                <span
+                                    aria-disabled="true"
+                                    className="text-gray-400 font-semibold px-2 py-2 cursor-not-allowed"
+                                >
+                                    Login
+                                </span>
+                                <span
+                                    aria-disabled="true"
+                                    className="border border-gray-300 text-gray-400 font-semibold px-6 py-2 rounded-md cursor-not-allowed bg-white/60"
+                                >
+                                    Sign Up
+                                </span>
+                            </>
+                        )}
+                    </div>
 
-                {/* Mobile Hamburger Menu */}
-                <button
-                    onClick={toggleSidebar}
-                    className="md:hidden text-gray-800 hover:text-brand-orange transition-colors p-2"
-                    aria-label="Toggle menu"
-                >
-                    {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                    {/* Mobile Hamburger Menu */}
+                    <button
+                        onClick={toggleSidebar}
+                        className="md:hidden text-gray-800 hover:text-brand-orange transition-colors p-2"
+                        aria-label="Toggle menu"
+                    >
+                        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
             </header>
 
             {/* Mobile Sidebar Overlay */}
@@ -124,20 +126,24 @@ export function Header() {
                             </>
                         ) : (
                             <>
-                                <Link
-                                    href="/login"
+                                <a
+                                    href="https://www.instagram.com/lesson_360/"
+                                    target="_blank"
+                                    rel="noreferrer"
                                     onClick={closeSidebar}
                                     className="text-gray-800 font-semibold hover:text-brand-orange transition-colors py-2"
                                 >
+                                    Instagram
+                                </a>
+                                <span className="text-gray-400 font-semibold py-2 cursor-not-allowed">
                                     Login
-                                </Link>
-                                <Link
-                                    href="/signup"
-                                    onClick={closeSidebar}
-                                    className="border border-brand-orange text-center text-gray-800 font-semibold px-6 py-3 rounded-md hover:bg-brand-orange/5 transition-colors"
+                                </span>
+                                <span
+                                    aria-disabled="true"
+                                    className="border border-gray-300 text-center text-gray-400 font-semibold px-6 py-3 rounded-md bg-gray-50 cursor-not-allowed"
                                 >
                                     Sign Up
-                                </Link>
+                                </span>
                             </>
                         )}
                     </div>
