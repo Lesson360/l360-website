@@ -29,48 +29,47 @@ export function Header() {
                     </Link>
                 </div>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-4">
-                        {user ? (
-                            <>
-                                <span className="text-gray-800 font-semibold">
-                                    {user.fullName || user.email}
-                                </span>
-                                <button
-                                    onClick={logout}
-                                    className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-4 py-2"
-                                >
-                                    Logout
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                            
-                                <span
-                                    aria-disabled="true"
-                                    className="text-gray-400 font-semibold px-2 py-2 cursor-not-allowed"
-                                >
-                                    Login
-                                </span>
-                                <span
-                                    aria-disabled="true"
-                                    className="border border-gray-300 text-gray-400 font-semibold px-6 py-2 rounded-md cursor-not-allowed bg-white/60"
-                                >
-                                    Sign Up
-                                </span>
-                            </>
-                        )}
-                    </div>
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex items-center space-x-4">
+                    {user ? (
+                        <>
+                            <span className="text-gray-800 font-semibold">
+                                {user.fullName || user.email}
+                            </span>
+                            <button
+                                onClick={logout}
+                                className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-4 py-2"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <>
 
-                    {/* Mobile Hamburger Menu */}
-                    <button
-                        onClick={toggleSidebar}
-                        className="md:hidden text-gray-800 hover:text-brand-orange transition-colors p-2"
-                        aria-label="Toggle menu"
-                    >
-                        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
+                            <span
+                                aria-disabled="true"
+                                className="text-gray-400 font-semibold px-2 py-2 cursor-not-allowed"
+                            >
+                                Login
+                            </span>
+                            <span
+                                aria-disabled="true"
+                                className="border border-gray-300 text-gray-400 font-semibold px-6 py-2 rounded-md cursor-not-allowed bg-white/60"
+                            >
+                                Sign Up
+                            </span>
+                        </>
+                    )}
                 </div>
+
+                {/* Mobile Hamburger Menu */}
+                <button
+                    onClick={toggleSidebar}
+                    className="md:hidden text-gray-800 hover:text-brand-orange transition-colors p-2"
+                    aria-label="Toggle menu"
+                >
+                    {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
             </header>
 
             {/* Mobile Sidebar Overlay */}

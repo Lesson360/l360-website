@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const FEATURES = [
@@ -72,15 +73,10 @@ export function Features() {
       <div className="max-w-6xl mx-auto relative px-4 sm:px-6 lg:px-8 z-10">
 
         {/* Cards Grid - Identical Height for All 3 Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3  relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 relative z-10">
           {FEATURES.map((card, index) => (
             <div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.5, delay: index * 0.12 }}
-              whileHover={{ y: -6 }}
               className={`${card.bgColor} rounded-[28px] sm:rounded-[32px] pt-6 sm:pt-8 px-4 shadow-sm flex flex-col items-center text-center overflow-hidden relative h-[280px] sm:h-[320px] md:h-[340px] w-full`}
             >
               {/* Card Title - Positioned close above phone image */}
@@ -99,7 +95,7 @@ export function Features() {
                   className="w-[90%] sm:w-full h-auto object-top object-fit"
                 />
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -120,7 +116,7 @@ export function Features() {
         />
       </motion.div>
 
-      
+
 
     </section>
   );
