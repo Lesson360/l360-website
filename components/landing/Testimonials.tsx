@@ -3,26 +3,49 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Quote } from 'lucide-react';
 
 const TESTIMONIALS = [
   {
+    id: 1,
     quote:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis Elementum In Odio. Diam In Justo Neque Arcu',
-    name: 'Aisha Mohammed',
-    role: 'Kids Mom',
+      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis',
+    name: 'Micheal Adewale',
+    avatar: '/guy-pressing-phone.png',
   },
   {
+    id: 2,
     quote:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis Elementum In Odio. Diam In Justo Neque Arcu',
-    name: 'Daniel Mackenzy',
-    role: 'Kids Dad',
+      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis',
+    name: 'Micheal Adewale',
+    avatar: '/guy-pressing-phone.png',
   },
   {
+    id: 3,
     quote:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis Elementum In Odio. Diam In Justo Neque Arcu',
-    name: 'Sarah Emmanuel',
-    role: 'Kids Mom',
+      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis',
+    name: 'Micheal Adewale',
+    avatar: '/guy-pressing-phone.png',
+  },
+  {
+    id: 4,
+    quote:
+      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis',
+    name: 'Anabelle Joseph',
+    avatar: '/secondary-student.jpg',
+  },
+  {
+    id: 5,
+    quote:
+      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis',
+    name: 'Anabelle Joseph',
+    avatar: '/secondary-student.jpg',
+  },
+  {
+    id: 6,
+    quote:
+      'Lorem Ipsum Dolor Sit Amet Consectetur. Pretium Amet Sed Pharetra Dignissim Vestibulum Mattis',
+    name: 'Anabelle Joseph',
+    avatar: '/secondary-student.jpg',
   },
 ];
 
@@ -30,8 +53,10 @@ export function Testimonials() {
   const [page, setPage] = useState(0);
 
   return (
-    <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#cfe8ff] py-16 sm:py-20 px-4">
-      <div className="max-w-6xl mx-auto relative z-10 mb-40">
+    <section className="relative w-full overflow-hidden bg-white py-16 sm:py-20 px-4">
+      <div className="max-w-6xl mx-auto relative z-10">
+
+        {/* Title Header */}
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-orange font-comic text-center leading-tight mb-16">
           <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2">
             <span>Check Out What</span>
@@ -50,103 +75,74 @@ export function Testimonials() {
                 Guardians
               </span>
             </span>
+            <span>Are Saying.</span>
           </div>
-          <div className="mt-2">Are Saying.</div>
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
+        {/* 6 Testimonial Cards (2 Rows x 3 Columns) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-10 gap-x-6 lg:gap-x-8 mb-12">
           {TESTIMONIALS.map((t, i) => (
             <motion.div
-              key={i}
-              initial={{
-                opacity: 0,
-                y: 40,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: true,
-                margin: '-80px',
-              }}
-              transition={{
-                duration: 0.5,
-                delay: i * 0.15,
-              }}
-              className="flex flex-col"
+              key={t.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="relative bg-[#FCFDF2] border border-[#2D284B]/30 rounded-2xl p-5 pt-8 pb-7 flex flex-col justify-between shadow-sm"
             >
-              {/* Quote box */}
-              <div className="bg-[#83007833] border-4 border-[#FF8CCF] rounded-[28px] p-6 pt-10 relative flex-1">
-                <Image src='/quote.png' alt='QUote image' width='40' height='44' className="absolute -top-[18px] left-6 " />
-                <p className="text-sm text-gray-700 leading-relaxed font-sans font-medium">
-                  {t.quote}
-                </p>
+              {/* Top-Left Avatar Badge */}
+              <div className="absolute -top-4 -left-1 w-11 h-11 rounded-full border border-black overflow-hidden bg-gray-200 shadow-sm z-10">
+                <Image
+                  src={t.avatar}
+                  alt={t.name}
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
-              {/* Profile Details box */}
-              <div className="flex items-center gap-4 border-2 border-brand-orange bg-[#eaf5ff] rounded-[20px] p-4 mt-6 relative z-10">
-                <div className="w-12 h-12 rounded-full bg-[#D9D9D9] shrink-0 flex items-center justify-center text-gray-600 font-semibold text-base">
-                  {t.name.charAt(0)}
-                </div>
-                <div className="flex flex-col">
-                  <p className="font-bold text-[#2d284b] text-base font-comic">
-                    {t.name}
-                  </p>
-                  <p className="text-sm text-gray-500 font-sans">{t.role}</p>
-                </div>
+              {/* Quote Text */}
+              <p className="text-xs sm:text-sm text-gray-800 font-sans font-medium leading-relaxed mb-4">
+                {t.quote}
+              </p>
+
+              {/* 5 Green Rating Stars */}
+              <div className="flex items-center gap-1 text-[#10B981] text-base mb-1">
+                {[...Array(5)].map((_, starIndex) => (
+                  <svg key={starIndex} viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                ))}
+              </div>
+
+              {/* Bottom-Right Yellow Name Pill */}
+              <div className="absolute -bottom-3.5 -right-2 bg-[#FFFF40] border border-black/20 text-[#1E1B3A] font-bold text-xs px-4 py-1.5 rounded-full shadow-sm whitespace-nowrap">
+                {t.name}
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Pagination dots */}
-        <div className="flex justify-center items-center gap-3 mt-12">
-          {[0, 1, 2].map((i) => (
-            <button
-              key={i}
-              aria-label={`Go to testimonial group ${i + 1}`}
-              onClick={() => setPage(i)}
-              className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none ${page === i ? 'w-8 bg-[#2d284b]' : 'w-2.5 bg-[#2d284b]/40 hover:bg-[#2d284b]/60'
-                }`}
-            />
-          ))}
+        {/* Pagination Dots */}
+        <div className="flex justify-center items-center gap-2.5 mt-8 mb-10">
+          <div className="w-8 h-2 bg-[#2D284B] rounded-full" />
+          <div className="w-2 h-2 bg-[#2D284B] rounded-full" />
+          <div className="w-2 h-2 bg-[#2D284B] rounded-full" />
         </div>
 
-        {/* View All button */}
-        <div className="flex justify-center mt-12 mb-6">
-          <button
-            className="inline-block relative w-[90vw] md:w-full m-auto max-w-[640px] h-12 group"
-          >
-            {/* White rotated background - behind everything */}
-            <span className='absolute inset-0 bg-[#2d284b] rounded-xl transition-transform duration-300 rotate-3 group-hover:rotate-0'></span>
+        {/* View All Button */}
+        <div className="flex justify-center mt-6 mb-6">
+          <button className="inline-block relative w-[90vw] sm:w-[320px] md:w-[420px] m-auto h-14 group">
+            {/* Dark navy rotated background */}
+            <span className="absolute inset-0 bg-[#2d284b] rounded-xl transition-transform duration-300 rotate-3 group-hover:rotate-0" />
 
             {/* Orange button on top */}
-            <span className="inline-block w-full bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-semibold px-7 py-2.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 relative font-comic text-center top-0 bottom-0">
+            <span className="inline-block w-full h-full bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-bold px-7 py-3.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 relative font-comic text-center text-xl sm:text-2xl flex items-center justify-center">
               View All
             </span>
           </button>
         </div>
-      </div>
 
-      {/* Mascot decorations */}
-      <div className="hidden md:block absolute bottom-0 left-0 w-36 sm:w-44 md:w-56 lg:w-64 h-auto pointer-events-none z-0 mix-blend-multiply">
-        <Image
-          src="/elephant.jpg"
-          alt="Elephant Mascot"
-          width={256}
-          height={256}
-          className="w-full h-auto object-contain"
-        />
-      </div>
-      <div className="hidden md:block absolute bottom-0 right-0 w-36 sm:w-44 md:w-56 lg:w-64 h-auto pointer-events-none z-0 mix-blend-multiply">
-        <Image
-          src="/dinosaur.jpg"
-          alt="Dinosaur Mascot"
-          width={256}
-          height={256}
-          className="w-full h-auto object-contain"
-        />
       </div>
     </section>
   );

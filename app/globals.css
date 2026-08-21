@@ -1,8 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'Monoglyphic';
+  src: url('/fonts/monoglyphic/Variable-TT/Monoglyphic-VF.ttf') format('truetype-variations'),
+       url('/fonts/monoglyphic/OpenType-TT/Monoglyphic-Regular.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Monoglyphic-Bold';
+  src: url('/fonts/monoglyphic/OpenType-TT/Monoglyphic-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Monoglyphic-Black';
+  src: url('/fonts/monoglyphic/OpenType-TT/Monoglyphic-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --brand-orange: #FF4800;
@@ -13,12 +36,16 @@
 html,
 body {
   height: 100%;
-  font-family: 'Poppins', system-ui, sans-serif;
+  font-family: 'Monoglyphic', system-ui, sans-serif;
   color: #1a1a1a;
 }
 
 .font-display {
-  font-family: 'Poppins', system-ui, sans-serif;
+  font-family: 'Monoglyphic', system-ui, sans-serif;
+}
+
+.font-comic {
+  font-family: 'Monoglyphic', 'Monoglyphic-Black', system-ui, sans-serif;
 }
 
 /* Custom scrollbar */

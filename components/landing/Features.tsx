@@ -6,42 +6,56 @@ import Image from 'next/image';
 const FEATURES = [
   {
     title: 'All Pre School\nTopics In\n1 App',
-    description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
-    bgColor: 'bg-[#2d284b]',
-    textColor: 'text-white',
-    borderColor: 'border-[#2d284b]',
+    bgColor: 'bg-[#F2FCE4]',
+    borderColor: 'border-gray-300',
+    image: '/feature-col1-phone.png',
+    alt: 'Lesson360 Pre-School App',
   },
   {
-    title: 'Fun And\nEducational\nWorksheet',
-    description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
-    bgColor: 'bg-brand-orange',
-    textColor: 'text-white',
-    borderColor: 'border-[#FF4800]',
+    title: 'Fun And Educational\nWorksheet',
+    bgColor: 'bg-white',
+    borderColor: 'border-gray-300',
+    image: '/feature-col2-phone.png',
+    alt: 'Fun and Educational Worksheet Test',
   },
   {
     title: 'Activity Based On\nProgress With\nLesson360',
-    description:
-      'Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi Et Vitae. Lorem Ipsum Dolor Sit Amet Consectetur.',
-    bgColor: 'bg-[#5468ff]',
-    textColor: 'text-white',
-    borderColor: 'border-[#2d284b]',
+    bgColor: 'bg-[#FFF0F2]',
+    borderColor: 'border-gray-300',
+    image: '/feature-col3-phone.png',
+    alt: 'Activity Progress Dashboard',
   },
 ];
 
 export function Features() {
   return (
-    <section className="relative w-full bg-gradient-to-b from-[#FFFFFF] to-[#FFCBCB] pt-20 overflow-hidden font-sans">
+    <section className="relative w-full bg-gradient-to-b from-[#FFFFFF] via-[#FFF8F8] to-[#FFD8D8] pt-12 pb-8 md:pt-16 md:pb-12 overflow-hidden font-sans">
+
+      {/* Glossy Red Heart 1 (Top-Left) */}
+      <motion.div
+        initial={{ scale: 0.8, rotate: -15 }}
+        animate={{ y: [0, -8, 0], rotate: [-15, -10, -15] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute top-8 left-3 sm:top-12 sm:left-8 md:left-16 z-20 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 pointer-events-none select-none drop-shadow-md"
+      >
+        <Image
+          src="https://cdn.magicpatterns.com/uploads/2ezoB2Bf1GYqz5rkVubuYW/image_2.png"
+          alt="Glossy red heart badge"
+          fill
+          sizes="80px"
+          className="object-contain"
+        />
+      </motion.div>
+
       {/* Header Section */}
-      <div className="text-center mb-44 relative z-10 font-comic">
-        <h2 className="text-4xl md:text-5xl lg:text-6xl  text-brand-orange flex flex-wrap justify-center items-center gap-x-4 gap-y-2">
+      <div className="text-center mb-10 sm:mb-14 relative z-10 font-comic px-4">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-brand-orange flex flex-wrap justify-center items-center gap-x-3 gap-y-1">
           <span>Why Do</span>
           <span className="relative inline-block mx-1">
             <span
               className="text-brand-orange relative z-10 font-black tracking-wide"
               style={{
-                WebkitTextStroke: '8px #2d284b',
+                WebkitTextStroke: '6px #2d284b',
                 paintOrder: 'stroke fill',
               }}
             >
@@ -55,96 +69,60 @@ export function Features() {
         </h2>
       </div>
 
-      {/* 3D Heart Icon & Dashed Line Container */}
-      <div className="max-w-6xl mx-auto relative px-4 z-10">
-        {/* The 3D Heart */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-40 z-20">
-          <div className="relative w-36 h-36">
-            <Image
-              src="https://cdn.magicpatterns.com/uploads/2ezoB2Bf1GYqz5rkVubuYW/image_2.png"
-              alt="Glossy red heart"
-              width={144}
-              height={144}
-              className="w-36 h-36 object-contain drop-shadow-xl"
-            />
-          </div>
-        </div>
+      {/* 3D Cards Grid Container */}
+      <div className="max-w-6xl mx-auto relative px-4 sm:px-6 lg:px-8 z-10">
 
-        <div className='border-2 border-dotted border-[#FF6C6C] rounded-full absolute top-16 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-80'>
-
-        </div>
-
-
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 relative z-10">
+        {/* Cards Grid - Identical Height for All 3 Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3  relative z-10">
           {FEATURES.map((card, index) => (
             <motion.div
               key={index}
-              initial={{
-                opacity: 0,
-                y: 50,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: true,
-                margin: '-100px',
-              }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.2,
-              }}
-              whileHover={{
-                y: -10,
-              }}
-              className={`${card.bgColor} ${card.textColor} border-4 ${card.borderColor} rounded-[36px] p-8 shadow-xl flex flex-col items-center text-center`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: index * 0.12 }}
+              whileHover={{ y: -6 }}
+              className={`${card.bgColor} rounded-[28px] sm:rounded-[32px] pt-6 sm:pt-8 px-4 shadow-sm flex flex-col items-center text-center overflow-hidden relative h-[280px] sm:h-[320px] md:h-[340px] w-full`}
             >
-              <h3 className="text-2xl md:text-3xl font-comic mb-6 whitespace-pre-line leading-tight">
+              {/* Card Title - Positioned close above phone image */}
+              <h3 className="text-lg sm:text-xl md:text-2xl font-normal font-comic text-[#1E1B3A] mb-3 sm:mb-4 whitespace-pre-line leading-tight">
                 {card.title}
               </h3>
-              <p className="text-sm text-white/80 leading-relaxed">
-                {card.description}
-              </p>
+
+              {/* Phone Image - Directly inside container taking 90% width */}
+              <div className="w-full flex-grow flex items-start justify-center overflow-hidden">
+                <Image
+                  src={card.image}
+                  alt={card.alt}
+                  width={440}
+                  height={600}
+                  priority={index === 0}
+                  className="w-[90%] sm:w-full h-auto object-top object-fit"
+                />
+              </div>
             </motion.div>
           ))}
         </div>
       </div>
 
-      {/* Bottom Clouds & Sun Decoration */}
-      <div className="flex mt-20 items-end w-full">
-        <div className=" w-[56%] ">
-          <Image
-            src="/cloud.png"
-            alt="Clouds Transition"
-            width={240}
-            height={120}
-            className="w-full h-full "
-          />
-        </div>
-        {/* Sun Image */}
-        <div className="w-[20%] -z-4 -ml-20">
-          <Image
-            src="/sun.png"
-            alt="Sun Decoration"
-            width={240}
-            height={120}
-            className="  h-auto"
-          />
-        </div>
+      {/* Glossy Red Heart 2 (Bottom-Right) */}
+      <motion.div
+        initial={{ scale: 0.8, rotate: 15 }}
+        animate={{ y: [0, 8, 0], rotate: [15, 20, 15] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute bottom-20 right-3 sm:bottom-24 sm:right-8 md:right-16 z-20 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 pointer-events-none select-none drop-shadow-md"
+      >
+        <Image
+          src="https://cdn.magicpatterns.com/uploads/2ezoB2Bf1GYqz5rkVubuYW/image_2.png"
+          alt="Glossy red heart badge bottom"
+          fill
+          sizes="80px"
+          className="object-contain"
+        />
+      </motion.div>
 
-        {/* Clouds Image */}
-        <div className="w-[53%]">
-          <Image
-            src="/cloud.png"
-            alt="Clouds Transition"
-            width={240}
-            height={120}
-            className="w-full h-full"
-          />
-        </div>
-      </div>
+      
+
     </section>
   );
 }

@@ -39,7 +39,7 @@ function Decorations() {
         <div aria-hidden="true" className="hidden lg:block">
             {/* dashed snaking connector */}
             <svg
-                className="absolute inset-0 w-full h-full z-0"
+                className="absolute inset-0 w-full h-full z-8"
                 viewBox="0 0 1000 520"
                 fill="none"
                 preserveAspectRatio="none"

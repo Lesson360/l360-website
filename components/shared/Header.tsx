@@ -21,9 +21,9 @@ export function Header() {
                         <Image
                             src="https://cdn.magicpatterns.com/uploads/gCuHuVJSJspn2uVtMavkc6/l360-logo.png"
                             alt="Lesson 360 Logo"
-                            width={160}
-                            height={36}
-                            className="h-8 sm:h-9 object-contain"
+                            width={120}
+                            height={24}
+                            className="h-6 object-contain"
                             style={{ width: 'auto', height: 'auto' }}
                         />
                     </Link>

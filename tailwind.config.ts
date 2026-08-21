@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'system-ui', 'sans-serif'],
-        display: ['Poppins', 'system-ui', 'sans-serif'],
-        comic: ['"Comic Sans MS"', 'Comic Sans', 'cursive', 'sans-serif'],
+        sans: ['Monoglyphic', 'system-ui', 'sans-serif'],
+        display: ['Monoglyphic', 'system-ui', 'sans-serif'],
+        comic: ['Monoglyphic', 'Monoglyphic-Black', 'system-ui', 'sans-serif'],
       },
       colors: {
         brand: {
