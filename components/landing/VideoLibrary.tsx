@@ -7,15 +7,15 @@ import Image from 'next/image';
 
 const VIDEOS = [
     {
-        src: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80',
+        src: '/vid-1.jpg',
         alt: 'Teacher helping a student at a desk',
     },
     {
-        src: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+        src: '/vid-2.jpg',
         alt: 'Teacher writing on a chalkboard',
     },
     {
-        src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80',
+        src: '/vid-3.jpg',
         alt: 'Teacher explaining a math problem to a child',
     },
 ];
@@ -41,7 +41,7 @@ function VideoCard({ src, alt }: { src: string; alt: string }) {
         <div className="bg-white rounded-md overflow-hidden shadow-md">
             <Perforations />
             <div className="relative p-2 bg-white">
-                <div className="relative rounded-lg overflow-hidden aspect-[4/3]">
+                <div className="relative rounded-2xl overflow-hidden aspect-[5/3]">
                     <Image
                         src={src}
                         alt={alt}
@@ -51,7 +51,7 @@ function VideoCard({ src, alt }: { src: string; alt: string }) {
                     />
                     <button
                         aria-label="Play video"
-                        className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-green-500/70 hover:bg-green-500/90 transition-colors flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                        className="absolute inset-0 ml-auto mt-auto mr-4 mb-4 w-14 h-14 rounded-full bg-green-500/40 hover:bg-green-500/90 transition-colors flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
                         <PlayIcon className="w-6 h-6 text-white fill-white" />
                     </button>

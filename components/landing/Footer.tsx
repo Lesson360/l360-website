@@ -101,12 +101,7 @@ export function Footer() {
             </div>
 
             {/* Giraffe mascot */}
-            <span
-                aria-hidden="true"
-                className="hidden md:block absolute bottom-6 right-10 text-7xl lg:text-8xl select-none"
-            >
-                🦒
-            </span>
+            <Image src='/giraff.png' alt='giraffe' className='w-64 h-64 object-contain absolute bottom-6 right-10' width={256} height={256} />
         </footer>
     );
 }

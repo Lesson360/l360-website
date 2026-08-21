@@ -2,219 +2,220 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 
 export function Hero() {
-    const router = useRouter();
-
     return (
         <div className="bg-white flex flex-col font-sans overflow-hidden">
-            <main className="flex-grow flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto w-full px-6 py-12 lg:py-20 relative">
-                {/* Left Column - Text & CTA */}
-                <div className="w-full lg:w-1/2 flex flex-col items-start z-10 relative">
-                    {/* Bouncing 3D ABC Cube with grounded shadow */}
-                    <div className="mb-8 relative w-24 h-28">
-                        <motion.img
-                            src="https://cdn.magicpatterns.com/uploads/9rWY8Fe7hwdVtCtbUr4c7q/brick_1.png"
-                            alt="3D ABC building block"
-                            className="w-24 h-24 object-contain absolute top-0 left-0 z-10"
-                            animate={{
-                                y: [0, -18, 0],
-                                rotate: [-3, 3, -3],
-                            }}
-                            transition={{
-                                duration: 2.4,
-                                repeat: Infinity,
-                                ease: 'easeInOut',
-                            }}
-                        />
-                        <motion.div
-                            aria-hidden="true"
-                            className="w-16 h-3 bg-gray-400/40 rounded-[100%] blur-[2px] absolute bottom-0 left-1/2 -translate-x-1/2"
-                            animate={{
-                                scaleX: [1, 0.7, 1],
-                                opacity: [0.45, 0.18, 0.45],
-                            }}
-                            transition={{
-                                duration: 2.4,
-                                repeat: Infinity,
-                                ease: 'easeInOut',
-                            }}
-                        />
-                    </div>
+            {/* Top Wavy Graphic Panel */}
+            <div className="relative bg-white w-full flex justify-center items-center min-h-[500px] sm:min-h-[580px] md:min-h-[660px]">
 
-                    <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight mb-4 relative">
-                        Turn Screen <br />
-                        <span className="relative inline-block">
-                            Time Into
-                            {/* Floating Kite next to headline */}
-                            <span 
-                                aria-hidden="true"
-                                className="absolute -top-8 -right-20 sm:-right-24 md:-right-28 lg:-right-48 w-16 h-20 sm:w-32 sm:h-32 pointer-events-none z-20"
-                            >
-                                <motion.img
-                                    src="https://cdn.magicpatterns.com/uploads/jfhVvsqWJJ9T1XEqzxyCa5/kite_1.png"
-                                    alt=""
-                                    className="w-full h-full object-contain"
-                                    animate={{
-                                        y: [0, -12, 0],
-                                        rotate: [-5, 5, -5],
-                                    }}
-                                    transition={{
-                                        duration: 3,
-                                        repeat: Infinity,
-                                        ease: 'easeInOut',
-                                    }}
-                                />
-                                <motion.div
-                                    className="w-10 h-2 bg-gray-400/30 rounded-[100%] blur-[2px] mx-auto mt-1"
-                                    animate={{
-                                        scaleX: [1, 0.7, 1],
-                                        opacity: [0.4, 0.16, 0.4],
-                                    }}
-                                    transition={{
-                                        duration: 3,
-                                        repeat: Infinity,
-                                        ease: 'easeInOut',
-                                    }}
-                                />
-                            </span>
-                        </span>
-                        <br />
-                        <span className="text-brand-orange font-comic text-6xl lg:text-[80px] font-bold leading-tight lg:leading-[75px] block mt-2">
-                            Learning Time.
-                        </span>
-                    </h1>
-
-                    <p className="text-gray-600 text-lg max-w-md mb-8">
-                        Lorem Ipsum Dolor Sit Amet Consectetur. In Elit Nisi Ipsum Velit
-                        Congue. At Varius Vitae Sapien Id Velit. Cras Commodo Duis Facilisi
-                        Et Vitae.
-                    </p>
-
-                    <motion.button
-                        whileHover={{
-                            scale: 1.05,
-                        }}
-                        whileTap={{
-                            scale: 0.95,
-                        }}
-                        onClick={() => router.push('/signup')}
-                        className="bg-brand-orange text-white text-xl font-bold py-4 px-12 rounded-sm shadow-md hover:bg-brand-orange-deep transition-colors w-full text-center  flex items-center justify-center"
+                {/* Full-Bleed 'W'-Shaped Background SVG */}
+                <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                    <svg
+                        viewBox="0 0 1440 650"
+                        fill="none"
+                        preserveAspectRatio="none"
+                        className="w-full h-full"
                     >
-                        Start Now
-                    </motion.button>
+                        {/* Peach Filled Region ('W' Top Contour) */}
+                        <path
+                            d="M 0,0 L 1440,0 L 1440,60 C 1300,320 1200,490 1060,490 C 920,490 820,240 720,240 C 620,240 520,490 380,490 C 240,490 140,320 0,60 Z"
+                            fill="#FFEEE4"
+                        />
+                        {/* Continuous Orange Outline Stroke */}
+                        <path
+                            d="M 1440,60 C 1300,320 1200,490 1060,490 C 920,490 820,240 720,240 C 620,240 520,490 380,490 C 240,490 140,320 0,60"
+                            fill="none"
+                            stroke="#FF4800"
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                        />
+                    </svg>
                 </div>
 
-                {/* Right Column - Image & Floating Elements */}
-                <div className="w-full lg:w-1/2 mt-16 lg:mt-0 relative flex justify-center items-center">
-                    <motion.div
-                        initial={{
-                            opacity: 0,
-                            scale: 0.8,
-                        }}
-                        animate={{
-                            opacity: 1,
-                            scale: 1,
-                        }}
-                        transition={{
-                            duration: 0.8,
-                            ease: 'easeOut',
-                        }}
-                        className="relative w-80 h-80 lg:w-[450px] lg:h-[450px] overflow-hidden border-8 border-white shadow-2xl z-10"
-                        style={{ borderRadius: '45% 55% 48% 52% / 50% 45% 55% 50%' }}
-                    >
+                {/* Central Arch and Floating Elements Container */}
+                <div className="relative w-[290px] h-[390px] xs:w-[320px] xs:h-[430px] md:w-[400px] md:h-[530px] flex-shrink-0 z-20 ">
+
+                    {/* White overlay circle dot (Top-Left of Arch) */}
+                    <div className="absolute top-[3%] left-[18%] w-6 h-6 md:w-8 md:h-8 bg-white rounded-full z-30 border border-orange-100" />
+
+                    {/* Central Arch Capsule with Orange Ring Border (No Shadow) */}
+                    <div className="w-full h-full border-[6px] md:border-[8px] border-[#FF4800] bg-white rounded-full overflow-hidden relative">
                         <Image
-                            src="https://cdn.magicpatterns.com/uploads/pJyXv9yy6fcYw3vLZnhiD7/download_-_2026-06-07T192852.783_1.jpg"
-                            alt="Smiling student"
+                            src="/guy-pressing-phone.png"
+                            alt="Student pressing phone"
                             fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 320px, 450px"
+                            priority
+                            sizes="(max-width: 768px) 320px, 400px"
+                            className="object-cover object-top scale-[1.05]"
                         />
-                    </motion.div>
+                    </div>
 
-                    {/* Floating Shapes */}
-                    {/* Orange circle top-left */}
-                    <motion.div
-                        className="absolute top-2 left-6 lg:top-8 lg:left-14 w-8 h-8 lg:w-10 lg:h-10 bg-brand-orange rounded-full z-20"
-                        animate={{
-                            y: [0, -12, 0],
-                            x: [0, 8, 0],
-                        }}
-                        transition={{
-                            duration: 4,
-                            repeat: Infinity,
-                            ease: 'easeInOut',
-                        }}
-                    />
+                    {/* Green neon circle overlay badge (Bottom-Right of Arch - No Shadow) */}
+                    <div className="absolute bottom-[8%] right-[2%] w-8 h-8 md:w-10 md:h-10 bg-[#00FF00] rounded-full z-30" />
 
-                    {/* Blue star bottom-left */}
-                    <motion.div
-                        className="absolute bottom-16 left-2 lg:bottom-24 lg:left-10 z-20"
-                        animate={{
-                            rotate: [0, 180, 360],
-                            scale: [1, 1.15, 1],
-                        }}
-                        transition={{
-                            duration: 8,
-                            repeat: Infinity,
-                            ease: 'linear',
-                        }}
-                    >
-                        <svg
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="#8b9fff"
-                            xmlns="http://www.w3.org/2000/svg"
+                    {/* Floating ABC Block (Top-Left - No Shadow) */}
+                    <div className="absolute -top-6 -left-12 md:-top-6 md:-left-[360px] w-24 h-24 md:w-32 md:h-32 z-20 select-none pointer-events-none">
+                        <motion.div
+                            animate={{ y: [0, -12, 0] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                            className="relative w-full h-full"
                         >
-                            <path
-                                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                                fill="#8b9fff"
+                            <Image
+                                src="/hero-brick.svg"
+                                alt="ABC Building Block"
+                                fill
+                                sizes="(max-width: 768px) 96px, 128px"
+                                className="object-contain z-10"
                             />
-                        </svg>
+                        </motion.div>
+                    </div>
+
+                    {/* Floating Blue Star Balloon (Bottom-Left Dip - No Shadow) */}
+                    <div className="absolute bottom-6 -left-16 md:bottom-12 md:-left-60 w-20 h-20 md:w-28 md:h-28 z-20 select-none">
+                        <motion.div
+                            // animate={{
+                            //     y: [0, -8, 0],
+                            //     rotate: 360
+                            // }}
+                            transition={{
+                                y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+                                rotate: { duration: 30, repeat: Infinity, ease: 'linear' }
+                            }}
+                            className="w-full h-full"
+                        >
+                            <Image
+                                src="/hero-blue-star.png"
+                                alt="Blue Star"
+                                fill
+                                sizes="(max-width: 768px) 120px, 152px"
+                                className="object-contain"
+                            />
+                        </motion.div>
+                    </div>
+
+                    {/* Video Lessons Badge (Left Overlap - Light Font, No Shadow) */}
+                    <motion.div
+                        className="absolute top-[32%] -left-12 xs:-left-16 md:-left-24 z-30 flex items-center gap-2 md:gap-3 bg-[#FFEB14] border-[2px] border-[#0018CF] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        <div className="relative w-8 h-8 md:w-11 md:h-11 flex-shrink-0">
+                            <Image
+                                src="/hero-clapperboard.png"
+                                alt="Clapperboard"
+                                fill
+                                sizes="44px"
+                                className="object-contain"
+                            />
+                        </div>
+                        <div className="flex flex-col text-left">
+                            <span className="text-base md:text-2xl font-medium text-[#1E1B4B] leading-none">3,000+</span>
+                            <span className="text-[10px] md:text-[13px] font-light text-[#1E1B4B] leading-tight">video lesson</span>
+                        </div>
                     </motion.div>
 
-                    {/* Green circle bottom-right */}
+                    {/* Quizzes Badge (Right Overlap - Light Font, No Shadow) */}
                     <motion.div
-                        className="absolute bottom-8 right-6 lg:bottom-16 lg:right-14 w-10 h-10 lg:w-12 lg:h-12 bg-[#00FF00] rounded-full z-20"
-                        animate={{
-                            y: [0, 15, 0],
-                            x: [0, -10, 0],
-                        }}
-                        transition={{
-                            duration: 5,
-                            repeat: Infinity,
-                            ease: 'easeInOut',
-                            delay: 1,
-                        }}
-                    />
+                        className="absolute bottom-[28%] -right-12 xs:-right-16 md:-right-24 z-30 flex items-center gap-2 md:gap-3 bg-[#4E3BFF] border-[2px] border-[#1E1B4B] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        <div className="relative w-8 h-8 md:w-11 md:h-11 flex-shrink-0">
+                            <Image
+                                src="/hero-quiz-cube.png"
+                                alt="Quiz Cube"
+                                fill
+                                sizes="44px"
+                                className="object-contain"
+                            />
+                        </div>
+                        <div className="flex flex-col text-left">
+                            <span className="text-base md:text-2xl font-medium text-white leading-none">200+</span>
+                            <span className="text-[10px] md:text-[13px] font-light text-white/95 leading-tight">available quizzes</span>
+                        </div>
+                    </motion.div>
+
+                    {/* Enrichment Courses Card (Top-0, Shifted Further Right, Increased Image, Light Font, No Shadow) */}
+                    <motion.div
+                        className="absolute top-0 -right-20 md:top-0 md:-right-80 z-30 w-40 h-44 md:w-[180px] md:h-[180px] bg-[#E8F5E9] border-[2.5px] border-black rounded-[24px] rounded-tr-[70px] md:rounded-tr-[90px] p-3 md:p-4 flex flex-col items-center justify-between cursor-pointer"
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        <div className="relative w-full flex-grow flex items-center justify-center min-h-[75px] md:min-h-[105px]">
+                            <motion.div
+                                animate={{ y: [0, -4, 0] }}
+                                transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                                className="relative w-[90px] h-[75px] md:w-[130px] md:h-[105px]"
+                            >
+                                <Image
+                                    src="/hero-enrichment.png"
+                                    alt="Enrichment Courses"
+                                    fill
+                                    sizes="(max-width: 768px) 90px, 130px"
+                                    className="object-contain"
+                                />
+                            </motion.div>
+                        </div>
+                        <div className="text-center mt-1">
+                            <p className="text-[11px] md:text-[14px] font-light text-black leading-tight font-comic">Explore</p>
+                            <p className="text-[11px] md:text-[14px] font-light text-black leading-tight font-comic">Enrichment courses.</p>
+                        </div>
+                    </motion.div>
+
                 </div>
-            </main>
 
-            {/* Stats Bar */}
-            <div className="w-full px-6 mt-auto md:my-16">
-                <div 
-                    className="max-w-6xl mx-auto text-white py-8 px-4 sm:px-12 flex flex-col sm:flex-row justify-between items-center shadow-xl border-b-0 rounded-t-[40px] md:rounded-t-[100px]"
-                    style={{ background: 'linear-gradient(174.21deg, #FF4800 19.09%, #4F1105 95.88%)' }}
-                >
-                    <div className="text-center mb-6 sm:mb-0 w-full sm:w-1/3">
-                        <h3 className="text-4xl lg:text-5xl font-bold mb-1">1000+</h3>
-                        <p className="text-sm lg:text-base opacity-90">Lessons & Games</p>
+            </div>
+
+            {/* Title / Heading Section (Light Font) */}
+            <div className="w-full text-center px-6 z-20">
+                <h1 className="text-2xl font-normal text-gray-900 leading-tight font-comic">
+                    Turn Screen Time Into{' '}
+                    <span className="text-[#FF4800] font-comic font-normal inline-block md:mt-0 mt-1">
+                        Learning Time.
+                    </span>
+                </h1>
+            </div>
+
+            {/* Stats Card Section (No Shadow, Light Font) */}
+            <div className="w-full px-6  flex justify-center z-20">
+                <div className="relative w-full max-w-5xl bg-[#B9BEFF20] mt-6 border-x border-t border-[#1E1B4B]/10 rounded-t-[32px] md:rounded-t-[48px] py-6 px-8 md:py-10 md:px-16 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0">
+                    {/* Left Decorative Orange Star */}
+                    <div className="absolute left-4 bottom-4 md:left-6 md:top-1/2 md:-translate-y-1/2 md:bottom-auto text-[#FF4800] w-6 h-6 md:w-8 md:h-8 select-none opacity-80">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                            <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2" />
+                        </svg>
                     </div>
 
-                    <div className="hidden sm:block w-px h-16 bg-white/30"></div>
-
-                    <div className="text-center mb-6 sm:mb-0 w-full sm:w-1/3 border-t border-b border-white/20 sm:border-0 py-4 sm:py-0">
-                        <h3 className="text-4xl lg:text-5xl font-bold mb-1">1M+</h3>
-                        <p className="text-sm lg:text-base opacity-90">Parents Trust Us.</p>
+                    {/* Stat 1 */}
+                    <div className="text-center w-full md:w-1/3">
+                        <h3 className="text-3xl md:text-4xl lg:text-5xl font-medium text-[#1E1B4B] mb-1 font-comic">2M+</h3>
+                        <p className="text-xs md:text-sm lg:text-base font-light text-gray-500 font-comic">Kids Love Us.</p>
                     </div>
 
-                    <div className="hidden sm:block w-px h-16 bg-white/30"></div>
+                    {/* Divider 1 */}
+                    <div className="hidden md:block w-[1.5px] h-12 bg-[#1E1B4B]/10" />
 
-                    <div className="text-center w-full sm:w-1/3">
-                        <h3 className="text-4xl lg:text-5xl font-bold mb-1">2M+</h3>
-                        <p className="text-sm lg:text-base opacity-90">Kids Love Us.</p>
+                    {/* Stat 2 */}
+                    <div className="text-center w-full md:w-1/3">
+                        <h3 className="text-3xl md:text-4xl lg:text-5xl font-medium text-[#1E1B4B] mb-1 font-comic">1000+</h3>
+                        <p className="text-xs md:text-sm lg:text-base font-light text-gray-500 font-comic">Lessons & Games</p>
+                    </div>
+
+                    {/* Divider 2 */}
+                    <div className="hidden md:block w-[1.5px] h-12 bg-[#1E1B4B]/10" />
+
+                    {/* Stat 3 */}
+                    <div className="text-center w-full md:w-1/3">
+                        <h3 className="text-3xl md:text-4xl lg:text-5xl font-medium text-[#1E1B4B] mb-1 font-comic">1M+</h3>
+                        <p className="text-xs md:text-sm lg:text-base font-light text-gray-500 font-comic">Parents Trust Us.</p>
+                    </div>
+
+                    {/* Right Decorative Orange Star */}
+                    <div className="absolute right-4 top-4 md:right-6 md:top-1/2 md:-translate-y-1/2 text-[#FF4800] w-6 h-6 md:w-8 md:h-8 select-none opacity-80">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                            <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2" />
+                        </svg>
                     </div>
                 </div>
             </div>
