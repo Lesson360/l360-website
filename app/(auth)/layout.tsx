@@ -22,13 +22,13 @@ export default function AuthLayout({
                         <div className="absolute -bottom-4 -left-4 w-14 h-14 bg-[#26203B] rounded-full z-10 shadow-sm" />
 
                         {/* Main Framed Classroom Photo Box */}
-                        <div className="relative rounded-2xl overflow-hidden border-2 border-sky-400 p-1 bg-white shadow-xl w-full">
+                        <div className="relative rounded overflow-hidden border-2 p-1 bg-white shadow-xl w-full">
 
                             {/* Top-Left Orange Corner Bracket Accent */}
-                            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-brand-orange z-20" />
+                            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-brand-orange z-20 " />
 
                             {/* Bottom-Right Orange Corner Bracket Accent */}
-                            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-brand-orange z-20" />
+                            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-brand-orange z-20 " />
 
                             {/* Classroom Image */}
                             <div className="relative aspect-[3/4] w-full max-h-[calc(100vh-6rem)] overflow-hidden rounded-xl bg-amber-50">
@@ -41,10 +41,7 @@ export default function AuthLayout({
                                 />
                             </div>
 
-                            {/* Dimension Tag matching mockup */}
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-sky-500 text-white text-[11px] font-mono px-2.5 py-0.5 rounded shadow-sm z-20 font-bold">
-                                559 × 804
-                            </div>
+
                         </div>
                     </div>
                 </div>

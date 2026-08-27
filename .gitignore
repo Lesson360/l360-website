@@ -13,6 +13,8 @@
 /.skills
 *.md
 
+lesson360.postman_collection peter.json
+
 # testing
 /coverage
 

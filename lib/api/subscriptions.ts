@@ -98,10 +98,10 @@ export const subscriptionsApi = {
     // Fetch TestDriller products
     getTestDrillerProducts: () =>
         apiClient.get<{ message: string; data: TestDrillerProduct[] | { items: TestDrillerProduct[] } }>(
-            '/test-driller-products'
+            '/test-driller/products/public'
         ).catch(() =>
             apiClient.get<{ message: string; data: TestDrillerProduct[] | { items: TestDrillerProduct[] } }>(
-                '/test-driller/products'
+                '/test-driller/products/public'
             )
         ).catch(() => ({ data: [] as TestDrillerProduct[] })),
 

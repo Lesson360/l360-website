@@ -89,11 +89,17 @@ function VerifyOtpContent() {
         setSuccessMessage('');
 
         try {
-            await authApi.resendOTP({
-                phoneNumber: contact,
+            const verifyPayload: any = {
                 purpose: 'phone_verification',
                 channel: mode === 'email' ? 'email' : 'sms',
-            });
+            };
+
+            if (mode === 'email') {
+                verifyPayload.email = contact;
+            } else {
+                verifyPayload.phoneNumber = contact;
+            }
+            await authApi.resendOTP(verifyPayload);
             setSuccessMessage('A new verification code has been sent!');
             setResendTimer(30);
         } catch (err: any) {

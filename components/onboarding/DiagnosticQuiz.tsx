@@ -478,10 +478,10 @@ export default function DiagnosticQuiz() {
                                     <div
                                         className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${isSelected
                                             ? 'bg-brand-orange text-white'
-                                            : 'bg-gray-100 text-gray-700'
+                                            : 'bg-gray-100 text-gray-700 border border-gray-200'
                                             }`}
                                     >
-                                        {opt.key.toUpperCase()}
+                                        {/* {opt.key.toUpperCase()} */}
                                     </div>
 
                                     <div className="flex-1 text-sm font-semibold text-gray-800 leading-relaxed">
