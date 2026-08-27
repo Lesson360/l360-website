@@ -29,9 +29,18 @@ export class ApiClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          Cookies.remove('token');
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+          const requestUrl = error.config?.url || '';
+          const isAuthEndpoint =
+            requestUrl.includes('/auth/login') ||
+            requestUrl.includes('/auth/register') ||
+            requestUrl.includes('/auth/verify-otp') ||
+            requestUrl.includes('/auth/resend-otp');
+
+          if (!isAuthEndpoint) {
+            Cookies.remove('token');
+            if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+              window.location.href = '/login';
+            }
           }
         }
         return Promise.reject(error);
