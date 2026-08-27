@@ -55,12 +55,14 @@ export interface AuthResponse {
 }
 
 export interface OTPVerification {
-    phoneNumber: string;
+    phoneNumber?: string;
+    email?: string;
     otp: string;
 }
 
 export interface ForgotPasswordRequest {
-    phoneNumber: string;
+    phoneNumber?: string;
+    email?: string;
     channel?: 'sms' | 'email';
 }
 
