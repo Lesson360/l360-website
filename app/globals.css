@@ -5,7 +5,7 @@
 @font-face {
   font-family: 'Monoglyphic';
   src: url('/fonts/monoglyphic/Variable-TT/Monoglyphic-VF.ttf') format('truetype-variations'),
-       url('/fonts/monoglyphic/OpenType-TT/Monoglyphic-Regular.ttf') format('truetype');
+    url('/fonts/monoglyphic/OpenType-TT/Monoglyphic-Regular.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -28,9 +28,18 @@
 }
 
 :root {
-  --brand-orange: #FF4800;
+  --brand-orange: #FF4801;
   --brand-orange-deep: #D83D00;
   --brand-peach: #FFEEE4;
+
+  /* Primary Colors */
+  --brand-purple: #501461;
+  --brand-peach: #FAB294;
+
+  /* Secondary Colors */
+  --brand-lavender: #D2B4D8;
+  --brand-pink: #FDCFD9;
+  --color-brand-grey: #C5BBB8;
 }
 
 html,
@@ -48,18 +57,25 @@ body {
   font-family: 'Monoglyphic', 'Monoglyphic-Black', system-ui, sans-serif;
 }
 
-/* Custom scrollbar */
+/* Custom branded scrollbar across the entire website */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-orange) var(--brand-peach);
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--brand-peach);
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--brand-orange);
-  border-radius: 4px;
+  border-radius: 9999px;
+  border: 2px solid var(--brand-peach);
 }
 
 ::-webkit-scrollbar-thumb:hover {
