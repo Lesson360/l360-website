@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 const PRICING_PLANS = [
     {
@@ -161,9 +162,9 @@ export function Pricing() {
 
                         {/* Bottom Subscribe Button */}
                         <div className="mt-8 pt-4">
-                            <button className={`w-full py-3.5 px-6 rounded-2xl font-comic text-base sm:text-lg font-normal transition-all shadow-md active:scale-95 ${plan.buttonBg}`}>
+                            <Link href="/signup" className={`block text-center w-full py-3.5 px-6 rounded-2xl font-comic text-base sm:text-lg font-normal transition-all shadow-md active:scale-95 ${plan.buttonBg}`}>
                                 Subscribe
-                            </button>
+                            </Link>
                         </div>
 
                     </motion.div>

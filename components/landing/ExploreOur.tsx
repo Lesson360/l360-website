@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function ExploreOur() {
     return (
@@ -265,9 +266,9 @@ export function ExploreOur() {
                                 <button className="bg-[#2B2447] text-white font-bold text-xs py-2 px-4 rounded-full w-full mb-3 shadow-xs">
                                     24 Practice Questions
                                 </button>
-                                <button className="bg-[#CDECFF] hover:bg-[#BDE4FF] border border-black/20 text-[#1E1B3A] font-bold text-sm py-2 px-6 rounded-xl w-full transition-colors">
+                                <Link href="/signup" className="bg-[#CDECFF] hover:bg-[#BDE4FF] border border-black/20 text-[#1E1B3A] font-bold text-sm py-2 px-6 rounded-xl w-full transition-colors text-center inline-block">
                                     Start
-                                </button>
+                                </Link>
                             </div>
 
                             {/* Card 2: Physics */}
@@ -289,9 +290,9 @@ export function ExploreOur() {
                                 <button className="bg-[#2B2447] text-white font-bold text-xs py-2 px-4 rounded-full w-full mb-3 shadow-xs">
                                     24 Practice Questions
                                 </button>
-                                <button className="bg-[#CDECFF] hover:bg-[#BDE4FF] border border-black/20 text-[#1E1B3A] font-bold text-sm py-2 px-6 rounded-xl w-full transition-colors">
+                                <Link href="/signup" className="bg-[#CDECFF] hover:bg-[#BDE4FF] border border-black/20 text-[#1E1B3A] font-bold text-sm py-2 px-6 rounded-xl w-full transition-colors text-center inline-block">
                                     Start
-                                </button>
+                                </Link>
                             </div>
 
                             {/* Card 3: Chemistry */}
@@ -314,9 +315,9 @@ export function ExploreOur() {
                                 <button className="bg-[#2B2447] text-white font-bold text-xs py-2 px-4 rounded-full w-full mb-3 shadow-xs">
                                     24 Practice Questions
                                 </button>
-                                <button className="bg-[#CDECFF] hover:bg-[#BDE4FF] border border-black/20 text-[#1E1B3A] font-bold text-sm py-2 px-6 rounded-xl w-full transition-colors">
+                                <Link href="/signup" className="bg-[#CDECFF] hover:bg-[#BDE4FF] border border-black/20 text-[#1E1B3A] font-bold text-sm py-2 px-6 rounded-xl w-full transition-colors text-center inline-block">
                                     Start
-                                </button>
+                                </Link>
                             </div>
 
                         </div>
