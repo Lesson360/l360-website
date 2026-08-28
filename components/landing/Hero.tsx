@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function Hero() {
     return (
@@ -74,10 +75,6 @@ export function Hero() {
                     {/* Floating Blue Star Balloon (Bottom-Left Dip - No Shadow) */}
                     <div className="absolute bottom-6 -left-16 md:bottom-12 md:-left-60 w-20 h-20 md:w-28 md:h-28 z-20 select-none">
                         <motion.div
-                            // animate={{
-                            //     y: [0, -8, 0],
-                            //     rotate: 360
-                            // }}
                             transition={{
                                 y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
                                 rotate: { duration: 30, repeat: Infinity, ease: 'linear' }
@@ -94,74 +91,80 @@ export function Hero() {
                         </motion.div>
                     </div>
 
-                    {/* Video Lessons Badge (Left Overlap - Light Font, No Shadow) */}
-                    <motion.div
-                        className="absolute top-[32%] -left-12 xs:-left-16 md:-left-24 z-30 flex items-center gap-2 md:gap-3 bg-[#FFEB14] border-[2px] border-[#0018CF] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <div className="relative w-8 h-8 md:w-11 md:h-11 flex-shrink-0">
-                            <Image
-                                src="/hero-clapperboard.png"
-                                alt="Clapperboard"
-                                fill
-                                sizes="44px"
-                                className="object-contain"
-                            />
-                        </div>
-                        <div className="flex flex-col text-left">
-                            <span className="text-base md:text-2xl font-medium text-[#1E1B4B] leading-none">3,000+</span>
-                            <span className="text-[10px] md:text-[13px] font-light text-[#1E1B4B] leading-tight">video lesson</span>
-                        </div>
-                    </motion.div>
-
-                    {/* Quizzes Badge (Right Overlap - Light Font, No Shadow) */}
-                    <motion.div
-                        className="absolute bottom-[28%] -right-12 xs:-right-16 md:-right-24 z-30 flex items-center gap-2 md:gap-3 bg-[#4E3BFF] border-[2px] border-[#1E1B4B] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <div className="relative w-8 h-8 md:w-11 md:h-11 flex-shrink-0">
-                            <Image
-                                src="/hero-quiz-cube.png"
-                                alt="Quiz Cube"
-                                fill
-                                sizes="44px"
-                                className="object-contain"
-                            />
-                        </div>
-                        <div className="flex flex-col text-left">
-                            <span className="text-base md:text-2xl font-medium text-white leading-none">200+</span>
-                            <span className="text-[10px] md:text-[13px] font-light text-white/95 leading-tight">available quizzes</span>
-                        </div>
-                    </motion.div>
-
-                    {/* Enrichment Courses Card (Top-0, Shifted Further Right, Increased Image, Light Font, No Shadow) */}
-                    <motion.div
-                        className="absolute top-0 -right-20 md:top-0 md:-right-80 z-30 w-40 h-44 md:w-[180px] md:h-[180px] bg-[#E8F5E9] border-[2.5px] border-black rounded-[24px] rounded-tr-[70px] md:rounded-tr-[90px] p-3 md:p-4 flex flex-col items-center justify-between cursor-pointer"
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <div className="relative w-full flex-grow flex items-center justify-center min-h-[75px] md:min-h-[105px]">
-                            <motion.div
-                                animate={{ y: [0, -4, 0] }}
-                                transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-                                className="relative w-[90px] h-[75px] md:w-[130px] md:h-[105px]"
-                            >
+                    {/* Video Lessons Badge */}
+                    <Link href="/signup" className="absolute top-[32%] -left-12 xs:-left-16 md:-left-24 z-30">
+                        <motion.div
+                            className="flex items-center gap-2 md:gap-3 bg-[#FFEB14] border-[2px] border-[#0018CF] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <div className="relative w-8 h-8 md:w-11 md:h-11 flex-shrink-0">
                                 <Image
-                                    src="/hero-enrichment.png"
-                                    alt="Enrichment Courses"
+                                    src="/hero-clapperboard.png"
+                                    alt="Clapperboard"
                                     fill
-                                    sizes="(max-width: 768px) 90px, 130px"
+                                    sizes="44px"
                                     className="object-contain"
                                 />
-                            </motion.div>
-                        </div>
-                        <div className="text-center mt-1">
-                            <p className="text-[11px] md:text-[14px] font-light text-black leading-tight font-comic">Explore</p>
-                            <p className="text-[11px] md:text-[14px] font-light text-black leading-tight font-comic">Enrichment courses.</p>
-                        </div>
-                    </motion.div>
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <span className="text-base md:text-2xl font-medium text-[#1E1B4B] leading-none">3,000+</span>
+                                <span className="text-[10px] md:text-[13px] font-light text-[#1E1B4B] leading-tight">video lesson</span>
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                    {/* Quizzes Badge */}
+                    <Link href="/signup" className="absolute bottom-[28%] -right-12 xs:-right-16 md:-right-24 z-30">
+                        <motion.div
+                            className="flex items-center gap-2 md:gap-3 bg-[#4E3BFF] border-[2px] border-[#1E1B4B] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <div className="relative w-8 h-8 md:w-11 md:h-11 flex-shrink-0">
+                                <Image
+                                    src="/hero-quiz-cube.png"
+                                    alt="Quiz Cube"
+                                    fill
+                                    sizes="44px"
+                                    className="object-contain"
+                                />
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <span className="text-base md:text-2xl font-medium text-white leading-none">200+</span>
+                                <span className="text-[10px] md:text-[13px] font-light text-white/95 leading-tight">available quizzes</span>
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                    {/* Enrichment Courses Card */}
+                    <Link href="/signup" className="absolute top-0 -right-20 md:top-0 md:-right-80 z-30">
+                        <motion.div
+                            className="w-40 h-44 md:w-[180px] md:h-[180px] bg-[#E8F5E9] border-[2.5px] border-black rounded-[24px] rounded-tr-[70px] md:rounded-tr-[90px] p-3 md:p-4 flex flex-col items-center justify-between cursor-pointer"
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <div className="relative w-full flex-grow flex items-center justify-center min-h-[75px] md:min-h-[105px]">
+                                <motion.div
+                                    animate={{ y: [0, -4, 0] }}
+                                    transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                                    className="relative w-[90px] h-[75px] md:w-[130px] md:h-[105px]"
+                                >
+                                    <Image
+                                        src="/hero-enrichment.png"
+                                        alt="Enrichment Courses"
+                                        fill
+                                        sizes="(max-width: 768px) 90px, 130px"
+                                        className="object-contain"
+                                    />
+                                </motion.div>
+                            </div>
+                            <div className="text-center mt-1">
+                                <p className="text-[11px] md:text-[14px] font-light text-black leading-tight font-comic">Explore</p>
+                                <p className="text-[11px] md:text-[14px] font-light text-black leading-tight font-comic">Enrichment courses.</p>
+                            </div>
+                        </motion.div>
+                    </Link>
 
                 </div>
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const TESTIMONIALS = [
   {
@@ -132,7 +133,7 @@ export function Testimonials() {
 
         {/* View All Button */}
         <div className="flex justify-center mt-6 mb-6">
-          <button className="inline-block relative w-[90vw] sm:w-[320px] md:w-[420px] m-auto h-14 group">
+          <Link href="/signup" className="inline-block relative w-[90vw] sm:w-[320px] md:w-[420px] m-auto h-14 group">
             {/* Dark navy rotated background */}
             <span className="absolute inset-0 bg-[#2d284b] rounded-xl transition-transform duration-300 rotate-3 group-hover:rotate-0" />
 
@@ -140,7 +141,7 @@ export function Testimonials() {
             <span className="inline-block w-full h-full bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-bold px-7 py-3.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 relative font-comic text-center text-xl sm:text-2xl flex items-center justify-center">
               View All
             </span>
-          </button>
+          </Link>
         </div>
 
       </div>

@@ -45,19 +45,18 @@ export function Header() {
                         </>
                     ) : (
                         <>
-
-                            <span
-                                aria-disabled="true"
-                                className="text-gray-400 font-semibold px-2 py-2 cursor-not-allowed"
+                            <Link
+                                href="/login"
+                                className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-3 py-2"
                             >
                                 Login
-                            </span>
-                            <span
-                                aria-disabled="true"
-                                className="border border-gray-300 text-gray-400 font-semibold px-6 py-2 rounded-md cursor-not-allowed bg-white/60"
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="border border-brand-orange text-gray-800 font-semibold px-6 py-2 rounded-md hover:bg-brand-orange/10 transition-colors"
                             >
                                 Sign Up
-                            </span>
+                            </Link>
                         </>
                     )}
                 </div>
@@ -134,15 +133,20 @@ export function Header() {
                                 >
                                     Instagram
                                 </a>
-                                <span className="text-gray-400 font-semibold py-2 cursor-not-allowed">
+                                <Link
+                                    href="/login"
+                                    onClick={closeSidebar}
+                                    className="text-gray-800 font-semibold hover:text-brand-orange transition-colors py-2"
+                                >
                                     Login
-                                </span>
-                                <span
-                                    aria-disabled="true"
-                                    className="border border-gray-300 text-center text-gray-400 font-semibold px-6 py-3 rounded-md bg-gray-50 cursor-not-allowed"
+                                </Link>
+                                <Link
+                                    href="/signup"
+                                    onClick={closeSidebar}
+                                    className="border border-brand-orange text-center text-gray-800 font-semibold px-6 py-3 rounded-md hover:bg-brand-orange/10 transition-colors"
                                 >
                                     Sign Up
-                                </span>
+                                </Link>
                             </>
                         )}
                     </div>
