@@ -14,6 +14,10 @@ import {
     Award,
     CheckCircle2,
     BookOpen,
+    Maximize2,
+    ZoomIn,
+    X,
+    ImageIcon,
 } from 'lucide-react';
 import {
     diagnosticApi,
@@ -34,14 +38,15 @@ const FALLBACK_TEMPLATE: DiagnosticTemplate = {
     questions: [
         {
             id: 'q1',
-            prompt: 'What is 15 + 27?',
-            helperText: 'Select the correct sum',
+            prompt: 'What fraction of a shape is shaded if 3 out of 4 equal parts are colored?',
+            helperText: 'Examine the diagram carefully and select the matching fraction',
+            imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80',
             skillTag: 'Mathematics',
             options: [
-                { key: 'a', text: '32', score: 0 },
-                { key: 'b', text: '42', score: 1 },
-                { key: 'c', text: '52', score: 0 },
-                { key: 'd', text: '45', score: 0 },
+                { key: 'a', text: '1/4', score: 0 },
+                { key: 'b', text: '2/4', score: 0 },
+                { key: 'c', text: '3/4', score: 1 },
+                { key: 'd', text: '4/3', score: 0 },
             ],
         },
         {
@@ -60,6 +65,7 @@ const FALLBACK_TEMPLATE: DiagnosticTemplate = {
             id: 'q3',
             prompt: 'Which planet in our solar system is known as the Red Planet?',
             helperText: 'Solar System Knowledge',
+            imageUrl: 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&w=800&q=80',
             skillTag: 'Basic Science',
             options: [
                 { key: 'a', text: 'Venus', score: 0 },
@@ -70,20 +76,21 @@ const FALLBACK_TEMPLATE: DiagnosticTemplate = {
         },
         {
             id: 'q4',
-            prompt: 'What fraction of a shape is shaded if 3 out of 4 equal parts are colored?',
-            helperText: 'Fractions understanding',
+            prompt: 'What is 15 + 27?',
+            helperText: 'Select the correct sum',
             skillTag: 'Mathematics',
             options: [
-                { key: 'a', text: '1/4', score: 0 },
-                { key: 'b', text: '2/4', score: 0 },
-                { key: 'c', text: '3/4', score: 1 },
-                { key: 'd', text: '4/3', score: 0 },
+                { key: 'a', text: '32', score: 0 },
+                { key: 'b', text: '42', score: 1 },
+                { key: 'c', text: '52', score: 0 },
+                { key: 'd', text: '45', score: 0 },
             ],
         },
         {
             id: 'q5',
             prompt: 'What is the main job of plant roots?',
             helperText: 'Botany & Environment',
+            imageUrl: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
             skillTag: 'Basic Science',
             options: [
                 { key: 'a', text: 'Absorb water and nutrients from soil', score: 1 },
@@ -116,6 +123,9 @@ export default function DiagnosticQuiz() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+
+    // Lightbox / Zoom Modal State for Question Images
+    const [activeZoomImage, setActiveZoomImage] = useState<{ url: string; prompt?: string } | null>(null);
 
     // Load active child and fetch diagnostic template
     useEffect(() => {
@@ -204,6 +214,15 @@ export default function DiagnosticQuiz() {
         initDiagnostic();
     }, []);
 
+    // Handle Escape key to close image lightbox
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setActiveZoomImage(null);
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     const questions: DiagnosticQuestion[] = template?.questions || [];
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -259,7 +278,6 @@ export default function DiagnosticQuiz() {
                 if (attemptData) {
                     setResult(attemptData);
                 } else {
-                    // Compute mock local result if payload format differs
                     computeLocalResult();
                 }
             } else {
@@ -307,7 +325,6 @@ export default function DiagnosticQuiz() {
     };
 
     const handleFinishAndNavigate = async () => {
-        // Refresh session to get updated progress.screen = 'home'
         await authApi.getProfile().catch(() => null);
         router.push('/home');
     };
@@ -324,7 +341,7 @@ export default function DiagnosticQuiz() {
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 lg:p-10 rounded-3xl border border-gray-100 shadow-md space-y-8">
+        <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 lg:p-10 rounded-3xl border border-gray-100 shadow-md space-y-8 relative">
 
             {/* VIEW 1: INTRO SCREEN */}
             {view === 'intro' && (
@@ -383,7 +400,7 @@ export default function DiagnosticQuiz() {
                         <button
                             type="button"
                             onClick={() => setView('quiz')}
-                            className="w-full sm:w-auto px-4 md:px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
                         >
                             <span>Start Assessment</span>
                             <ArrowRight className="w-5 h-5" />
@@ -424,7 +441,7 @@ export default function DiagnosticQuiz() {
                     )}
 
                     {/* Question Prompt Card */}
-                    <div className="p-6 rounded-2xl bg-gray-50 border border-gray-100 space-y-4">
+                    <div className="p-6 sm:p-7 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-5 shadow-xs">
                         {currentQuestion.skillTag && (
                             <span className="inline-block px-3 py-1 rounded-full bg-brand-peach text-brand-orange text-xs font-bold">
                                 {currentQuestion.skillTag}
@@ -436,25 +453,55 @@ export default function DiagnosticQuiz() {
                         </h2>
 
                         {currentQuestion.helperText && (
-                            <p className="text-xs text-gray-500 font-medium">
-                                💡 {currentQuestion.helperText}
+                            <p className="text-xs sm:text-sm text-gray-500 font-medium flex items-center gap-1.5">
+                                💡 <span>{currentQuestion.helperText}</span>
                             </p>
                         )}
 
-                        {/* Optional Question Image */}
-                        {currentQuestion.imageUrl && !failedImages[currentQuestion.id] && (
-                            <div className="relative max-w-md max-h-48 mx-auto overflow-hidden rounded-xl border border-gray-200">
-                                <img
-                                    src={currentQuestion.imageUrl}
-                                    alt="Question Illustration"
-                                    onError={() =>
-                                        setFailedImages((prev) => ({
-                                            ...prev,
-                                            [currentQuestion.id]: true,
-                                        }))
+                        {/* ENHANCED DIAGNOSTIC QUESTION IMAGE DISPLAY */}
+                        {currentQuestion.imageUrl && !failedImages[currentQuestion.id || currentQuestion._id || ''] && (
+                            <div className="pt-2">
+                                <div
+                                    onClick={() =>
+                                        setActiveZoomImage({
+                                            url: currentQuestion.imageUrl!,
+                                            prompt: currentQuestion.prompt,
+                                        })
                                     }
-                                    className="w-full h-full object-contain"
-                                />
+                                    className="group relative max-w-xl mx-auto rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-100/60 to-slate-200/40 p-3 sm:p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden flex flex-col items-center justify-center"
+                                >
+                                    {/* Hover Zoom Badge */}
+                                    <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-xs text-gray-700 text-xs font-bold shadow-xs flex items-center gap-1.5 group-hover:bg-brand-orange group-hover:text-white transition-all">
+                                        <ZoomIn className="w-3.5 h-3.5" />
+                                        <span>Click to expand diagram</span>
+                                    </div>
+
+                                    {/* Responsive Image Display */}
+                                    <div className="relative w-full max-h-64 sm:max-h-80 flex items-center justify-center overflow-hidden rounded-xl bg-white p-2">
+                                        <img
+                                            src={currentQuestion.imageUrl}
+                                            alt={currentQuestion.prompt || 'Question Illustration'}
+                                            onError={() =>
+                                                setFailedImages((prev) => ({
+                                                    ...prev,
+                                                    [currentQuestion.id || currentQuestion._id || '']: true,
+                                                }))
+                                            }
+                                            className="max-h-60 sm:max-h-72 w-auto max-w-full object-contain rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
+                                        />
+                                    </div>
+
+                                    {/* Bottom Caption Bar */}
+                                    <div className="w-full pt-2 flex items-center justify-between text-[11px] text-gray-500 font-medium px-1">
+                                        <span className="flex items-center gap-1">
+                                            <ImageIcon className="w-3.5 h-3.5 text-brand-orange" />
+                                            <span>Diagnostic Diagram</span>
+                                        </span>
+                                        <span className="text-brand-orange group-hover:underline font-bold">
+                                            Full Resolution Preview 🔍
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -481,7 +528,6 @@ export default function DiagnosticQuiz() {
                                             : 'bg-gray-100 text-gray-700 border border-gray-200'
                                             }`}
                                     >
-                                        {/* {opt.key.toUpperCase()} */}
                                     </div>
 
                                     <div className="flex-1 text-sm font-semibold text-gray-800 leading-relaxed">
@@ -533,7 +579,7 @@ export default function DiagnosticQuiz() {
                                 ) : (
                                     <>
                                         <Check className="w-4 h-4" />
-                                        <span>Submit <span className='hidden md:inline'>Assessment</span></span>
+                                        <span>Submit <span className="hidden md:inline">Assessment</span></span>
                                     </>
                                 )}
                             </button>
@@ -577,7 +623,7 @@ export default function DiagnosticQuiz() {
                         <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 text-center space-y-2">
                             <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Learning Band</p>
                             <div className="text-2xl sm:text-3xl font-extrabold text-purple-700 capitalize">
-                                {result?.band || 'Rising Star'}
+                                {result?.band?.replaceAll('_', ' ') || 'Rising Star'}
                             </div>
                             <p className="text-xs text-purple-600 font-semibold">
                                 Tailored Curriculum Assigned
@@ -621,6 +667,56 @@ export default function DiagnosticQuiz() {
                         </button>
                     </div>
 
+                </div>
+            )}
+
+            {/* LIGHTBOX / ZOOM MODAL FOR DIAGNOSTIC IMAGES */}
+            {activeZoomImage && (
+                <div
+                    onClick={() => setActiveZoomImage(null)}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 sm:p-8 animate-in fade-in duration-200"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative max-w-4xl max-h-[90vh] bg-white rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden flex flex-col space-y-4"
+                    >
+                        {/* Lightbox Header */}
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <div className="flex items-center gap-2 text-gray-900 font-bold text-sm sm:text-base">
+                                <Maximize2 className="w-4 h-4 text-brand-orange" />
+                                <span>{activeZoomImage.prompt || 'Diagnostic Diagram Zoom'}</span>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setActiveZoomImage(null)}
+                                className="p-2 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {/* Lightbox Image Container */}
+                        <div className="flex-1 min-h-0 flex items-center justify-center bg-slate-900/5 rounded-2xl p-2 sm:p-4 overflow-auto">
+                            <img
+                                src={activeZoomImage.url}
+                                alt="Diagnostic Diagram Zoom"
+                                className="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-md"
+                            />
+                        </div>
+
+                        {/* Lightbox Footer */}
+                        <div className="flex items-center justify-between text-xs text-gray-500 font-medium pt-1">
+                            <span>Press <kbd className="px-1.5 py-0.5 rounded bg-gray-100 border text-gray-700 font-mono">Esc</kbd> or click outside to close</span>
+                            <button
+                                type="button"
+                                onClick={() => setActiveZoomImage(null)}
+                                className="text-brand-orange font-bold hover:underline cursor-pointer"
+                            >
+                                Close Modal
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

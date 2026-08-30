@@ -64,8 +64,15 @@ export const schoolStructureApi = {
 
     // Create child profile
     createChildProfile: (data: CreateChildProfilePayload) =>
-        apiClient.post<{ message: string; data: { childProfile: ChildProfile } }>(
+        apiClient.post<{ message: string; data: {id?:string, childProfile: ChildProfile } }>(
             '/child-profiles',
+            data
+        ),
+
+    // Update child profile
+    updateChildProfile: (childProfileId: string, data: Partial<CreateChildProfilePayload>) =>
+        apiClient.patch<{ message: string; data: { childProfile: ChildProfile } }>(
+            `/child-profiles/${childProfileId}`,
             data
         ),
 
