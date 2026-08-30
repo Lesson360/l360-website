@@ -55,6 +55,9 @@ export interface DiagnosticAttemptResult {
     recommendation?: {
         headline?: string;
         summary?: string;
+        primaryServiceType?: string;
+        secondaryServiceType?: string;
+        notes?: string[];
     };
 }
 

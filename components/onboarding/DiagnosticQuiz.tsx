@@ -27,6 +27,7 @@ import {
 } from '@/lib/api/diagnostic';
 import { authApi } from '@/lib/api/auth';
 import { schoolStructureApi } from '@/lib/api/school-structure';
+import SupportServiceRecommendations from '@/components/onboarding/SupportServiceRecommendations';
 
 // Fallback Diagnostic Template if API template is unavailable
 const FALLBACK_TEMPLATE: DiagnosticTemplate = {
@@ -642,28 +643,28 @@ export default function DiagnosticQuiz() {
                         </div>
                     </div>
 
-                    {/* Recommendation Box */}
-                    {result?.recommendation?.summary && (
-                        <div className="p-5 rounded-2xl bg-gray-50 border border-gray-200 flex items-start gap-3">
-                            <BookOpen className="w-5 h-5 text-brand-orange shrink-0 mt-0.5" />
-                            <div className="space-y-1 text-left">
-                                <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">Learning Recommendation</p>
-                                <p className="text-sm font-medium text-gray-600 leading-relaxed">
-                                    {result.recommendation.summary}
-                                </p>
-                            </div>
-                        </div>
-                    )}
+                    {/* Recommended Support Services Section */}
+                    <SupportServiceRecommendations
+                        attemptId={result?.id}
+                        childProfileId={childProfileId}
+                        childName={childName || 'Learner'}
+                        recommendationSummary={result?.recommendation?.summary}
+                        recommendationNotes={result?.recommendation?.notes || []}
+                        onComplete={handleFinishAndNavigate}
+                    />
 
                     {/* Finish CTA */}
-                    <div className="pt-4 border-t border-gray-100 flex justify-end">
+                    <div className="pt-6 border-t border-gray-100 flex items-center justify-between gap-4">
+                        <span className="text-xs font-semibold text-gray-500">
+                            Or skip support services for now and view curriculum:
+                        </span>
                         <button
                             type="button"
                             onClick={handleFinishAndNavigate}
-                            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                            className="px-6 py-3.5 rounded-2xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
                         >
                             <span>Go to Learner Dashboard</span>
-                            <ArrowRight className="w-5 h-5" />
+                            <ArrowRight className="w-4 h-4" />
                         </button>
                     </div>
 
