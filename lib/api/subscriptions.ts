@@ -112,13 +112,17 @@ export const subscriptionsApi = {
             payload
         ),
 
-    // Verify payment endpoint: GET /api/v1/subscriptions/payments/callback?reference=...
+    // Verify payment endpoint: POST /api/v1/subscriptions/payments/:reference/verify
     verifyPaymentCallback: (reference: string) =>
-        apiClient.get<VerifyPaymentResponse>(
-            `/subscriptions/payments/callback`,
-            { params: { reference } }
+        apiClient.post<VerifyPaymentResponse>(
+            `/subscriptions/payments/${reference}/verify`,
+            {}
         ).catch(() =>
-            // Fallback verification endpoint if callback alias isn't matched
+            apiClient.get<VerifyPaymentResponse>(
+                `/subscriptions/payments/callback`,
+                { params: { reference } }
+            )
+        ).catch(() =>
             apiClient.get<VerifyPaymentResponse>(
                 `/subscriptions/verify/${reference}`
             )
