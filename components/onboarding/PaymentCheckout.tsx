@@ -27,8 +27,24 @@ export default function PaymentCheckout() {
 
             try {
                 const res = await subscriptionsApi.verifyPaymentCallback(reference);
-                const status = (res.data?.status || (res.data as any)?.payment?.status || '').toLowerCase();
-                if (status === 'success' || status === 'paid' || res.message?.toLowerCase().includes('success')) {
+                const rawData: any = res.data || res;
+                const itemStatus = (
+                    rawData?.item?.status ||
+                    rawData?.payment?.status ||
+                    rawData?.status ||
+                    rawData?.subscription?.status ||
+                    ''
+                ).toLowerCase();
+
+                const msg = (res.message || '').toLowerCase();
+                const isSuccess =
+                    ['success', 'paid', 'active', 'completed', 'verified'].includes(itemStatus) ||
+                    msg.includes('completed') ||
+                    msg.includes('success') ||
+                    msg.includes('verified') ||
+                    msg.includes('paid');
+
+                if (isSuccess) {
                     setStatus('success');
                     setMessage('Payment successful! Finalizing your subscription setup...');
 

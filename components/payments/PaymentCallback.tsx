@@ -246,8 +246,24 @@ export default function PaymentCallback() {
 
         try {
             const res = await subscriptionsApi.verifyPaymentCallback(ref);
-            const statusStr = (res.data?.status || (res.data as any)?.payment?.status || '').toLowerCase();
-            if (statusStr === 'success' || statusStr === 'paid' || res.message?.toLowerCase().includes('success')) {
+            const rawData: any = res.data || res;
+            const itemStatus = (
+                rawData?.item?.status ||
+                rawData?.payment?.status ||
+                rawData?.status ||
+                rawData?.subscription?.status ||
+                ''
+            ).toLowerCase();
+
+            const msg = (res.message || '').toLowerCase();
+            const isSuccess =
+                ['success', 'paid', 'active', 'completed', 'verified'].includes(itemStatus) ||
+                msg.includes('completed') ||
+                msg.includes('success') ||
+                msg.includes('verified') ||
+                msg.includes('paid');
+
+            if (isSuccess) {
                 setStatus('success');
                 setMessage('Subscription confirmed! Finalizing your learner setup...');
 
