@@ -375,14 +375,24 @@ export default function SupportPaymentCallback() {
                         </div>
                     )}
 
-                    <button
-                        type="button"
-                        onClick={() => router.push('/onboarding/diagnostic')}
-                        className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                        <span>Return to Diagnostic Quiz</span>
-                        <ArrowRight className="w-5 h-5" />
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={() => router.push('/dashboard')}
+                            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            <span>Go to Learner Dashboard</span>
+                            <ArrowRight className="w-5 h-5" />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => router.push('/onboarding/diagnostic')}
+                            className="w-full sm:w-auto px-6 py-4 rounded-2xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            <span>View Diagnostic Results</span>
+                        </button>
+                    </div>
                 </div>
             )}
 
