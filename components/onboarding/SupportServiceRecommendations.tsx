@@ -216,29 +216,8 @@ export default function SupportServiceRecommendations({
             }
 
             if (checkoutObj?.authorizationUrl) {
-                // Open Paystack popup window or redirect
-                const width = 600;
-                const height = 700;
-                const left = (window.innerWidth - width) / 2;
-                const top = (window.innerHeight - height) / 2;
-
-                const paystackWindow = window.open(
-                    checkoutObj.authorizationUrl,
-                    'PaystackCheckout',
-                    `width=${width},height=${height},top=${top},left=${left}`
-                );
-
-                // Check for window close or verification reference
-                const ref = checkoutObj.reference;
-                if (ref) {
-                    const timer = setInterval(async () => {
-                        if (paystackWindow && paystackWindow.closed) {
-                            clearInterval(timer);
-                            // Verify payment when window closes
-                            await handleVerifyPayment(ref, offering, enrollmentObj?.id);
-                        }
-                    }, 1500);
-                }
+                // Direct window redirect for seamless Paystack checkout
+                window.location.href = checkoutObj.authorizationUrl;
             } else {
                 // If API returned enrollment without checkout URL (demo mode or free), move to slot booking
                 if (offering.requiresSlotSelection) {
