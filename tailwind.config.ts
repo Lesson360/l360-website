@@ -8,15 +8,21 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Monoglyphic', 'system-ui', 'sans-serif'],
-        display: ['Monoglyphic', 'system-ui', 'sans-serif'],
-        comic: ['Monoglyphic', 'Monoglyphic-Black', 'system-ui', 'sans-serif'],
+        sans: ['"Comic Sans MS"', '"Comic Sans"', '"Comic Neue"', 'cursive', 'sans-serif'],
+        display: ['"Comic Sans MS"', '"Comic Sans"', '"Comic Neue"', 'cursive', 'sans-serif'],
+        comic: ['"Comic Sans MS"', '"Comic Sans"', '"Comic Neue"', 'cursive', 'sans-serif'],
       },
       colors: {
         brand: {
-          orange: '#FF4800',
-          'orange-deep': '#D83D00',
-          peach: '#FFEEE4',
+          orange: '#FFB085',
+          'orange-deep': '#F4976C',
+          peach: '#FFF1E6',
+          purple: '#C8B6E2',
+          lavender: '#E8D7F1',
+          pink: '#FFC6FF',
+          blue: '#B5E2FA',
+          mint: '#C7F9CC',
+          yellow: '#FFFAA0',
         },
       },
     },

@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @font-face {
   font-family: 'Monoglyphic';
   src: url('/fonts/monoglyphic/Variable-TT/Monoglyphic-VF.ttf') format('truetype-variations'),
@@ -12,50 +11,30 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Monoglyphic-Bold';
-  src: url('/fonts/monoglyphic/OpenType-TT/Monoglyphic-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Monoglyphic-Black';
-  src: url('/fonts/monoglyphic/OpenType-TT/Monoglyphic-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
-  --brand-orange: #FF4801;
-  --brand-orange-deep: #D83D00;
-  --brand-peach: #FFEEE4;
+  /* Soft Pastel Color Tokens */
+  --brand-orange: #FFB085;
+  --brand-orange-deep: #F4976C;
+  --brand-peach: #FFF1E6;
 
-  /* Primary Colors */
-  --brand-purple: #501461;
-  --brand-peach: #FAB294;
-
-  /* Secondary Colors */
-  --brand-lavender: #D2B4D8;
-  --brand-pink: #FDCFD9;
-  --color-brand-grey: #C5BBB8;
+  /* Primary Pastel Colors */
+  --brand-purple: #C8B6E2;
+  --brand-lavender: #E8D7F1;
+  --brand-pink: #FFC6FF;
+  --color-brand-grey: #E5E0DF;
 }
 
 html,
 body {
   height: 100%;
-  font-family: 'Monoglyphic', system-ui, sans-serif;
-  color: #1a1a1a;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive, sans-serif;
+  color: #2D3748;
 }
 
-.font-display {
-  font-family: 'Monoglyphic', system-ui, sans-serif;
-}
-
+.font-sans,
+.font-display,
 .font-comic {
-  font-family: 'Monoglyphic', 'Monoglyphic-Black', system-ui, sans-serif;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive, sans-serif !important;
 }
 
 /* Custom branded scrollbar across the entire website */
@@ -65,8 +44,8 @@ html {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
