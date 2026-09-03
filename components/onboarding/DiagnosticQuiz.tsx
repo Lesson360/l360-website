@@ -663,7 +663,7 @@ export default function DiagnosticQuiz() {
                             onClick={handleFinishAndNavigate}
                             className="px-6 py-3.5 rounded-2xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
                         >
-                            <span>Go Dashboard</span>
+                            <span>Go to Dashboard</span>
                             <ArrowRight className="w-4 h-4" />
                         </button>
                     </div>
