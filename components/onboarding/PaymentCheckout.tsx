@@ -52,16 +52,16 @@ export default function PaymentCheckout() {
                     setTimeout(async () => {
                         const profileRes = await authApi.getProfile().catch(() => null);
                         const nextScreen = (profileRes as any)?.data?.progress?.screen || 'kindly_take_quiz';
+                        const targetUrl = nextScreen === 'home' ? '/dashboard' : '/onboarding/diagnostic';
 
-                        switch (nextScreen) {
-                            case 'kindly_take_quiz':
-                                router.push('/onboarding/diagnostic');
-                                break;
-                            case 'home':
-                            default:
-                                router.push('/onboarding/diagnostic');
-                                break;
+                        if (typeof window !== 'undefined' && window.opener && window.opener !== window) {
+                            try {
+                                window.opener.location.href = targetUrl;
+                                window.close();
+                                return;
+                            } catch (e) { }
                         }
+                        router.push(targetUrl);
                     }, 1500);
                 } else {
                     setStatus('failed');

@@ -98,14 +98,28 @@ export default function SupportPaymentCallback() {
     const [isFetchingSlots, setIsFetchingSlots] = useState(false);
     const [isBookingSlot, setIsBookingSlot] = useState(false);
 
+    // Smart navigation helper to handle both main window and popup window close/redirects
+    const smartNavigate = (targetUrl: string) => {
+        if (typeof window !== 'undefined' && window.opener && window.opener !== window) {
+            try {
+                window.opener.location.href = targetUrl;
+                window.close();
+                return;
+            } catch (e) {
+                console.warn('Cross-origin window.opener redirect failed:', e);
+            }
+        }
+        router.push(targetUrl);
+    };
+
     useEffect(() => {
         if (!reference) {
-            router.push('/onboarding/diagnostic');
+            smartNavigate('/onboarding/diagnostic');
             return;
         }
 
         verifySupportPayment(reference);
-    }, [reference, router]);
+    }, [reference]);
 
     // Verify Support Services Payment
     const verifySupportPayment = async (ref: string) => {
@@ -378,7 +392,7 @@ export default function SupportPaymentCallback() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                         <button
                             type="button"
-                            onClick={() => router.push('/dashboard')}
+                            onClick={() => smartNavigate('/dashboard')}
                             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <span>Go to Dashboard</span>
@@ -387,7 +401,7 @@ export default function SupportPaymentCallback() {
 
                         <button
                             type="button"
-                            onClick={() => router.push('/onboarding/diagnostic')}
+                            onClick={() => smartNavigate('/onboarding/diagnostic')}
                             className="w-full sm:w-auto px-6 py-4 rounded-2xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <span>View Diagnostic Results</span>
