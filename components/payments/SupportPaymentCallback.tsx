@@ -381,7 +381,7 @@ export default function SupportPaymentCallback() {
                             onClick={() => router.push('/dashboard')}
                             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
                         >
-                            <span>Go to Learner Dashboard</span>
+                            <span>Go Dashboard</span>
                             <ArrowRight className="w-5 h-5" />
                         </button>
 
