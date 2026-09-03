@@ -48,6 +48,7 @@ export interface SupportCheckoutPayload {
     offeringId: string;
     diagnosticAttemptId?: string;
     provider?: string;
+    callbackUrl?: string;
     reference?: string;
     metadata?: Record<string, any>;
     rawPayload?: Record<string, any>;

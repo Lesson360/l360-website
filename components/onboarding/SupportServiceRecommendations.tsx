@@ -195,11 +195,16 @@ export default function SupportServiceRecommendations({
         setIsCheckoutLoading(true);
 
         try {
+            const callbackUrl = typeof window !== 'undefined'
+                ? `${window.location.origin}/payments/support/callback`
+                : '/payments/support/callback';
+
             const res = await supportServicesApi.checkout({
                 childProfileId,
                 offeringId: offering.id,
                 diagnosticAttemptId: attemptId,
                 provider: 'paystack',
+                callbackUrl,
             });
 
             const resObj: any = res;
