@@ -9,23 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "axios": "^1.7.2",
+    "framer-motion": "^11.18.2",
+    "hls.js": "^1.7.2",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.577.0",
     "next": "14.2.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "lucide-react": "^0.577.0",
-    "framer-motion": "^11.18.2",
-    "tailwind-merge": "^2.6.1",
     "react-hook-form": "^7.52.1",
-    "zod": "^3.23.8",
-    "@hookform/resolvers": "^3.9.0",
-    "axios": "^1.7.2",
-    "js-cookie": "^3.0.5"
+    "tailwind-merge": "^2.6.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/js-cookie": "^3.0.6",
     "autoprefixer": "^10",
     "postcss": "^8",
     "tailwindcss": "^3",
