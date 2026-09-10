@@ -649,11 +649,16 @@ export default function PracticeExamPage() {
                                                 number: idx + 1,
                                                 text: q.prompt,
                                                 marks: q.marks || 1,
-                                                options: q.options.map((opt) => ({
-                                                    id: opt.key,
-                                                    label: opt.key.toUpperCase(),
-                                                    text: opt.text
-                                                })),
+                                                options: (q.options || []).map((opt, optIdx) => {
+                                                    const defaultLabel = String.fromCharCode(65 + optIdx);
+                                                    const keyVal = String(opt.key || opt.id || opt._id || defaultLabel);
+                                                    const labelVal = opt.label || (opt.key ? String(opt.key).toUpperCase() : defaultLabel);
+                                                    return {
+                                                        id: keyVal,
+                                                        label: labelVal,
+                                                        text: opt.text
+                                                    };
+                                                }),
                                                 correctOptionId: '',
                                                 topicId: 'api-main-topic'
                                             }))
@@ -742,12 +747,17 @@ export default function PracticeExamPage() {
                                             number: idx + 1,
                                             text: q.prompt,
                                             marks: 1,
-                                            options: q.options.map((opt) => ({
-                                                id: opt.key,
-                                                label: opt.key.toUpperCase(),
-                                                text: opt.text
-                                            })),
-                                            correctOptionId: q.options.find((opt) => opt.isCorrect)?.key || '',
+                                            options: (q.options || []).map((opt, optIdx) => {
+                                                const defaultLabel = String.fromCharCode(65 + optIdx);
+                                                const keyVal = String(opt.key || opt.id || opt._id || defaultLabel);
+                                                const labelVal = opt.label || (opt.key ? String(opt.key).toUpperCase() : defaultLabel);
+                                                return {
+                                                    id: keyVal,
+                                                    label: labelVal,
+                                                    text: opt.text
+                                                };
+                                            }),
+                                            correctOptionId: q.options.find((opt) => opt.isCorrect)?.key || q.options.find((opt) => opt.isCorrect)?.id || '',
                                             explanation: q.explanation,
                                             topicId: 'rev-topic'
                                         }))
