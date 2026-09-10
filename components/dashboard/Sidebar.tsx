@@ -19,11 +19,11 @@ import {
 import { useAuth } from '@/lib/hooks/useAuth';
 
 const NAV_ITEMS = [
-    {
-        name: 'Profile',
-        href: '/dashboard/profile',
-        icon: User,
-    },
+    // {
+    //     name: 'Profile',
+    //     href: '/dashboard/profile',
+    //     icon: User,
+    // },
     {
         name: 'Video Library',
         href: '/dashboard/video-library',
@@ -43,11 +43,6 @@ const NAV_ITEMS = [
         name: 'My Library',
         href: '/dashboard/my-library',
         icon: Library,
-    },
-    {
-        name: 'Subscriptions',
-        href: '/dashboard/subscriptions',
-        icon: CreditCard,
     },
     {
         name: 'Settings',

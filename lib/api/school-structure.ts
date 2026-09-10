@@ -47,6 +47,9 @@ export interface ChildProfile {
     nextScreen?: string;
     currentLevelId?: string;
     currentClassId?: string;
+    levelName?: string;
+    className?: string;
+    currentClassName?: string;
 }
 
 export const schoolStructureApi = {
@@ -64,7 +67,7 @@ export const schoolStructureApi = {
 
     // Create child profile
     createChildProfile: (data: CreateChildProfilePayload) =>
-        apiClient.post<{ message: string; data: {id?:string, childProfile: ChildProfile } }>(
+        apiClient.post<{ message: string; data: { id?: string; childProfile: ChildProfile } }>(
             '/child-profiles',
             data
         ),
