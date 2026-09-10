@@ -57,7 +57,10 @@ export interface Paper {
 }
 
 export interface QuestionOption {
-    key: string;
+    id?: string;
+    _id?: string;
+    key?: string;
+    label?: string;
     text: string;
     isCorrect?: boolean;
 }
@@ -209,7 +212,7 @@ export const testDrillerApi = {
     async startPaperAttempt(childProfileId: string, paperId: string): Promise<StartAttemptResponse> {
         const res: any = await apiClient.post(
             `/test-driller/child-profiles/${childProfileId}/papers/${paperId}/start`,
-            { submissionReason: 'manual' }
+            {}
         );
         return res?.data || res;
     },
@@ -231,12 +234,11 @@ export const testDrillerApi = {
     async submitAttempt(
         childProfileId: string,
         attemptId: string,
-        answers: QuestionAnswerPayload[],
-        submissionReason: string = 'manual'
+        answers: QuestionAnswerPayload[]
     ): Promise<SubmitAttemptResponse> {
         const res: any = await apiClient.post(
             `/test-driller/child-profiles/${childProfileId}/attempts/${attemptId}/submit`,
-            { answers, submissionReason }
+            { answers }
         );
         return res?.data || res;
     }
