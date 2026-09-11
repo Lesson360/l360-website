@@ -12,8 +12,12 @@ import {
     AttemptItem,
     SessionQuestion
 } from '@/lib/api/test-driller';
+
+// 1. CHANGE CHAPTERS TO EPISODES
+// 2. CHANGE TEST TO QUIZ
+
 import { authApi } from '@/lib/api/auth';
-import { schoolStructureApi } from '@/lib/api/school-structure';
+import { schoolStructureApi, resolveAndSyncActiveChild } from '@/lib/api/school-structure';
 import { SubjectExam, PRACTICE_EXAMS, UserAnswerMap, ExamResultSummary } from '@/lib/data/practiceExamsData';
 
 import { ExamSelectionGrid } from '@/components/practice-exam/ExamSelectionGrid';
@@ -88,53 +92,32 @@ export default function PracticeExamPage() {
     const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // ==========================================
-    // INIT & ACCESS CHECK
+    // INIT & ACCESS CHECK WITH STALE CACHE PURGING
     // ==========================================
     useEffect(() => {
         async function initAccess() {
             setIsCheckingAccess(true);
-            let resolvedChildId = '';
-            let resolvedName = '';
 
-            // Check localStorage
-            if (typeof window !== 'undefined') {
-                const cachedStr = localStorage.getItem('lesson360_active_child');
-                if (cachedStr) {
-                    try {
-                        const cached = JSON.parse(cachedStr);
-                        resolvedChildId = cached.id || cached._id || cached.childProfileId || '';
-                        resolvedName = cached.name || cached.childName || '';
-                    } catch { }
-                }
-            }
+            // Validate and sync cached child profile against real backend profiles
+            let activeChild = await resolveAndSyncActiveChild().catch(() => null);
 
-            // Fallback to authApi.getProfile()
+            let resolvedChildId = activeChild?.id || activeChild?._id || '';
+            let resolvedName = activeChild?.name || activeChild?.childName || '';
+
+            // Secondary fallback if resolveAndSyncActiveChild returned null
             if (!resolvedChildId) {
                 const profileRes = await authApi.getProfile().catch(() => null);
                 const profileData = (profileRes as any)?.data;
                 const userObj = profileData?.user || profileData;
-                const activeChild =
+                const altChild =
                     profileData?.activeChild ||
                     userObj?.activeChild ||
                     userObj?.childInfo ||
                     (userObj?.childProfiles && userObj.childProfiles[0]);
 
-                if (activeChild) {
-                    resolvedChildId = activeChild.id || activeChild._id || '';
-                    resolvedName = activeChild.name || activeChild.childName || '';
-                }
-            }
-
-            // Fallback to schoolStructureApi.getChildProfiles()
-            if (!resolvedChildId) {
-                const cpRes = await schoolStructureApi.getChildProfiles().catch(() => null);
-                let cpList: any[] = [];
-                if (Array.isArray(cpRes?.data)) cpList = cpRes.data;
-                else if (Array.isArray((cpRes?.data as any)?.items)) cpList = (cpRes?.data as any).items;
-
-                if (cpList.length > 0) {
-                    resolvedChildId = cpList[0].id || cpList[0]._id || '';
-                    resolvedName = cpList[0].name || cpList[0].childName || '';
+                if (altChild) {
+                    resolvedChildId = altChild.id || altChild._id || '';
+                    resolvedName = altChild.name || altChild.childName || '';
                 }
             }
 
@@ -143,7 +126,39 @@ export default function PracticeExamPage() {
                 setChildName(resolvedName);
 
                 try {
-                    const accessRes = await testDrillerApi.checkChildAccess(resolvedChildId);
+                    let accessRes: ChildAccessResponse;
+                    try {
+                        accessRes = await testDrillerApi.checkChildAccess(resolvedChildId);
+                    } catch (err: any) {
+                        const errMsg = err?.response?.data?.message || err?.message || '';
+                        // Handle stale/deleted child profile ID error
+                        if (errMsg.toLowerCase().includes('not found') || err?.response?.status === 404) {
+                            console.warn(`Child profile ID ${resolvedChildId} not found on server. Purging stale localStorage and re-syncing...`);
+                            if (typeof window !== 'undefined') {
+                                localStorage.removeItem('lesson360_active_child');
+                            }
+                            const freshProfilesRes = await schoolStructureApi.getChildProfiles().catch(() => null);
+                            const rawFresh = freshProfilesRes?.data;
+                            const freshProfiles: any[] = Array.isArray(rawFresh) ? rawFresh : (rawFresh as any)?.items || [];
+
+                            if (freshProfiles.length > 0) {
+                                const freshChild = freshProfiles[0];
+                                resolvedChildId = freshChild.id || freshChild._id || '';
+                                resolvedName = freshChild.name || freshChild.childName || '';
+                                setChildProfileId(resolvedChildId);
+                                setChildName(resolvedName);
+                                if (typeof window !== 'undefined') {
+                                    localStorage.setItem('lesson360_active_child', JSON.stringify(freshChild));
+                                }
+                                accessRes = await testDrillerApi.checkChildAccess(resolvedChildId);
+                            } else {
+                                throw err;
+                            }
+                        } else {
+                            throw err;
+                        }
+                    }
+
                     setAccessData(accessRes);
 
                     if (!accessRes.hasAccess) {
@@ -179,6 +194,7 @@ export default function PracticeExamPage() {
 
         initAccess();
     }, []);
+
 
     // Load subjects, years, and papers for active filters
     const loadSubjectsAndPapers = async (cId: string, eTypeId?: string, sId?: string, y?: number) => {

@@ -66,14 +66,7 @@ export function DashboardHeader({ onOpenMobileSidebar }: DashboardHeaderProps) {
 
             {/* Right Action Icons & User Badge */}
             <div className="flex items-center gap-3 sm:gap-6 shrink-0">
-                {/* Shopping Cart */}
-                <button
-                    type="button"
-                    aria-label="Shopping Cart"
-                    className="text-gray-700 hover:text-brand-orange transition-colors relative p-1.5"
-                >
-                    <ShoppingCart className="w-5 h-5" />
-                </button>
+               
 
                 {/* User Menu */}
                 <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-800 cursor-pointer hover:text-brand-orange transition-colors">

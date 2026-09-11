@@ -27,7 +27,7 @@ export function Hero() {
                         <path
                             d="M 1440,60 C 1300,320 1200,490 1060,490 C 920,490 820,240 720,240 C 620,240 520,490 380,490 C 240,490 140,320 0,60"
                             fill="none"
-                            stroke="#FF4800"
+                            stroke="#FF480090"
                             strokeWidth="8"
                             strokeLinecap="round"
                         />
@@ -41,7 +41,7 @@ export function Hero() {
                     <div className="absolute top-[3%] left-[18%] w-6 h-6 md:w-8 md:h-8 bg-white rounded-full z-30 border border-orange-100" />
 
                     {/* Central Arch Capsule with Orange Ring Border (No Shadow) */}
-                    <div className="w-full h-full border-[6px] md:border-[8px] border-[#FF4800] bg-white rounded-full overflow-hidden relative">
+                    <div className="w-full h-full border-[6px] md:border-[8px] border-[#FF480090] bg-white rounded-full overflow-hidden relative">
                         <Image
                             src="/guy-pressing-phone.png"
                             alt="Student pressing phone"
@@ -94,7 +94,7 @@ export function Hero() {
                     {/* Video Lessons Badge */}
                     <Link href="/signup" className="absolute top-[32%] -left-12 xs:-left-16 md:-left-24 z-30">
                         <motion.div
-                            className="flex items-center gap-2 md:gap-3 bg-[#FFEB14] border-[2px] border-[#0018CF] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
+                            className="flex items-center gap-2 md:gap-3 bg-[#ffeb149c] border-[2px] border-[#0018CF] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
                             whileHover={{ scale: 1.05, y: -2 }}
                             whileTap={{ scale: 0.98 }}
                         >
@@ -117,7 +117,7 @@ export function Hero() {
                     {/* Quizzes Badge */}
                     <Link href="/signup" className="absolute bottom-[28%] -right-12 xs:-right-16 md:-right-24 z-30">
                         <motion.div
-                            className="flex items-center gap-2 md:gap-3 bg-[#4E3BFF] border-[2px] border-[#1E1B4B] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
+                            className="flex items-center gap-2 md:gap-3 bg-[#4E3BFF99] border-[2px] border-[#1E1B4B] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
                             whileHover={{ scale: 1.05, y: -2 }}
                             whileTap={{ scale: 0.98 }}
                         >
@@ -174,7 +174,7 @@ export function Hero() {
             <div className="w-full text-center px-6 z-20">
                 <h1 className="text-2xl font-normal text-gray-900 leading-tight font-comic">
                     Turn Screen Time Into{' '}
-                    <span className="text-[#FF4800] font-comic font-normal inline-block md:mt-0 mt-1">
+                    <span className="text-[#FF480090] font-comic font-normal inline-block md:mt-0 mt-1">
                         Learning Time.
                     </span>
                 </h1>
@@ -184,7 +184,7 @@ export function Hero() {
             <div className="w-full px-6  flex justify-center z-20">
                 <div className="relative w-full max-w-5xl bg-[#B9BEFF20] mt-6 border-x border-t border-[#1E1B4B]/10 rounded-t-[32px] md:rounded-t-[48px] py-6 px-8 md:py-10 md:px-16 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-0">
                     {/* Left Decorative Orange Star */}
-                    <div className="absolute left-4 bottom-4 md:left-6 md:top-1/2 md:-translate-y-1/2 md:bottom-auto text-[#FF4800] w-6 h-6 md:w-8 md:h-8 select-none opacity-80">
+                    <div className="absolute left-4 bottom-4 md:left-6 md:top-1/2 md:-translate-y-1/2 md:bottom-auto text-[#FF480090] w-6 h-6 md:w-8 md:h-8 select-none opacity-80">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                             <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2" />
                         </svg>
@@ -215,7 +215,7 @@ export function Hero() {
                     </div>
 
                     {/* Right Decorative Orange Star */}
-                    <div className="absolute right-4 top-4 md:right-6 md:top-1/2 md:-translate-y-1/2 text-[#FF4800] w-6 h-6 md:w-8 md:h-8 select-none opacity-80">
+                    <div className="absolute right-4 top-4 md:right-6 md:top-1/2 md:-translate-y-1/2 text-[#FF480090] w-6 h-6 md:w-8 md:h-8 select-none opacity-80">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                             <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2" />
                         </svg>

@@ -26,7 +26,7 @@ import {
     DiagnosticAttemptResult,
 } from '@/lib/api/diagnostic';
 import { authApi } from '@/lib/api/auth';
-import { schoolStructureApi } from '@/lib/api/school-structure';
+import { schoolStructureApi, resolveAndSyncActiveChild } from '@/lib/api/school-structure';
 import SupportServiceRecommendations from '@/components/onboarding/SupportServiceRecommendations';
 
 // Fallback Diagnostic Template if API template is unavailable
@@ -134,53 +134,31 @@ export default function DiagnosticQuiz() {
             setIsLoading(true);
             setErrorMessage('');
 
-            let resolvedChildId = '';
-            let resolvedChildName = '';
+            // 1. Resolve & Sync active child profile against backend
+            const activeChild = await resolveAndSyncActiveChild().catch(() => null);
+            let resolvedChildId = activeChild?.id || activeChild?._id || '';
+            let resolvedChildName = activeChild?.name || activeChild?.childName || '';
 
-            // 1. Check localStorage
-            if (typeof window !== 'undefined') {
-                const cachedStr = localStorage.getItem('lesson360_active_child');
-                if (cachedStr) {
-                    try {
-                        const cached = JSON.parse(cachedStr);
-                        resolvedChildId = cached.id || cached._id || cached.childProfileId || '';
-                        resolvedChildName = cached.name || cached.childName || '';
-                    } catch { }
-                }
-            }
-
-            // 2. Fallback to authApi.getProfile()
+            // 2. Fallback to authApi.getProfile() if needed
             if (!resolvedChildId) {
                 const profileRes = await authApi.getProfile().catch(() => null);
                 const profileData = (profileRes as any)?.data;
                 const userObj = profileData?.user || profileData;
-                const activeChild =
+                const altChild =
                     profileData?.activeChild ||
                     userObj?.activeChild ||
                     userObj?.childInfo ||
                     (userObj?.childProfiles && userObj.childProfiles[0]);
 
-                if (activeChild) {
-                    resolvedChildId = activeChild.id || activeChild._id || '';
-                    resolvedChildName = activeChild.name || activeChild.childName || '';
-                }
-            }
-
-            // 3. Fallback to schoolStructureApi.getChildProfiles()
-            if (!resolvedChildId) {
-                const cpRes = await schoolStructureApi.getChildProfiles().catch(() => null);
-                let cpList: any[] = [];
-                if (Array.isArray(cpRes?.data)) cpList = cpRes.data;
-                else if (Array.isArray((cpRes?.data as any)?.items)) cpList = (cpRes?.data as any).items;
-
-                if (cpList.length > 0) {
-                    resolvedChildId = cpList[0].id || cpList[0]._id || '';
-                    resolvedChildName = cpList[0].name || cpList[0].childName || '';
+                if (altChild) {
+                    resolvedChildId = altChild.id || altChild._id || '';
+                    resolvedChildName = altChild.name || altChild.childName || '';
                 }
             }
 
             if (resolvedChildId) setChildProfileId(resolvedChildId);
             if (resolvedChildName) setChildName(resolvedChildName);
+
 
             // Fetch template from API if profile ID exists
             if (resolvedChildId) {

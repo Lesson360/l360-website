@@ -42,7 +42,8 @@ export interface CreateChildProfilePayload {
 export interface ChildProfile {
     id?: string;
     _id?: string;
-    name: string;
+    name?: string;
+    childName?: string;
     setupStatus?: string;
     nextScreen?: string;
     currentLevelId?: string;
@@ -92,3 +93,49 @@ export const schoolStructureApi = {
             '/child-profiles'
         ),
 };
+
+/**
+ * Validates localStorage cached child profile against active backend child profiles.
+ * Clears stale/invalid entries (like deleted MongoDB ObjectIDs) and syncs valid active profile to localStorage.
+ */
+export async function resolveAndSyncActiveChild(): Promise<ChildProfile | null> {
+    try {
+        const cpRes = await schoolStructureApi.getChildProfiles().catch(() => null);
+        const rawData = cpRes?.data;
+        const profiles: ChildProfile[] = Array.isArray(rawData)
+            ? rawData
+            : (rawData as any)?.items || [];
+
+        if (profiles.length === 0) {
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('lesson360_active_child');
+            }
+            return null;
+        }
+
+        let cachedChildId = '';
+        if (typeof window !== 'undefined') {
+            const cachedStr = localStorage.getItem('lesson360_active_child');
+            if (cachedStr) {
+                try {
+                    const cached = JSON.parse(cachedStr);
+                    cachedChildId = cached.id || cached._id || cached.childProfileId || '';
+                } catch { }
+            }
+        }
+
+        // Validate cached child profile ID against server profiles
+        const matched = cachedChildId ? profiles.find(p => p.id === cachedChildId || p._id === cachedChildId) : null;
+
+        const activeChild = matched || profiles[0];
+
+        if (typeof window !== 'undefined' && activeChild) {
+            localStorage.setItem('lesson360_active_child', JSON.stringify(activeChild));
+        }
+
+        return activeChild;
+    } catch {
+        return null;
+    }
+}
+

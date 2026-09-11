@@ -5,6 +5,7 @@ import {
     Search,
     BookOpen,
     PlayCircle,
+    Play,
     FileText,
     Award,
     Download,
@@ -149,6 +150,9 @@ export default function VideoLibraryPage() {
                         const found = profiles.find((p) => p.id === cached.id || p._id === cached.id);
                         if (found) currentChild = found;
                     } catch { }
+                }
+                if (currentChild) {
+                    localStorage.setItem('lesson360_active_child', JSON.stringify(currentChild));
                 }
             }
 
@@ -575,7 +579,7 @@ export default function VideoLibraryPage() {
     );
 
     return (
-        <div className="space-y-8 pb-12 relative">
+        <div className=" relative">
 
             {/* TOAST NOTIFICATION CONTAINER */}
             {toastMessage && (
@@ -687,11 +691,11 @@ export default function VideoLibraryPage() {
                         </div>
                     </div>
 
-                    {/* Section Header: Class Subjects */}
+                    {/* Section Header: Courses */}
                     <div className="flex items-center justify-between gap-4 pt-2">
                         <div>
                             <h2 className="text-2xl font-black text-gray-900 tracking-tight">
-                                Class Subjects
+                                Courses
                             </h2>
                             <p className="text-xs text-gray-500 font-medium">Select a subject to view its full chapter curriculum.</p>
                         </div>
@@ -710,7 +714,7 @@ export default function VideoLibraryPage() {
                     {loadingData ? (
                         <div className="py-12 flex flex-col items-center justify-center space-y-3">
                             <Loader2 className="w-8 h-8 text-[#FF4801] animate-spin" />
-                            <p className="text-sm font-bold text-gray-500">Loading class subjects...</p>
+                            <p className="text-sm font-bold text-gray-500">Loading Courses...</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -746,7 +750,7 @@ export default function VideoLibraryPage() {
                                             </div>
 
                                             <div className="pt-2 w-full flex items-center justify-center gap-1.5 text-xs font-bold text-orange-200 group-hover:text-white transition-colors">
-                                                <span>View Chapters</span>
+                                                <span>View Episodes</span>
                                                 <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                                             </div>
                                         </div>
@@ -778,7 +782,7 @@ export default function VideoLibraryPage() {
                                     {selectedSubject.name}
                                 </h1>
                                 <p className="text-xs font-bold text-gray-500">
-                                    {topics.length} Chapters
+                                    {topics.length} Episodes
                                 </p>
                             </div>
                         </div>
@@ -798,20 +802,20 @@ export default function VideoLibraryPage() {
 
                     {/* Section Title */}
                     <h2 className="text-xl font-bold text-gray-900 tracking-tight">
-                        All Chapters
+                        All Episodes
                     </h2>
 
                     {/* 3-Column Grid of Chapter Cards matching Image 2 */}
                     {loadingTopics ? (
                         <div className="py-12 flex flex-col items-center justify-center space-y-3">
                             <Loader2 className="w-8 h-8 text-[#FF4801] animate-spin" />
-                            <p className="text-sm font-bold text-gray-500">Loading chapters...</p>
+                            <p className="text-sm font-bold text-gray-500">Loading episodes...</p>
                         </div>
                     ) : filteredTopics.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredTopics.map((topic: any, idx: number) => {
                                 const chapNumber = topic.chapterNumber || idx + 1;
-                                const chapTitle = topic.name || topic.title || `Chapter ${chapNumber}`;
+                                const chapTitle = topic.name || topic.title || `Episode ${chapNumber}`;
                                 const lessonCount = topic.videos?.length || topic.videoList?.length || 0;
 
                                 return (
@@ -828,7 +832,7 @@ export default function VideoLibraryPage() {
 
                                         <div className="space-y-1 w-full">
                                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
-                                                Chapter {chapNumber}
+                                                Episode {chapNumber}
                                             </span>
                                             <h3 className="text-sm font-extrabold text-gray-900 line-clamp-2 leading-snug group-hover:text-[#FF4801] transition-colors">
                                                 {chapTitle}
@@ -853,7 +857,7 @@ export default function VideoLibraryPage() {
                     ) : (
                         <div className="p-12 text-center bg-white rounded-3xl border border-gray-100 space-y-3">
                             <BookOpen className="w-10 h-10 text-gray-400 mx-auto" />
-                            <p className="text-base font-bold text-gray-700">No chapters found for this subject.</p>
+                            <p className="text-base font-bold text-gray-700">No episodes found for this course.</p>
                             <p className="text-xs text-gray-400 font-medium">Check back soon as new topics are updated.</p>
                         </div>
                     )}
@@ -894,7 +898,7 @@ export default function VideoLibraryPage() {
 
                             <div>
                                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
-                                    Chapter {selectedChapterInfo.chapterNumber}
+                                    Episode {selectedChapterInfo.chapterNumber}
                                 </span>
                                 <h2 className="text-2xl font-black text-gray-900 mt-1">
                                     {selectedChapterInfo.title}
@@ -944,7 +948,7 @@ export default function VideoLibraryPage() {
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                 >
-                                    Tests ({assessments.length})
+                                    Quizes ({assessments.length})
                                 </button>
                             </div>
                         </div>
@@ -955,7 +959,7 @@ export default function VideoLibraryPage() {
                             {loadingModalDetails ? (
                                 <div className="py-12 flex flex-col items-center justify-center space-y-3">
                                     <Loader2 className="w-8 h-8 text-[#FF4801] animate-spin" />
-                                    <p className="text-sm font-bold text-gray-500">Loading chapter resources...</p>
+                                    <p className="text-sm font-bold text-gray-500">Loading episode resources...</p>
                                 </div>
                             ) : (
                                 <>
@@ -984,12 +988,12 @@ export default function VideoLibraryPage() {
                                                                             />
                                                                         ) : (
                                                                             <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                                                                                <PlayCircle className="w-6 h-6 text-orange-400" />
+                                                                                <Play className="w-5 h-5 text-orange-400 fill-current ml-0.5" />
                                                                             </div>
                                                                         )}
                                                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                                                                         <div className="absolute inset-0 m-auto w-7 h-7 rounded-full bg-white text-[#FF4801] flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                                                                            <PlayCircle className="w-5 h-5 fill-current" />
+                                                                            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                                                                         </div>
                                                                     </div>
 
@@ -1029,7 +1033,7 @@ export default function VideoLibraryPage() {
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2 text-gray-900 font-black text-base">
                                                         <FileText className="w-5 h-5 text-[#FF4801]" />
-                                                        <span>Chapter Revision Study Notes</span>
+                                                        <span>Episode Revision Study Notes</span>
                                                     </div>
                                                     <button
                                                         type="button"
@@ -1042,7 +1046,7 @@ export default function VideoLibraryPage() {
                                                 </div>
 
                                                 <p className="text-xs text-gray-600 font-medium leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                                    {topicNotes?.content || `Comprehensive chapter revision summary notes for ${selectedChapterInfo.title}. Download notes file for offline revision.`}
+                                                    {topicNotes?.content || `Comprehensive episode revision summary notes for ${selectedChapterInfo.title}. Download notes file for offline revision.`}
                                                 </p>
                                             </div>
                                         </div>
@@ -1091,7 +1095,7 @@ export default function VideoLibraryPage() {
                                     {/* TAB 4: TESTS (IMAGE 4) */}
                                     {modalTab === 'tests' && (
                                         <div className="space-y-4">
-                                            <h4 className="text-sm font-black text-gray-900 uppercase tracking-wider">Chapter Tests & Practice Drills</h4>
+                                            <h4 className="text-sm font-black text-gray-900 uppercase tracking-wider">Episode Quiz</h4>
 
                                             {assessments.length > 0 ? (
                                                 assessments.map((test, idx) => (
@@ -1121,7 +1125,7 @@ export default function VideoLibraryPage() {
                                             ) : (
                                                 <div className="p-8 text-center bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
                                                     <Award className="w-8 h-8 text-gray-400 mx-auto" />
-                                                    <p className="text-sm font-bold text-gray-700">No practice tests assigned to this chapter yet.</p>
+                                                    <p className="text-sm font-bold text-gray-700">No practice quizs assigned to this episode yet.</p>
                                                 </div>
                                             )}
                                         </div>
@@ -1284,10 +1288,10 @@ export default function VideoLibraryPage() {
                                 Assessment Submitted & Graded
                             </span>
                             <h2 className="text-3xl font-black text-gray-900 mt-1">
-                                {quizResult.passed ? 'Great Job! Test Passed' : 'Practice Completed'}
+                                {quizResult.passed ? 'Great Job! Quiz Passed' : 'Practice Completed'}
                             </h2>
                             <p className="text-xs text-gray-500 font-medium mt-1">
-                                {activeAssessment?.title || 'Chapter Assessment'}
+                                {activeAssessment?.title || 'Episode Quiz'}
                             </p>
                         </div>
 
@@ -1386,7 +1390,7 @@ export default function VideoLibraryPage() {
                                 }}
                                 className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#00C838] hover:bg-emerald-600 text-white font-black text-xs shadow-md cursor-pointer"
                             >
-                                Back to Chapter Resources
+                                Back to Episode Resources
                             </button>
                         </div>
                     </div>

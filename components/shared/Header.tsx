@@ -4,10 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { Menu, X } from 'lucide-react'; // or use any icon library
+import { Menu, X, User } from 'lucide-react';
 
 export function Header() {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -32,17 +32,15 @@ export function Header() {
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center space-x-4">
                     {user ? (
-                        <>
-                            <span className="text-gray-800 font-semibold">
-                                {user.fullName || user.email}
-                            </span>
-                            <button
-                                onClick={logout}
-                                className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-4 py-2"
-                            >
-                                Logout
-                            </button>
-                        </>
+                        <Link
+                            href="/dashboard"
+                            className="flex items-center gap-2 p-2 rounded-full text-gray-800 hover:text-brand-orange hover:bg-brand-orange/10 transition-colors"
+                            title="Go to Dashboard"
+                        >
+                            <div className="w-9 h-9 rounded-full bg-brand-orange/20 text-brand-orange border border-brand-orange/40 flex items-center justify-center shadow-xs">
+                                <User size={20} />
+                            </div>
+                        </Link>
                     ) : (
                         <>
                             <Link
@@ -103,25 +101,23 @@ export function Header() {
                     {/* Sidebar Content */}
                     <div className="flex flex-col p-6 space-y-4 flex-1">
                         {user ? (
-                            <>
-                                <div className="pb-4 border-b">
-                                    <p className="text-gray-800 font-semibold">
+                            <Link
+                                href="/dashboard"
+                                onClick={closeSidebar}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-brand-orange/10 text-gray-800 hover:text-brand-orange transition-colors"
+                            >
+                                <div className="w-10 h-10 rounded-full bg-brand-orange text-white flex items-center justify-center shrink-0 shadow-xs">
+                                    <User size={22} />
+                                </div>
+                                <div className="overflow-hidden">
+                                    <p className="text-sm font-bold text-gray-900 truncate">
                                         {user.fullName || user.email}
                                     </p>
-                                    <p className="text-sm text-gray-500 truncate">
-                                        {user.email}
+                                    <p className="text-xs text-brand-orange font-semibold">
+                                        Dashboard →
                                     </p>
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        logout();
-                                        closeSidebar();
-                                    }}
-                                    className="w-full text-left text-gray-800 font-semibold hover:text-brand-orange transition-colors py-2"
-                                >
-                                    Logout
-                                </button>
-                            </>
+                            </Link>
                         ) : (
                             <>
                                 <a
@@ -155,3 +151,4 @@ export function Header() {
         </>
     );
 }
+
