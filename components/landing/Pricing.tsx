@@ -9,12 +9,12 @@ import { subscriptionsApi, SubscriptionPlan, PlanDescriptionObject } from '@/lib
 const CARD_THEMES = [
     {
         cardBg: 'bg-[#FDE4E6]',
-        titleColor: 'text-[#FF4800]',
-        priceColor: 'text-[#FF4800]',
+        titleColor: 'text-[#FF480090]',
+        priceColor: 'text-[#FF480099]',
         subtitleColor: 'text-[#FF4800]/70',
         dividerColor: 'border-[#FF4800]/20',
         textColor: 'text-[#1E1B3A]',
-        buttonBg: 'bg-[#FF1E00] hover:bg-[#E01A00] text-white',
+        buttonBg: 'bg-[#FF1E0099] hover:bg-[#E01A00] text-white',
         badgeBg: 'bg-[#FF4800] text-white',
         iconBg: 'bg-purple-100 text-purple-600',
     },
@@ -30,7 +30,7 @@ const CARD_THEMES = [
         iconBg: 'bg-purple-800 text-purple-200',
     },
     {
-        cardBg: 'bg-[#FF4800]',
+        cardBg: 'bg-[#FF480099]',
         titleColor: 'text-white',
         priceColor: 'text-white',
         subtitleColor: 'text-orange-100/80',
@@ -41,6 +41,8 @@ const CARD_THEMES = [
         iconBg: 'bg-orange-600/90 text-white',
     },
 ];
+
+
 
 const FALLBACK_PLANS: SubscriptionPlan[] = [
     {
