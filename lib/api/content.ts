@@ -1,6 +1,86 @@
 import { apiClient } from './client';
 
 export interface AnalyticsOverview {
+    childProfile?: {
+        id: string;
+        name: string;
+        avatarUrl?: string;
+        status?: string;
+        currentLevelId?: string;
+        currentLevelName?: string;
+        currentClassId?: string;
+        currentClassName?: string;
+    };
+    hero?: {
+        title?: string;
+        subtitle?: string;
+    };
+    summary?: {
+        courses?: number;
+        averageScore?: number;
+        testsTaken?: number;
+        improvementPercentage?: number;
+    };
+    performanceBySubject?: Array<{
+        subjectId: string;
+        subjectName: string;
+        averageScore?: number;
+        testsTaken?: number;
+        latestSubmittedAt?: string | null;
+    }>;
+    recentAssessments?: Array<{
+        attemptId: string;
+        assessmentId: string;
+        assessmentType?: string;
+        assessmentTitle?: string;
+        subjectId?: string;
+        subjectName?: string;
+        topicId?: string;
+        totalQuestions?: number;
+        scoreEarned?: number;
+        maxScore?: number;
+        percentageScore?: number;
+        submittedAt?: string;
+        gradedAt?: string;
+        status?: string;
+    }>;
+    trend?: {
+        currentPeriodAverage?: number;
+        previousPeriodAverage?: number;
+        difference?: number;
+        improvementPercentage?: number;
+        direction?: string;
+    };
+    progression?: {
+        totalPoints?: number;
+        completedVideos?: number;
+        currentBadge?: {
+            id: string;
+            name: string;
+            slug?: string;
+            description?: string;
+            minPoints?: number;
+            iconUrl?: string;
+            colorHex?: string;
+            status?: string;
+            sortOrder?: number;
+        };
+        nextBadge?: {
+            id: string;
+            name: string;
+            slug?: string;
+            description?: string;
+            minPoints?: number;
+            iconUrl?: string;
+            colorHex?: string;
+            status?: string;
+            sortOrder?: number;
+        };
+        pointsToNextBadge?: number;
+        progressPercentage?: number;
+    };
+
+    // Backward Compatibility
     totalVideosWatched?: number;
     totalQuizAttempts?: number;
     averageQuizScore?: number;
@@ -200,6 +280,35 @@ export interface QuizAttemptResult {
     answers?: QuizAttemptAnswer[];
 }
 
+export interface ContinueWatchingPlayback {
+    url?: string;
+    expiresAt?: string;
+}
+
+export interface ContinueWatchingItem {
+    id?: string;
+    _id?: string;
+    videoId?: string;
+    title?: string;
+    name?: string;
+    description?: string;
+    subjectName?: string;
+    subjectId?: string;
+    topicName?: string;
+    topicId?: string;
+    durationLabel?: string;
+    thumbnailUrl?: string;
+    thumbnailAccessUrl?: string;
+    duration?: number;
+    durationSeconds?: number;
+    lastPositionSeconds?: number;
+    progressSeconds?: number;
+    progressPercentage?: number;
+    isCompleted?: boolean;
+    playback?: ContinueWatchingPlayback | null;
+    updatedAt?: string;
+}
+
 export interface QuizSubmissionResponseData {
     assessment?: TopicAssessment;
     attempt?: QuizAttemptResult;
@@ -211,6 +320,18 @@ export const contentApi = {
         apiClient.get<{ message: string; data: AnalyticsOverview }>(
             `/child-profiles/${profileId}/analytics/overview`
         ),
+
+    // Continue watching list for child profile
+    getContinueWatching: (profileId: string, limit: number = 5) =>
+        apiClient
+            .get<{ message: string; data: ContinueWatchingItem[] | { items: ContinueWatchingItem[]; total: number } }>(
+                `/content/child-profiles/${profileId}/continue-watching?limit=${limit}`
+            )
+            .catch(() =>
+                apiClient.get<{ message: string; data: ContinueWatchingItem[] | { items: ContinueWatchingItem[]; total: number } }>(
+                    `/content/child-profiles/${profileId}/videos/continue-watching?limit=${limit}`
+                )
+            ),
 
     // Subjects available for child profile
     getChildSubjects: (profileId: string) =>

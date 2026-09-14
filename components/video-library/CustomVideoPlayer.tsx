@@ -22,6 +22,8 @@ interface CustomVideoPlayerProps {
     onBack: () => void;
     onNextLesson?: () => void;
     hasNextLesson?: boolean;
+    initialPosition?: number;
+    onProgressUpdate?: (lastPositionSeconds: number, durationSeconds: number) => void;
 }
 
 export function CustomVideoPlayer({
@@ -29,7 +31,9 @@ export function CustomVideoPlayer({
     title,
     onBack,
     onNextLesson,
-    hasNextLesson = false
+    hasNextLesson = false,
+    initialPosition = 0,
+    onProgressUpdate
 }: CustomVideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -47,14 +51,26 @@ export function CustomVideoPlayer({
     const [showControls, setShowControls] = useState(true);
 
     const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastSavedTimeRef = useRef<number>(0);
+
+    // Handle initial seek when metadata loaded
+    const hasSeekedInitialRef = useRef(false);
 
     // HLS & Media Source binding
     useEffect(() => {
         if (!src || !videoRef.current) return;
         setIsLoading(true);
+        hasSeekedInitialRef.current = false;
 
         let hlsInstance: any = null;
         const isHls = src.includes('.m3u8');
+
+        const applyInitialSeek = () => {
+            if (videoRef.current && initialPosition > 0 && !hasSeekedInitialRef.current) {
+                videoRef.current.currentTime = initialPosition;
+                hasSeekedInitialRef.current = true;
+            }
+        };
 
         if (isHls) {
             import('hls.js').then(({ default: Hls }) => {
@@ -64,17 +80,20 @@ export function CustomVideoPlayer({
                     hlsInstance.attachMedia(videoRef.current);
                     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                         setIsLoading(false);
+                        applyInitialSeek();
                         videoRef.current?.play().catch(() => null);
                     });
                 } else if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
                     videoRef.current.src = src;
                     setIsLoading(false);
+                    applyInitialSeek();
                     videoRef.current.play().catch(() => null);
                 }
             });
         } else {
             videoRef.current.src = src;
             setIsLoading(false);
+            applyInitialSeek();
             videoRef.current.play().catch(() => null);
         }
 
@@ -83,13 +102,27 @@ export function CustomVideoPlayer({
                 hlsInstance.destroy();
             }
         };
-    }, [src]);
+    }, [src, initialPosition]);
 
-    // Handle Time Update
+    // Handle Time Update & Periodic Progress Saving
     const handleTimeUpdate = () => {
         if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime);
-            setDuration(videoRef.current.duration || 0);
+            const curTime = videoRef.current.currentTime;
+            const dur = videoRef.current.duration || 0;
+            setCurrentTime(curTime);
+            setDuration(dur);
+
+            if (onProgressUpdate && Math.abs(curTime - lastSavedTimeRef.current) >= 5) {
+                lastSavedTimeRef.current = curTime;
+                onProgressUpdate(curTime, dur);
+            }
+        }
+    };
+
+    // Save progress on pause or back
+    const reportProgress = () => {
+        if (videoRef.current && onProgressUpdate) {
+            onProgressUpdate(videoRef.current.currentTime, videoRef.current.duration || 0);
         }
     };
 
@@ -99,6 +132,7 @@ export function CustomVideoPlayer({
         if (isPlaying) {
             videoRef.current.pause();
             setIsPlaying(false);
+            reportProgress();
         } else {
             videoRef.current.play().then(() => setIsPlaying(true)).catch(() => null);
         }
