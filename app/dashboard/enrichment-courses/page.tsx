@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     GraduationCap,
+    X,
     BookOpen,
     PlayCircle,
     Download,
@@ -76,22 +77,6 @@ export default function EnrichmentCoursesPage() {
     const [loadingPreview, setLoadingPreview] = useState(false);
     const [initiatingCheckout, setInitiatingCheckout] = useState(false);
     const [downloadingResource, setDownloadingResource] = useState<string | null>(null);
-
-    const handleExplorePublicCourse = async (course: StandaloneCourseItem) => {
-        setPreviewCourse(course);
-        setLoadingPreview(true);
-        try {
-            const courseId = course.id || (course as any)._id;
-            const res = await enrichmentCoursesApi.getPublicCourseDetail(courseId);
-            if (res?.item) {
-                setPreviewCourse(res.item);
-            }
-        } catch (err) {
-            console.error('Error fetching public course detail:', err);
-        } finally {
-            setLoadingPreview(false);
-        }
-    };
 
     // Load Child Profiles and Categories on mount
     useEffect(() => {
@@ -203,9 +188,9 @@ export default function EnrichmentCoursesPage() {
         try {
             const cat = categorySlug && categorySlug !== 'all' ? categorySlug : undefined;
             const res = await enrichmentCoursesApi.getPublicCourses(cat);
-            console.log("public courses: ", res)
-            if (res?.data.items) {
-                setPublicCourses(res.data.items);
+            console.log("public courses: ", res);
+            if (res?.items) {
+                setPublicCourses(res.items);
             }
         } catch (err) {
             console.error('Error fetching public courses:', err);
@@ -331,7 +316,7 @@ export default function EnrichmentCoursesPage() {
                 localStorage.setItem('pending_enrichment_checkout', JSON.stringify({
                     childProfileId: childId,
                     courseId: courseId,
-                    purchaseId: res.purchase.id,
+                    purchaseId: res.purchase?.id,
                     reference: res.checkout.reference,
                     authorizationUrl: res.checkout.authorizationUrl,
                     createdAt: new Date().toISOString()
@@ -348,7 +333,24 @@ export default function EnrichmentCoursesPage() {
         }
     };
 
-    const filteredPublicCourses = publicCourses.filter(c => {
+    // Public Course Preview Modal handler
+    const handleExplorePublicCourse = async (course: StandaloneCourseItem) => {
+        setPreviewCourse(course);
+        setLoadingPreview(true);
+        try {
+            const courseId = course.id || (course as any)._id;
+            const res = await enrichmentCoursesApi.getPublicCourseDetail(courseId);
+            if (res?.item) {
+                setPreviewCourse(res.item);
+            }
+        } catch (err) {
+            console.error('Error fetching public course detail:', err);
+        } finally {
+            setLoadingPreview(false);
+        }
+    };
+
+    const filteredPublicCourses = publicCourses.filter((c: StandaloneCourseItem) => {
         const title = c.title || '';
         const desc = c.description || c.shortDescription || '';
         return title.toLowerCase().includes(searchQuery.toLowerCase()) || desc.toLowerCase().includes(searchQuery.toLowerCase());
@@ -379,7 +381,7 @@ export default function EnrichmentCoursesPage() {
                             Learning Profile
                         </span>
                         <div className="flex items-center gap-2">
-                            {childProfiles.map(child => {
+                            {childProfiles.map((child: ChildProfile) => {
                                 const isSelected = selectedChild?.id === child.id;
                                 return (
                                     <button
@@ -451,7 +453,7 @@ export default function EnrichmentCoursesPage() {
                             >
                                 All Categories
                             </button>
-                            {categories.map(cat => (
+                            {categories.map((cat: StandaloneCourseCategory) => (
                                 <button
                                     key={cat.id || cat.slug}
                                     onClick={() => handleCategoryFilter(cat.slug)}
@@ -472,7 +474,7 @@ export default function EnrichmentCoursesPage() {
                                 type="text"
                                 placeholder="Search courses..."
                                 value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-medium focus:outline-none focus:border-[#FF4801]"
                             />
                         </div>
@@ -481,7 +483,7 @@ export default function EnrichmentCoursesPage() {
                     {/* Catalogue Grid */}
                     {loadingCatalogue ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[1, 2, 3].map(i => (
+                            {[1, 2, 3].map((i: number) => (
                                 <div key={i} className="h-64 rounded-3xl bg-gray-100 animate-pulse" />
                             ))}
                         </div>
@@ -493,8 +495,8 @@ export default function EnrichmentCoursesPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredPublicCourses.map(course => {
-                                const isOwned = myCourses.some(mc => mc.id === course.id);
+                            {filteredPublicCourses.map((course: StandaloneCourseItem) => {
+                                const isOwned = myCourses.some((mc: StandaloneCourseItem) => mc.id === course.id);
                                 return (
                                     <div
                                         key={course.id || (course as any)._id}
@@ -555,7 +557,7 @@ export default function EnrichmentCoursesPage() {
 
                                             {isOwned ? (
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); handleOpenCourse(course); }}
+                                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleOpenCourse(course); }}
                                                     className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-sm"
                                                 >
                                                     <CheckCircle2 className="w-4 h-4" />
@@ -563,7 +565,7 @@ export default function EnrichmentCoursesPage() {
                                                 </button>
                                             ) : (
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); handleExplorePublicCourse(course); }}
+                                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleExplorePublicCourse(course); }}
                                                     className="px-5 py-2.5 rounded-xl bg-[#FF4801] hover:bg-[#e03d00] text-white font-bold text-xs transition-all shadow-sm hover:shadow-md flex items-center gap-1.5"
                                                 >
                                                     <span>Explore</span>
@@ -584,7 +586,7 @@ export default function EnrichmentCoursesPage() {
                 <div className="space-y-6">
                     {loadingMyCourses ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[1, 2].map(i => (
+                            {[1, 2].map((i: number) => (
                                 <div key={i} className="h-64 rounded-3xl bg-gray-100 animate-pulse" />
                             ))}
                         </div>
@@ -608,7 +610,7 @@ export default function EnrichmentCoursesPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {myCourses.map(course => (
+                            {myCourses.map((course: StandaloneCourseItem) => (
                                 <div
                                     key={course.id || (course as any)._id}
                                     onClick={() => handleOpenCourse(course)}
@@ -681,7 +683,7 @@ export default function EnrichmentCoursesPage() {
                         {/* Sections List & Video Lessons */}
                         {loadingContent ? (
                             <div className="space-y-4">
-                                {[1, 2].map(i => (
+                                {[1, 2].map((i: number) => (
                                     <div key={i} className="h-24 rounded-2xl bg-gray-100 animate-pulse" />
                                 ))}
                             </div>
@@ -697,7 +699,7 @@ export default function EnrichmentCoursesPage() {
                                         Course Sections ({sections.length})
                                     </h4>
                                     <div className="space-y-2">
-                                        {sections.map(section => {
+                                        {sections.map((section: CourseSectionItem) => {
                                             const isActive = activeSection?.id === section.id;
                                             return (
                                                 <button
@@ -776,7 +778,7 @@ export default function EnrichmentCoursesPage() {
                                                     <p className="text-xs text-gray-400 py-4">No video lessons available in this section.</p>
                                                 ) : (
                                                     <div className="space-y-3">
-                                                        {sectionVideos.map(video => (
+                                                        {sectionVideos.map((video: SectionVideoItem) => (
                                                             <div
                                                                 key={video.id || (video as any)._id}
                                                                 onClick={() => handlePlayVideo(video)}
@@ -852,7 +854,7 @@ export default function EnrichmentCoursesPage() {
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPreviewCourse(null)}>
                     <div
                         className="bg-white rounded-3xl border border-gray-100 shadow-2xl max-w-lg w-full overflow-hidden relative"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     >
                         {/* Banner Image */}
                         <div className="h-52 bg-slate-900 relative overflow-hidden">
@@ -932,7 +934,7 @@ export default function EnrichmentCoursesPage() {
 
                                     {/* Action Buttons */}
                                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-gray-100">
-                                        {myCourses.some(mc => mc.id === previewCourse.id) ? (
+                                        {myCourses.some((mc: StandaloneCourseItem) => mc.id === previewCourse.id) ? (
                                             <button
                                                 onClick={() => {
                                                     setPreviewCourse(null);

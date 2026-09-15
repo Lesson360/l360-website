@@ -150,7 +150,7 @@ export const enrichmentCoursesApi = {
         apiClient.get<StandaloneCourseCategory[]>('/standalone-course-categories/public'),
 
     getPublicCourses: (category?: string) =>
-        apiClient.get<{ data: {items: StandaloneCourseItem[]; total: number }}>(
+        apiClient.get<{ items: StandaloneCourseItem[]; total: number }>(
             category ? `/standalone-courses/public?category=${encodeURIComponent(category)}` : '/standalone-courses/public'
         ),
 
