@@ -189,8 +189,8 @@ export default function EnrichmentCoursesPage() {
             const cat = categorySlug && categorySlug !== 'all' ? categorySlug : undefined;
             const res = await enrichmentCoursesApi.getPublicCourses(cat);
             console.log("public courses: ", res);
-            if (res?.items) {
-                setPublicCourses(res.items);
+            if (res?.data.items) {
+                setPublicCourses(res.data.items);
             }
         } catch (err) {
             console.error('Error fetching public courses:', err);
