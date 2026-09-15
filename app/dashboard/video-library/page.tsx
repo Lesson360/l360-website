@@ -37,7 +37,8 @@ import {
     TopicAssessment,
     AnalyticsOverview,
     QuizQuestion,
-    QuizAttemptResult
+    QuizAttemptResult,
+    ContinueWatchingItem
 } from '@/lib/api/content';
 import { CustomVideoPlayer } from '@/components/video-library/CustomVideoPlayer';
 
@@ -61,6 +62,7 @@ export default function VideoLibraryPage() {
     const [activeChild, setActiveChild] = useState<ChildProfile | null>(null);
     const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null);
     const [subjects, setSubjects] = useState<SubjectItem[]>([]);
+    const [continueWatchingList, setContinueWatchingList] = useState<ContinueWatchingItem[]>([]);
     const [loadingData, setLoadingData] = useState(true);
 
     // View Navigation Mode: 'library' | 'subject' | 'player' | 'quiz' | 'quiz_result'
@@ -163,6 +165,14 @@ export default function VideoLibraryPage() {
                 contentApi.getChildAnalytics(childId).then((res) => {
                     if (res.data) setAnalytics(res.data);
                 }).catch(() => null);
+
+                contentApi.getContinueWatching(childId, 5).then((res) => {
+                    const rawCW = res?.data;
+                    const cwItems: ContinueWatchingItem[] = Array.isArray(rawCW)
+                        ? rawCW
+                        : (rawCW as any)?.items || [];
+                    setContinueWatchingList(cwItems);
+                }).catch(() => setContinueWatchingList([]));
 
                 try {
                     const resSubjects = await contentApi.getChildSubjects(childId);
@@ -328,6 +338,23 @@ export default function VideoLibraryPage() {
             setPlaybackUrl(video.videoUrl || null);
         }
     };
+
+    // Save video playback progress
+    const handleSaveVideoProgress = useCallback(async (lastPositionSeconds: number, durationSeconds: number) => {
+        const childId = activeChild?.id || activeChild?._id;
+        const videoId = activeVideo?.id || activeVideo?._id;
+        if (childId && videoId) {
+            try {
+                await contentApi.updateVideoProgress(childId, videoId, {
+                    lastPositionSeconds: Math.floor(lastPositionSeconds),
+                    durationSeconds: Math.floor(durationSeconds),
+                    isPlaying: true
+                });
+            } catch (err) {
+                console.warn('Failed to update video progress:', err);
+            }
+        }
+    }, [activeChild, activeVideo]);
 
     // Play Next Lesson Video
     const handleNextLesson = () => {
@@ -661,7 +688,7 @@ export default function VideoLibraryPage() {
                             <div>
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Quizzes Attempted</p>
                                 <p className="text-2xl font-black text-gray-900">
-                                    {analytics?.totalQuizAttempts ?? 0}
+                                    {analytics?.summary?.testsTaken ?? analytics?.totalQuizAttempts ?? 0}
                                 </p>
                             </div>
                         </div>
@@ -673,7 +700,7 @@ export default function VideoLibraryPage() {
                             <div>
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subjects Enrolled</p>
                                 <p className="text-2xl font-black text-gray-900">
-                                    {subjects.length}
+                                    {analytics?.summary?.courses ?? subjects.length}
                                 </p>
                             </div>
                         </div>
@@ -685,11 +712,112 @@ export default function VideoLibraryPage() {
                             <div>
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Avg. Score</p>
                                 <p className="text-2xl font-black text-gray-900">
-                                    {analytics?.averageQuizScore ? `${analytics.averageQuizScore}%` : '0%'}
+                                    {analytics?.summary?.averageScore !== undefined
+                                        ? `${analytics.summary.averageScore}%`
+                                        : analytics?.averageQuizScore ? `${analytics.averageQuizScore}%` : '0%'}
                                 </p>
                             </div>
                         </div>
                     </div>
+
+                    {/* Continue Watching Section */}
+                    {continueWatchingList.length > 0 && (
+                        <div className="space-y-4 pt-2">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                                        <PlayCircle className="w-5 h-5 text-[#FF4801]" />
+                                        <span>Continue Watching</span>
+                                    </h2>
+                                    <p className="text-xs text-gray-500 font-medium">Resume your video lessons where you left off.</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                {continueWatchingList.map((cwItem, idx) => {
+                                    const titleStr = cwItem.title || cwItem.name || 'Lesson Video';
+                                    const durSec = cwItem.durationSeconds || cwItem.duration || 1;
+                                    const posSec = cwItem.lastPositionSeconds || cwItem.progressSeconds || 0;
+                                    const pct = cwItem.progressPercentage || (durSec > 0 ? Math.min(100, Math.round((posSec / durSec) * 100)) : 0);
+
+                                    return (
+                                        <div
+                                            key={cwItem.id || cwItem._id || idx}
+                                            onClick={() => {
+                                                const targetVideo: TopicVideo = {
+                                                    id: cwItem.videoId || cwItem.id || cwItem._id || '',
+                                                    title: titleStr,
+                                                    name: titleStr,
+                                                    progressSeconds: posSec,
+                                                    durationSeconds: durSec,
+                                                    thumbnailAccessUrl: cwItem.thumbnailAccessUrl,
+                                                    videoUrl: cwItem.playback?.url
+                                                };
+                                                if (cwItem.playback?.url) {
+                                                    setPlaybackUrl(cwItem.playback.url);
+                                                    setActiveVideo(targetVideo);
+                                                    setViewMode('player');
+                                                } else {
+                                                    handleLaunchVideoPlayer(targetVideo, 0);
+                                                }
+                                            }}
+                                            className="bg-white rounded-2xl border border-gray-200 p-4 hover:border-orange-300 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group space-y-3 relative overflow-hidden"
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                {cwItem.thumbnailAccessUrl ? (
+                                                    <div className="w-16 h-12 rounded-xl overflow-hidden bg-slate-900 shrink-0 relative group-hover:scale-105 transition-transform border border-gray-100">
+                                                        <img
+                                                            src={cwItem.thumbnailAccessUrl}
+                                                            alt={titleStr}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                            <Play className="w-4 h-4 fill-white text-white" />
+                                                        </div>
+                                                        {cwItem.durationLabel && (
+                                                            <span className="absolute bottom-0.5 right-0.5 px-1 py-0.2 bg-black/80 text-[9px] font-mono text-white rounded">
+                                                                {cwItem.durationLabel}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-12 h-12 rounded-xl bg-orange-100 text-[#FF4801] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                                                    </div>
+                                                )}
+                                                <div className="space-y-0.5 overflow-hidden">
+                                                    <span className="text-[10px] font-bold text-[#FF4801] uppercase tracking-wider block">
+                                                        {cwItem.subjectName || 'Lesson'}
+                                                    </span>
+                                                    <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-[#FF4801] transition-colors">
+                                                        {titleStr}
+                                                    </h4>
+                                                    {cwItem.topicName && (
+                                                        <p className="text-xs text-gray-500 truncate">{cwItem.topicName}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1.5 pt-2 border-t border-gray-100">
+                                                <div className="flex items-center justify-between text-[11px] font-bold text-gray-500">
+                                                    <span>{cwItem.durationLabel ? `Duration: ${cwItem.durationLabel}` : `Progress (${pct}%)`}</span>
+                                                    <span className="text-[#FF4801] group-hover:underline flex items-center gap-1">
+                                                        Resume <ChevronRight className="w-3.5 h-3.5" />
+                                                    </span>
+                                                </div>
+                                                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-[#FF4801] rounded-full transition-all duration-300"
+                                                        style={{ width: `${pct || 10}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Section Header: Courses */}
                     <div className="flex items-center justify-between gap-4 pt-2">
@@ -1144,6 +1272,8 @@ export default function VideoLibraryPage() {
                 <CustomVideoPlayer
                     src={playbackUrl || 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'}
                     title={activeVideo.title || 'Expressing numbers in index form'}
+                    initialPosition={activeVideo.progressSeconds || (activeVideo as any).lastPositionSeconds || 0}
+                    onProgressUpdate={handleSaveVideoProgress}
                     onBack={() => {
                         setViewMode('subject');
                         setIsChapterModalOpen(true);

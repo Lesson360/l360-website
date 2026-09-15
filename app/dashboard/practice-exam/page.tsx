@@ -35,7 +35,9 @@ import {
     RefreshCw,
     CheckCircle2,
     Clock,
-    FileText
+    FileText,
+    ArrowLeft,
+    ChevronRight
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -491,108 +493,220 @@ export default function PracticeExamPage() {
                     {/* Live API Paper Selector vs Mock Fallback */}
                     {!useMockFallback ? (
                         <div className="space-y-6">
-                            {/* Filter Bar: Exam Types & Years */}
-                            <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+                            {/* Exam Type Header & Filter Bar */}
+                            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-4">
+                                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-900">Select Exam Type</h2>
+                                        <p className="text-xs text-gray-500">Choose your targeted examination board to explore subjects and past papers.</p>
+                                    </div>
+                                    {selectedSubjectId && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedSubjectId('');
+                                                setSelectedYear(undefined);
+                                                if (childProfileId && selectedExamTypeId) {
+                                                    loadSubjectsAndPapers(childProfileId, selectedExamTypeId, undefined, undefined);
+                                                }
+                                            }}
+                                            className="text-xs font-bold text-[#FF4801] hover:underline flex items-center gap-1"
+                                        >
+                                            <ArrowLeft className="w-3.5 h-3.5" />
+                                            Back to Subject Selection
+                                        </button>
+                                    )}
+                                </div>
+
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">Exam Type:</span>
                                     {examTypes.map((et) => (
                                         <button
                                             key={et.id}
                                             type="button"
                                             onClick={() => handleExamTypeChange(et.id)}
-                                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedExamTypeId === et.id
+                                            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${selectedExamTypeId === et.id
                                                 ? 'bg-[#FF4801] text-white shadow-xs'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
-                                            {et.name}
+                                            <BookOpen className="w-4 h-4" />
+                                            <span>{et.name}</span>
                                         </button>
                                     ))}
                                 </div>
-
-                                {years.length > 0 && (
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="w-4 h-4 text-gray-400" />
-                                        <select
-                                            value={selectedYear || ''}
-                                            onChange={(e) => handleYearChange(e.target.value ? Number(e.target.value) : undefined)}
-                                            className="px-3 py-1.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-700 bg-white"
-                                        >
-                                            <option value="">All Available Years</option>
-                                            {years.map((y) => (
-                                                <option key={y} value={y}>{y}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
                             </div>
 
-                            {/* Papers List */}
-                            {isLoadingPapers ? (
-                                <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
-                                    <Loader2 className="w-8 h-8 animate-spin text-[#FF4801] mx-auto" />
-                                    <p className="text-sm font-semibold text-gray-600">Loading Available Past Papers...</p>
-                                </div>
-                            ) : papers.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {papers.map((paper) => (
-                                        <div
-                                            key={paper.id}
-                                            className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
-                                        >
-                                            <div className="space-y-2">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF4801] text-xs font-bold uppercase">
-                                                        {paper.year || 'Practice'}
-                                                    </span>
-                                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                                        {paper.attemptMode} Mode
-                                                    </span>
-                                                </div>
-                                                <h3 className="text-lg font-bold text-gray-900 leading-snug">
-                                                    {paper.title}
-                                                </h3>
-                                                <p className="text-xs text-gray-500 line-clamp-2">
-                                                    {paper.instructions || 'Standard test driller examination paper.'}
-                                                </p>
-                                            </div>
+                            {/* STEP 2: SUBJECT SELECTION GRID (when no subject is selected yet) */}
+                            {!selectedSubjectId ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                                            <BookOpen className="w-5 h-5 text-[#FF4801]" />
+                                            <span>Select Subject</span>
+                                        </h3>
+                                        <span className="text-xs text-gray-500 font-semibold">{apiSubjects.length} Subjects Available</span>
+                                    </div>
 
-                                            <div className="pt-4 border-t border-gray-100 space-y-3">
-                                                <div className="flex items-center justify-between text-xs text-gray-600 font-semibold">
-                                                    <span className="flex items-center gap-1">
-                                                        <FileText className="w-3.5 h-3.5 text-gray-400" />
-                                                        {paper.totalQuestions} Questions
-                                                    </span>
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                        {paper.durationMinutes} Mins
-                                                    </span>
-                                                </div>
-
-                                                <button
-                                                    type="button"
-                                                    disabled={isStartingAttempt}
-                                                    onClick={() => handleStartApiPaper(paper)}
-                                                    className="w-full bg-[#CBE9FF] hover:bg-[#b5e0ff] active:scale-[0.98] text-gray-900 font-bold text-sm py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                                >
-                                                    {isStartingAttempt && selectedPaper?.id === paper.id ? (
-                                                        <>
-                                                            <Loader2 className="w-4 h-4 animate-spin text-gray-800" />
-                                                            <span>Launching Exam...</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <span>Start Paper</span>
-                                                            <Play className="w-3.5 h-3.5 fill-current" />
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
+                                    {isLoadingPapers ? (
+                                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
+                                            <Loader2 className="w-8 h-8 animate-spin text-[#FF4801] mx-auto" />
+                                            <p className="text-sm font-semibold text-gray-600">Loading Available Subjects...</p>
                                         </div>
-                                    ))}
+                                    ) : apiSubjects.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                            {apiSubjects.map((sub) => (
+                                                <button
+                                                    key={sub.id}
+                                                    type="button"
+                                                    onClick={() => handleSubjectChange(sub.id)}
+                                                    className="bg-white hover:bg-orange-50/50 rounded-2xl border border-gray-200 hover:border-orange-300 p-5 text-left transition-all shadow-xs hover:shadow-md flex flex-col justify-between group space-y-4"
+                                                >
+                                                    <div className="flex items-start justify-between w-full">
+                                                        <div className="w-10 h-10 rounded-xl bg-orange-100 text-[#FF4801] font-bold flex items-center justify-center text-sm shadow-xs group-hover:scale-105 transition-transform">
+                                                            {sub.name.substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full group-hover:bg-orange-100 group-hover:text-[#FF4801] transition-colors">
+                                                            {sub.code || 'Driller'}
+                                                        </span>
+                                                    </div>
+
+                                                    <div>
+                                                        <h4 className="text-base font-bold text-gray-900 group-hover:text-[#FF4801] transition-colors">
+                                                            {sub.name}
+                                                        </h4>
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            Select to view all examination papers & practice tests.
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between w-full text-xs font-bold text-[#FF4801]">
+                                                        <span>View Papers</span>
+                                                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-8 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
+                                            <p className="text-sm font-semibold text-gray-600">No subjects found for this exam type.</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setUseMockFallback(true)}
+                                                className="text-xs font-bold text-[#FF4801] hover:underline"
+                                            >
+                                                Switch to Exam Simulation Mode
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
-                                <ExamSelectionGrid onSelectSubject={handleSelectSubjectMock} />
+                                /* STEP 3: PAPERS LIST FOR SELECTED SUBJECT WITH YEAR FILTER */
+                                <div className="space-y-4">
+                                    <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Filtered By Subject:</span>
+                                            <span className="px-3 py-1 bg-orange-100 text-[#FF4801] text-xs font-bold rounded-lg">
+                                                {apiSubjects.find((s) => s.id === selectedSubjectId)?.name || 'Selected Subject'}
+                                            </span>
+                                        </div>
+
+                                        {/* Year Filter Dropdown & Pills */}
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                                                <Calendar className="w-4 h-4 text-gray-400" />
+                                                Filter Year:
+                                            </span>
+                                            <select
+                                                value={selectedYear || ''}
+                                                onChange={(e) => handleYearChange(e.target.value ? Number(e.target.value) : undefined)}
+                                                className="px-3 py-1.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-700 bg-white shadow-2xs focus:ring-2 focus:ring-[#FF4801]"
+                                            >
+                                                <option value="">All Available Years</option>
+                                                {years.map((y) => (
+                                                    <option key={y} value={y}>{y}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Papers List */}
+                                    {isLoadingPapers ? (
+                                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
+                                            <Loader2 className="w-8 h-8 animate-spin text-[#FF4801] mx-auto" />
+                                            <p className="text-sm font-semibold text-gray-600">Loading Available Past Papers...</p>
+                                        </div>
+                                    ) : papers.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {papers.map((paper) => (
+                                                <div
+                                                    key={paper.id}
+                                                    className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                                                >
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF4801] text-xs font-bold uppercase">
+                                                                {paper.year || 'Practice'}
+                                                            </span>
+                                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                                {paper.attemptMode} Mode
+                                                            </span>
+                                                        </div>
+                                                        <h3 className="text-lg font-bold text-gray-900 leading-snug">
+                                                            {paper.title}
+                                                        </h3>
+                                                        <p className="text-xs text-gray-500 line-clamp-2">
+                                                            {paper.instructions || 'Standard test driller examination paper.'}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="pt-4 border-t border-gray-100 space-y-3">
+                                                        <div className="flex items-center justify-between text-xs text-gray-600 font-semibold">
+                                                            <span className="flex items-center gap-1">
+                                                                <FileText className="w-3.5 h-3.5 text-gray-400" />
+                                                                {paper.totalQuestions} Questions
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                                {paper.durationMinutes} Mins
+                                                            </span>
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            disabled={isStartingAttempt}
+                                                            onClick={() => handleStartApiPaper(paper)}
+                                                            className="w-full bg-[#CBE9FF] hover:bg-[#b5e0ff] active:scale-[0.98] text-gray-900 font-bold text-sm py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                                        >
+                                                            {isStartingAttempt && selectedPaper?.id === paper.id ? (
+                                                                <>
+                                                                    <Loader2 className="w-4 h-4 animate-spin text-gray-800" />
+                                                                    <span>Launching Exam...</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <span>Start Paper</span>
+                                                                    <Play className="w-3.5 h-3.5 fill-current" />
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
+                                            <p className="text-base font-bold text-gray-800">No examination papers found for this subject and year filter.</p>
+                                            <p className="text-xs text-gray-500">Try selecting "All Available Years" or choosing another subject.</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedYear(undefined)}
+                                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors"
+                                            >
+                                                Clear Year Filter
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     ) : (
