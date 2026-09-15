@@ -98,7 +98,7 @@ export default function EnrichmentCoursesPage() {
             const res = await schoolStructureApi.getChildProfiles().catch(() => null);
             const serverProfiles = Array.isArray(res?.data)
                 ? res.data
-                : (res?.data as any)?.items || [];
+                : (res?.data as any)?.data?.items || [];
 
             if (serverProfiles.length > 0) {
                 const normalized: ChildProfile[] = serverProfiles.map((p: any) => ({
@@ -189,8 +189,8 @@ export default function EnrichmentCoursesPage() {
             const cat = categorySlug && categorySlug !== 'all' ? categorySlug : undefined;
             const res = await enrichmentCoursesApi.getPublicCourses(cat);
             console.log("public courses: ", res);
-            if (res?.items) {
-                setPublicCourses(res.items);
+            if (res?.data?.items) {
+                setPublicCourses(res.data?.items);
             }
         } catch (err) {
             console.error('Error fetching public courses:', err);
@@ -208,8 +208,8 @@ export default function EnrichmentCoursesPage() {
         setLoadingMyCourses(true);
         try {
             const res = await enrichmentCoursesApi.getChildCourses(childId);
-            if (res?.items) {
-                setMyCourses(res.items);
+            if (res?.data?.items) {
+                setMyCourses(res?.data?.items);
             }
         } catch (err) {
             console.error('Error fetching child standalone courses:', err);
@@ -232,10 +232,10 @@ export default function EnrichmentCoursesPage() {
         try {
             const childId = selectedChild.id || (selectedChild as any)._id;
             const res = await enrichmentCoursesApi.getSections(childId, course.id || (course as any)._id);
-            if (res?.items) {
-                setSections(res.items);
-                if (res.items.length > 0) {
-                    handleSelectSection(res.items[0]);
+            if (res?.data?.items) {
+                setSections(res.data?.items);
+                if (res.data?.items.length > 0) {
+                    handleSelectSection(res.data?.items[0]);
                 }
             }
         } catch (err) {
@@ -251,8 +251,8 @@ export default function EnrichmentCoursesPage() {
         const childId = selectedChild.id || (selectedChild as any)._id;
         try {
             const res = await enrichmentCoursesApi.getSectionVideos(childId, section.id || (section as any)._id);
-            if (res?.items) {
-                setSectionVideos(res.items);
+            if (res?.data?.items) {
+                setSectionVideos(res.data?.items);
             }
         } catch (err) {
             console.error('Error loading section videos:', err);
@@ -267,8 +267,8 @@ export default function EnrichmentCoursesPage() {
 
         try {
             const res = await enrichmentCoursesApi.createVideoPlayback(childId, video.id || (video as any)._id);
-            if (res?.playback?.url) {
-                setPlaybackUrl(res.playback.url);
+            if (res?.data?.playback?.url) {
+                setPlaybackUrl(res.data.playback.url);
                 setViewMode('player');
             }
         } catch (err) {
@@ -310,20 +310,21 @@ export default function EnrichmentCoursesPage() {
                 courseId: courseId,
                 callbackUrl: `${window.location.origin}/dashboard/enrichment-courses/callback`
             });
+            console.log("res: ", res)
 
-            if (res?.checkout?.authorizationUrl) {
+            if (res?.data.checkout?.authorizationUrl) {
                 // Save pending checkout in local state
                 localStorage.setItem('pending_enrichment_checkout', JSON.stringify({
                     childProfileId: childId,
                     courseId: courseId,
-                    purchaseId: res.purchase?.id,
-                    reference: res.checkout.reference,
-                    authorizationUrl: res.checkout.authorizationUrl,
+                    purchaseId: res.data.purchase?.id,
+                    reference: res.data.checkout.reference,
+                    authorizationUrl: res.data.checkout.authorizationUrl,
                     createdAt: new Date().toISOString()
                 }));
 
                 // Redirect to Paystack
-                window.location.href = res.checkout.authorizationUrl;
+                window.location.href = res.data.checkout.authorizationUrl;
             }
         } catch (err: any) {
             console.error('Checkout error:', err);
@@ -1029,8 +1030,7 @@ export default function EnrichmentCoursesPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <span>Pay with Paystack</span>
-                                        <ExternalLink className="w-4 h-4" />
+                                        <span>Pay ₦{checkoutCourse.priceAmount.toLocaleString()}</span>
                                     </>
                                 )}
                             </button>

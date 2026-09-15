@@ -98,35 +98,37 @@ export interface DownloadUrlResponse {
 }
 
 export interface CheckoutResponseData {
-    purchase: {
-        id: string;
-        userId: string;
-        childProfileId: string;
-        courseId: string;
-        courseTitleSnapshot?: string;
-        priceAmountSnapshot?: number;
-        currencySnapshot?: string;
-        accessModelSnapshot?: string;
-        durationDaysSnapshot?: number;
-        status: string;
-    };
-    payment: {
-        id: string;
-        userId: string;
-        childProfileId: string;
-        purchaseId: string;
-        amount: number;
-        currency: string;
-        provider: string;
-        reference: string;
-        status: string;
-    };
-    checkout: {
-        provider: string;
-        authorizationUrl: string;
-        accessCode?: string;
-        reference: string;
-    };
+    data: {
+        purchase: {
+            id: string;
+            userId: string;
+            childProfileId: string;
+            courseId: string;
+            courseTitleSnapshot?: string;
+            priceAmountSnapshot?: number;
+            currencySnapshot?: string;
+            accessModelSnapshot?: string;
+            durationDaysSnapshot?: number;
+            status: string;
+        };
+        payment: {
+            id: string;
+            userId: string;
+            childProfileId: string;
+            purchaseId: string;
+            amount: number;
+            currency: string;
+            provider: string;
+            reference: string;
+            status: string;
+        };
+        checkout: {
+            provider: string;
+            authorizationUrl: string;
+            accessCode?: string;
+            reference: string;
+        };
+    }
 }
 
 export interface VerifyPaymentResponseData {
@@ -142,6 +144,19 @@ export interface VerifyPaymentResponseData {
         status: 'paid' | 'pending' | 'failed';
         paidAt?: string;
     };
+    data?: {
+        item: {
+            id: string;
+            childProfileId: string;
+            purchaseId: string;
+            amount: number;
+            currency: string;
+            provider: string;
+            reference: string;
+            status: 'paid' | 'pending' | 'failed';
+            paidAt?: string;
+        };
+    }
 }
 
 export const enrichmentCoursesApi = {
@@ -150,7 +165,7 @@ export const enrichmentCoursesApi = {
         apiClient.get<StandaloneCourseCategory[]>('/standalone-course-categories/public'),
 
     getPublicCourses: (category?: string) =>
-        apiClient.get<{ items: StandaloneCourseItem[]; total: number }>(
+        apiClient.get<{ data: { items: StandaloneCourseItem[]; total: number } }>(
             category ? `/standalone-courses/public?category=${encodeURIComponent(category)}` : '/standalone-courses/public'
         ),
 
@@ -172,28 +187,28 @@ export const enrichmentCoursesApi = {
 
     // 3. Child-Scoped Course Library
     getChildCourses: (childProfileId: string) =>
-        apiClient.get<{ items: StandaloneCourseItem[]; total: number }>(
+        apiClient.get<{data: { items: StandaloneCourseItem[]; total: number }}>(
             `/child-profiles/${childProfileId}/standalone-courses`
         ),
 
     getChildCourseDetail: (childProfileId: string, courseId: string) =>
-        apiClient.get<{ item: StandaloneCourseItem }>(
+        apiClient.get<{data: { item: StandaloneCourseItem }}>(
             `/child-profiles/${childProfileId}/standalone-courses/${courseId}`
         ),
 
     // 4. Sections, Videos & Downloads
     getSections: (childProfileId: string, courseId: string) =>
-        apiClient.get<{ items: CourseSectionItem[]; total: number }>(
+        apiClient.get<{data: { items: CourseSectionItem[]; total: number} }>(
             `/child-profiles/${childProfileId}/standalone-courses/${courseId}/sections`
         ),
 
     getSectionVideos: (childProfileId: string, sectionId: string) =>
-        apiClient.get<{ items: SectionVideoItem[]; total: number }>(
+        apiClient.get<{data: { items: SectionVideoItem[]; total: number} }>(
             `/child-profiles/${childProfileId}/standalone-sections/${sectionId}/videos`
         ),
 
     createVideoPlayback: (childProfileId: string, videoId: string) =>
-        apiClient.post<VideoPlaybackSession>(
+        apiClient.post<{data: VideoPlaybackSession}>(
             `/child-profiles/${childProfileId}/standalone-videos/${videoId}/playback`,
             {}
         ),

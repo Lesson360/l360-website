@@ -39,7 +39,7 @@ function CallbackContent() {
     const verifyRef = async (ref: string) => {
         try {
             const res = await enrichmentCoursesApi.verifyPayment(ref);
-            if (res?.item?.status === 'paid') {
+            if (res?.item?.status === 'paid' || res?.data?.item?.status === 'paid') {
                 setStatus('success');
                 setMessage('Payment verified successfully! Your child now has access to the enrichment course.');
                 localStorage.removeItem('pending_enrichment_checkout');
