@@ -42,19 +42,7 @@ import {
 } from '@/lib/api/content';
 import { CustomVideoPlayer } from '@/components/video-library/CustomVideoPlayer';
 
-const DEFAULT_SUBJECTS: SubjectItem[] = [
-    { id: 'math', name: 'Mathematics', description: 'Algebra, Geometry, Arithmetic', bgColor: 'bg-[#2B124C]', icon: 'math_symbol' },
-    { id: 'english', name: 'English Language', description: 'Grammar, Comprehension, Composition', bgColor: 'bg-[#6B66FF]', icon: 'text_en' },
-    { id: 'literature', name: 'Literature in English', description: 'Prose, Poetry, Drama', bgColor: 'bg-[#00B4D8]' },
-    { id: 'chemistry', name: 'Chemistry', description: 'Organic & Inorganic Chemistry', bgColor: 'bg-[#8B46B5]' },
-    { id: 'economics', name: 'Economics', description: 'Micro & Macro Economics', bgColor: 'bg-[#0A6C84]' },
-    { id: 'physics', name: 'Physics', description: 'Mechanics, Energy, Electricity', bgColor: 'bg-[#FF4800]' },
-    { id: 'accounting', name: 'Financial Accounting', description: 'Bookkeeping & Accounts', bgColor: 'bg-[#8A75FF]' },
-    { id: 'government', name: 'Government', description: 'Political Science & Civics', bgColor: 'bg-[#2D0C3F]' },
-    { id: 'biology', name: 'Biology', description: 'Life Sciences & Ecology', bgColor: 'bg-[#FF00CF]' },
-    { id: 'agric', name: 'Agricultural Science', description: 'Crop & Animal Farming', bgColor: 'bg-[#00C838]' },
-    { id: 'geography', name: 'Geography', description: 'Physical & Human Geography', bgColor: 'bg-[#FFA800]' },
-];
+const DEFAULT_SUBJECTS: SubjectItem[] = [];
 
 export default function VideoLibraryPage() {
     // Child & Active Profile State
@@ -64,6 +52,7 @@ export default function VideoLibraryPage() {
     const [subjects, setSubjects] = useState<SubjectItem[]>([]);
     const [continueWatchingList, setContinueWatchingList] = useState<ContinueWatchingItem[]>([]);
     const [loadingData, setLoadingData] = useState(true);
+    const [isInitializing, setIsInitializing] = useState(true);
 
     // View Navigation Mode: 'library' | 'subject' | 'player' | 'quiz' | 'quiz_result'
     const [viewMode, setViewMode] = useState<'library' | 'subject' | 'player' | 'quiz' | 'quiz_result'>('library');
@@ -73,6 +62,7 @@ export default function VideoLibraryPage() {
     const [topics, setTopics] = useState<TopicItem[]>([]);
     const [loadingTopics, setLoadingTopics] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [subjectSearchQuery, setSubjectSearchQuery] = useState('');
 
     // Chapter Modal State (Image 1 & Image 4)
     const [selectedTopic, setSelectedTopic] = useState<TopicItem | null>(null);
@@ -207,8 +197,13 @@ export default function VideoLibraryPage() {
     }, []);
 
     useEffect(() => {
-        loadDashboardOverview();
-    }, [loadDashboardOverview]);
+        const init = async () => {
+            setIsInitializing(true);
+            await loadDashboardOverview();
+            setIsInitializing(false);
+        };
+        init();
+    }, []);
 
     // Handle Active Child Switch
     const handleSwitchChild = async (child: ChildProfile) => {
@@ -605,6 +600,19 @@ export default function VideoLibraryPage() {
         (t.name || t.title || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const filteredSubjects = subjects.filter((s: SubjectItem) =>
+        (s.name || '').toLowerCase().includes(subjectSearchQuery.toLowerCase())
+    );
+
+    if (isInitializing) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <Loader2 className="w-10 h-10 text-[#FF4801] animate-spin" />
+                <p className="text-sm font-bold text-gray-500">Loading Video Library Dashboard...</p>
+            </div>
+        );
+    }
+
     return (
         <div className=" relative">
 
@@ -828,14 +836,26 @@ export default function VideoLibraryPage() {
                             <p className="text-xs text-gray-500 font-medium">Select a subject to view its full chapter curriculum.</p>
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={() => setSortBy(sortBy === 'all' ? 'name' : 'all')}
-                            className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:border-gray-400 shadow-xs flex items-center gap-2 cursor-pointer"
-                        >
-                            <span>{sortBy === 'name' ? 'Alphabetical' : 'Default Order'}</span>
-                            <ChevronDown className="w-4 h-4 text-gray-500" />
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                <input
+                                    type="text"
+                                    placeholder="Search subjects..."
+                                    value={subjectSearchQuery}
+                                    onChange={(e) => setSubjectSearchQuery(e.target.value)}
+                                    className="pl-9 pr-4 py-2 rounded-xl bg-white border border-gray-300 text-sm font-medium focus:outline-none focus:border-[#FF4801] w-[180px] sm:w-[220px]"
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSortBy(sortBy === 'all' ? 'name' : 'all')}
+                                className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:border-gray-400 shadow-xs flex items-center gap-2 cursor-pointer"
+                            >
+                                <span>{sortBy === 'name' ? 'Alphabetical' : 'Default Order'}</span>
+                                <ChevronDown className="w-4 h-4 text-gray-500" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Subjects Grid */}
@@ -844,9 +864,13 @@ export default function VideoLibraryPage() {
                             <Loader2 className="w-8 h-8 text-[#FF4801] animate-spin" />
                             <p className="text-sm font-bold text-gray-500">Loading Courses...</p>
                         </div>
+                    ) : filteredSubjects.length === 0 ? (
+                        <div className="py-12 flex items-center justify-center">
+                            <p className="text-sm font-bold text-gray-500">No subjects matches your search.</p>
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                            {subjects
+                            {filteredSubjects
                                 .slice()
                                 .sort((a, b) => (sortBy === 'name' ? a.name.localeCompare(b.name) : 0))
                                 .map((sub) => {
@@ -856,7 +880,7 @@ export default function VideoLibraryPage() {
                                         <div
                                             key={sub.id || sub._id || sub.name}
                                             onClick={() => handleOpenSubjectPage(sub)}
-                                            className={`p-6 rounded-3xl ${subBg} text-white shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col items-center justify-between text-center space-y-4 min-h-[180px] group hover:scale-[1.02] relative overflow-hidden border border-white/10`}
+                                            className={`p-6 rounded-3xl ${subBg} text-white shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col items-center justify-between text-center space-y-4 min-h-[80px] group hover:scale-[1.02] relative overflow-hidden border border-white/10`}
                                         >
                                             <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform group-hover:scale-110 shadow-inner">
                                                 {sub.icon === 'math_symbol' ? (

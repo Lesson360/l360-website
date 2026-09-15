@@ -78,11 +78,20 @@ export default function EnrichmentCoursesPage() {
     const [initiatingCheckout, setInitiatingCheckout] = useState(false);
     const [downloadingResource, setDownloadingResource] = useState<string | null>(null);
 
+    const [isInitializing, setIsInitializing] = useState(true);
+
     // Load Child Profiles and Categories on mount
     useEffect(() => {
-        loadChildProfiles();
-        loadCategories();
-        loadPublicCourses();
+        const init = async () => {
+            setIsInitializing(true);
+            await Promise.all([
+                loadChildProfiles(),
+                loadCategories(),
+                loadPublicCourses()
+            ]);
+            setIsInitializing(false);
+        };
+        init();
     }, []);
 
     // Load child's purchased courses when selected child changes or when activeTab switches to 'my-courses'
@@ -96,9 +105,18 @@ export default function EnrichmentCoursesPage() {
         try {
             // 1. Try fetching real profiles from server first
             const res = await schoolStructureApi.getChildProfiles().catch(() => null);
-            const serverProfiles = Array.isArray(res?.data)
-                ? res.data
-                : (res?.data as any)?.data?.items || [];
+            console.log("child profile: ", res)
+
+            let serverProfiles: any[] = [];
+            if (Array.isArray(res?.data)) {
+                serverProfiles = res.data;
+            } else if (Array.isArray((res?.data as any)?.items)) {
+                serverProfiles = (res?.data as any).items;
+            } else if (Array.isArray((res as any)?.items)) {
+                serverProfiles = (res as any).items;
+            } else if (Array.isArray(res)) {
+                serverProfiles = res;
+            }
 
             if (serverProfiles.length > 0) {
                 const normalized: ChildProfile[] = serverProfiles.map((p: any) => ({
@@ -174,9 +192,14 @@ export default function EnrichmentCoursesPage() {
 
     const loadCategories = async () => {
         try {
-            const res = await enrichmentCoursesApi.getCategories();
+            const rawRes = await enrichmentCoursesApi.getCategories();
+            const res = rawRes as any;
             if (Array.isArray(res)) {
                 setCategories(res);
+            } else if (Array.isArray(res?.data?.items)) {
+                setCategories(res.data.items);
+            } else if (Array.isArray(res?.items)) {
+                setCategories(res.items);
             }
         } catch (err) {
             console.error('Error fetching categories:', err);
@@ -299,10 +322,18 @@ export default function EnrichmentCoursesPage() {
     };
 
     const handleStartCheckout = async () => {
+        console.log("Clicked!", checkoutCourse, selectedChild);
+        // If no child is selected, attempt to default to the first available child profile
+        if (!selectedChild && childProfiles.length > 0) {
+            const fallback = childProfiles[0];
+            setSelectedChild(fallback);
+            console.log('Fallback to first child profile', fallback);
+        }
         if (!checkoutCourse || !selectedChild) return;
         setInitiatingCheckout(true);
         const childId = selectedChild.id || (selectedChild as any)._id;
         const courseId = checkoutCourse.id || (checkoutCourse as any)._id;
+
 
         try {
             const res = await enrichmentCoursesApi.startCheckout({
@@ -357,6 +388,15 @@ export default function EnrichmentCoursesPage() {
         return title.toLowerCase().includes(searchQuery.toLowerCase()) || desc.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
+    if (isInitializing) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <Loader2 className="w-10 h-10 text-[#FF4801] animate-spin" />
+                <p className="text-sm font-bold text-gray-500">Loading Enrichment Dashboard...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-8 pb-12">
             {/* Header Title Banner */}
@@ -364,10 +404,6 @@ export default function EnrichmentCoursesPage() {
                 <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-[#FF4801]/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-2 max-w-xl">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-bold uppercase tracking-wider">
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>Standalone Skill Modules</span>
-                        </div>
                         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
                             Enrichment Courses
                         </h1>
@@ -376,30 +412,7 @@ export default function EnrichmentCoursesPage() {
                         </p>
                     </div>
 
-                    {/* Child Profile Switcher */}
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/15 shrink-0 space-y-2">
-                        <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block px-1">
-                            Learning Profile
-                        </span>
-                        <div className="flex items-center gap-2">
-                            {childProfiles.map((child: ChildProfile) => {
-                                const isSelected = selectedChild?.id === child.id;
-                                return (
-                                    <button
-                                        key={child.id}
-                                        onClick={() => handleSelectChild(child)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${isSelected
-                                            ? 'bg-[#FF4801] text-white shadow-md'
-                                            : 'bg-white/10 text-slate-200 hover:bg-white/20'
-                                            }`}
-                                    >
-                                        <User className="w-3.5 h-3.5" />
-                                        <span>{child.name}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
+
                 </div>
 
                 {/* Tabs */}
@@ -443,29 +456,24 @@ export default function EnrichmentCoursesPage() {
                 <div className="space-y-6">
                     {/* Category Filter Chips & Search Bar */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        {/* Category Chips */}
-                        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                            <button
-                                onClick={() => handleCategoryFilter('all')}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === 'all'
-                                    ? 'bg-slate-900 text-white shadow-sm'
-                                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                                    }`}
+                        {/* Category Dropdown */}
+                        <div className="relative">
+                            <Filter className="w-4 h-4 absolute left-3.5 top-3 text-gray-400" />
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => handleCategoryFilter(e.target.value)}
+                                className="pl-10 pr-8 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:border-[#FF4801] cursor-pointer"
                             >
-                                All Categories
-                            </button>
-                            {categories.map((cat: StandaloneCourseCategory) => (
-                                <button
-                                    key={cat.id || cat.slug}
-                                    onClick={() => handleCategoryFilter(cat.slug)}
-                                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === cat.slug
-                                        ? 'bg-slate-900 text-white shadow-sm'
-                                        : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    {cat.title || cat.name}
-                                </button>
-                            ))}
+                                <option value="all">All Categories</option>
+                                {categories.map((cat: StandaloneCourseCategory) => (
+                                    <option key={cat.id || cat.slug} value={cat.slug}>
+                                        {cat.title || cat.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                            </div>
                         </div>
 
                         {/* Search Input */}
