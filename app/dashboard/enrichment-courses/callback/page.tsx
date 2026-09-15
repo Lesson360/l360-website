@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, XCircle, Loader2, ArrowLeft, GraduationCap } from 'lucide-react';
 import { enrichmentCoursesApi } from '@/lib/api/enrichment-courses';
 
-export default function EnrichmentCourseCallbackPage() {
+function CallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const reference = searchParams.get('reference') || searchParams.get('trxref');
@@ -15,7 +15,6 @@ export default function EnrichmentCourseCallbackPage() {
 
     useEffect(() => {
         if (!reference) {
-            // Check localStorage fallback
             const stored = localStorage.getItem('pending_enrichment_checkout');
             if (stored) {
                 try {
@@ -34,6 +33,7 @@ export default function EnrichmentCourseCallbackPage() {
         }
 
         verifyRef(reference);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reference]);
 
     const verifyRef = async (ref: string) => {
@@ -111,5 +111,22 @@ export default function EnrichmentCourseCallbackPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function EnrichmentCourseCallbackPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-[70vh] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-8 max-w-md w-full text-center space-y-4">
+                        <Loader2 className="w-10 h-10 text-[#FF4801] animate-spin mx-auto" />
+                        <h2 className="text-xl font-extrabold text-gray-900">Loading...</h2>
+                    </div>
+                </div>
+            }
+        >
+            <CallbackContent />
+        </Suspense>
     );
 }
