@@ -89,6 +89,9 @@ export interface QuestionAnswerPayload {
     questionId: string;
     selectedOptionKeys?: string[];
     textAnswer?: string;
+    // Populated on the response (attempt.answers / submit result), not sent in requests.
+    isCorrect?: boolean;
+    scoreAwarded?: number;
 }
 
 export interface AttemptItem {
@@ -124,6 +127,7 @@ export interface StartAttemptResponse {
 export interface ReviewQuestion {
     id: string;
     prompt: string;
+    type?: string;
     options: QuestionOption[];
     correctTextAnswers?: string[];
     explanation?: string;
@@ -361,11 +365,15 @@ export const testDrillerApi = {
     async startProductCheckout(
         payload: TestDrillerProductCheckoutPayload
     ): Promise<TestDrillerProductCheckoutResponse> {
+        // apiClient.post already unwraps axios's response.data, so `res` here is the full
+        // backend envelope { message, data: { purchase, payment, checkout } } — matching
+        // TestDrillerProductCheckoutResponse exactly. Do NOT strip `.data` here; the caller
+        // reads `res.data.checkout.authorizationUrl`.
         const res: any = await apiClient.post('/test-driller/checkout', {
             provider: 'paystack',
             ...payload
         });
-        return res?.data || res;
+        return res;
     },
 
     // 13. Verify Standalone Product Payment

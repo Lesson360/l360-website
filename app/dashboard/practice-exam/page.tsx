@@ -51,6 +51,25 @@ function matchExamTypesForProduct(product: TestDrillerProductCatalogItem, examTy
     });
 }
 
+// Build one answer-payload entry for autosave/submit. short_text questions must send
+// `textAnswer`, not `selectedOptionKeys` (the value typed into the textarea is stored in the
+// same `liveAnswers` map as a single-element array, e.g. liveAnswers[qId] = [typedText]).
+function buildAnswerPayloadEntry(questionId: string, values: string[], questions: SessionQuestion[]) {
+    const question = questions.find((q) => q.id === questionId);
+    if (question?.type === 'short_text') {
+        return { questionId, textAnswer: values[0] || '' };
+    }
+    return { questionId, selectedOptionKeys: values };
+}
+
+// The real Test Driller submit response's `review.questions[].options` can come back as raw
+// Mongoose subdocuments (internal fields like `_doc`, `__parentArray`, `$__`) instead of a
+// clean { key, text, isCorrect } shape. Unwrap defensively so the UI never depends on that.
+function cleanReviewOption(raw: any): { key?: string; text?: string; isCorrect?: boolean } {
+    const doc = raw?._doc || raw;
+    return { key: doc?.key, text: doc?.text, isCorrect: doc?.isCorrect };
+}
+
 // Restrict the year list to an entitlement's purchased year range, when it has one.
 function filterYearsByEntitlement(years: number[], entitlement: ChildEntitlement | null): number[] {
     if (!entitlement || (entitlement.yearStartSnapshot == null && entitlement.yearEndSnapshot == null)) {
@@ -115,6 +134,7 @@ export default function PracticeExamPage() {
     const [sessionQuestions, setSessionQuestions] = useState<SessionQuestion[]>([]);
     const [activeAttemptId, setActiveAttemptId] = useState<string>('');
     const [isStartingAttempt, setIsStartingAttempt] = useState<boolean>(false);
+    const [isSubmittingAttempt, setIsSubmittingAttempt] = useState<boolean>(false);
     const [autosaveStatus, setAutosaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
 
     // Live API answers map: questionId -> array of selected keys e.g. ['a'] or ['b']
@@ -465,10 +485,9 @@ export default function PracticeExamPage() {
         }
 
         autosaveTimerRef.current = setTimeout(async () => {
-            const answerPayload = Object.entries(currentAnswersMap).map(([qId, keys]) => ({
-                questionId: qId,
-                selectedOptionKeys: keys
-            }));
+            const answerPayload = Object.entries(currentAnswersMap).map(([qId, keys]) =>
+                buildAnswerPayloadEntry(qId, keys, sessionQuestions)
+            );
 
             try {
                 await testDrillerApi.saveAttemptProgress(
@@ -488,11 +507,11 @@ export default function PracticeExamPage() {
     const handleApiSubmit = async () => {
         if (!childProfileId || !activeAttemptId) return;
         setIsTimerRunning(false);
+        setIsSubmittingAttempt(true);
 
-        const answerPayload = Object.entries(liveAnswers).map(([qId, keys]) => ({
-            questionId: qId,
-            selectedOptionKeys: keys
-        }));
+        const answerPayload = Object.entries(liveAnswers).map(([qId, keys]) =>
+            buildAnswerPayloadEntry(qId, keys, sessionQuestions)
+        );
 
         try {
             const res = await testDrillerApi.submitAttempt(
@@ -506,6 +525,8 @@ export default function PracticeExamPage() {
         } catch (err: any) {
             console.error('API submission failed:', err);
             alert(err?.response?.data?.message || 'Submission error. Please check network.');
+        } finally {
+            setIsSubmittingAttempt(false);
         }
     };
 
@@ -866,6 +887,7 @@ export default function PracticeExamPage() {
                                                 number: idx + 1,
                                                 text: q.prompt,
                                                 marks: q.marks || 1,
+                                                type: q.type,
                                                 options: (q.options || []).map((opt, optIdx) => {
                                                     const defaultLabel = String.fromCharCode(65 + optIdx);
                                                     const keyVal = String(opt.key || opt.id || opt._id || defaultLabel);
@@ -889,6 +911,7 @@ export default function PracticeExamPage() {
                                 onSubmitExam={handleApiSubmit}
                                 onBackToSelection={handleBackToCatalog}
                                 elapsedSeconds={elapsedSeconds}
+                                isSubmitting={isSubmittingAttempt}
                             />
                         </div>
                     )}
@@ -959,25 +982,41 @@ export default function PracticeExamPage() {
                                         questionCount: apiSubmitResponse.review.questions.length,
                                         totalMarks: 100,
                                         durationMinutes: 60,
-                                        questions: apiSubmitResponse.review.questions.map((q, idx) => ({
-                                            id: q.id,
-                                            number: idx + 1,
-                                            text: q.prompt,
-                                            marks: 1,
-                                            options: (q.options || []).map((opt, optIdx) => {
-                                                const defaultLabel = String.fromCharCode(65 + optIdx);
-                                                const keyVal = String(opt.key || opt.id || opt._id || defaultLabel);
-                                                const labelVal = opt.label || (opt.key ? String(opt.key).toUpperCase() : defaultLabel);
-                                                return {
-                                                    id: keyVal,
-                                                    label: labelVal,
-                                                    text: opt.text
-                                                };
-                                            }),
-                                            correctOptionId: q.options.find((opt) => opt.isCorrect)?.key || q.options.find((opt) => opt.isCorrect)?.id || '',
-                                            explanation: q.explanation,
-                                            topicId: 'rev-topic'
-                                        }))
+                                        questions: apiSubmitResponse.review.questions.map((q, idx) => {
+                                            // The real backend can return options as raw Mongoose subdocuments
+                                            // (extra `_doc`/`__parentArray`/`$__` bookkeeping fields) — unwrap first.
+                                            const cleanedOptions = (q.options || []).map(cleanReviewOption);
+                                            const gradedAnswer = apiSubmitResponse.item.answers?.find((a) => a.questionId === q.id);
+
+                                            return {
+                                                id: q.id,
+                                                number: idx + 1,
+                                                text: q.prompt,
+                                                marks: 1,
+                                                type: q.type,
+                                                options: cleanedOptions.map((opt, optIdx) => {
+                                                    const defaultLabel = String.fromCharCode(65 + optIdx);
+                                                    const keyVal = String(opt.key || defaultLabel);
+                                                    const labelVal = opt.key ? String(opt.key).toUpperCase() : defaultLabel;
+                                                    return {
+                                                        id: keyVal,
+                                                        label: labelVal,
+                                                        text: opt.text || ''
+                                                    };
+                                                }),
+                                                correctOptionId: cleanedOptions.find((opt) => opt.isCorrect)?.key || '',
+                                                correctTextAnswers: q.correctTextAnswers,
+                                                explanation: q.explanation,
+                                                topicId: 'rev-topic',
+                                                backendGraded: gradedAnswer
+                                                    ? {
+                                                        isCorrect: !!gradedAnswer.isCorrect,
+                                                        scoreAwarded: gradedAnswer.scoreAwarded,
+                                                        userTextAnswer: gradedAnswer.textAnswer
+                                                    }
+                                                    : undefined
+                                            };
+                                        })
                                     }
                                 ]
                             }}

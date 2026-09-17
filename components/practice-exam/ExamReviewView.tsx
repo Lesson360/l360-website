@@ -23,7 +23,12 @@ export function ExamReviewView({
 
     const currentQuestion = allQuestions[currentIndex];
     const userAnswerId = userAnswers[currentQuestion.id];
-    const isCorrect = userAnswerId === currentQuestion.correctOptionId;
+    const isShortText = currentQuestion.type === 'short_text';
+    // Prefer the backend's own grading verdict (ground truth, and the only option for
+    // short_text answers) over recomputing correctness from options client-side.
+    const isCorrect = currentQuestion.backendGraded
+        ? currentQuestion.backendGraded.isCorrect
+        : userAnswerId === currentQuestion.correctOptionId;
     const topic = subject.topics.find((t) => t.id === currentQuestion.topicId);
 
     return (
@@ -73,7 +78,7 @@ export function ExamReviewView({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                        {userAnswerId === undefined ? (
+                        {(userAnswerId === undefined || (isShortText && !userAnswerId.trim())) ? (
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                                 <HelpCircle className="w-3.5 h-3.5" /> Skipped / Unanswered
                             </span>
@@ -101,47 +106,72 @@ export function ExamReviewView({
                     )}
                 </div>
 
-                {/* Options List with Highlighted Correct / Selected Answers */}
-                <div className="space-y-3">
-                    {currentQuestion.options.map((option) => {
-                        const isUserChoice = userAnswerId === option.id;
-                        const isCorrectChoice = option.id === currentQuestion.correctOptionId;
+                {/* Short-text: show typed answer vs reference answer(s). Otherwise, the
+                    multiple-choice / true-false options list with correct/selected highlighting. */}
+                {isShortText ? (
+                    <div className="space-y-3">
+                        <div className={`p-4 rounded-xl border ${isCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-red-400 bg-red-50'}`}>
+                            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500 block mb-1">
+                                Your Answer
+                            </span>
+                            <p className={`text-sm font-semibold ${isCorrect ? 'text-emerald-950' : 'text-red-950'}`}>
+                                {userAnswerId?.trim() ? userAnswerId : 'No answer submitted'}
+                            </p>
+                        </div>
 
-                        let styleClasses = 'border-gray-200 bg-white text-gray-700';
-                        if (isCorrectChoice) {
-                            styleClasses = 'border-emerald-500 bg-emerald-50 text-emerald-950 font-bold ring-1 ring-emerald-400';
-                        } else if (isUserChoice && !isCorrectChoice) {
-                            styleClasses = 'border-red-400 bg-red-50 text-red-950 font-medium';
-                        }
-
-                        return (
-                            <div
-                                key={option.id}
-                                className={`p-4 rounded-xl border transition-all flex items-center justify-between ${styleClasses}`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold shrink-0">
-                                        {option.label}
-                                    </span>
-                                    <span className="text-sm">{option.text}</span>
-                                </div>
-
-                                <div>
-                                    {isCorrectChoice && (
-                                        <span className="text-xs font-extrabold text-emerald-600 bg-emerald-100 px-2.5 py-1 rounded-md">
-                                            Correct Choice
-                                        </span>
-                                    )}
-                                    {isUserChoice && !isCorrectChoice && (
-                                        <span className="text-xs font-extrabold text-red-600 bg-red-100 px-2.5 py-1 rounded-md">
-                                            Your Answer
-                                        </span>
-                                    )}
-                                </div>
+                        {currentQuestion.correctTextAnswers && currentQuestion.correctTextAnswers.length > 0 && (
+                            <div className="p-4 rounded-xl border border-emerald-500 bg-emerald-50">
+                                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 block mb-1">
+                                    Accepted Answer{currentQuestion.correctTextAnswers.length > 1 ? 's' : ''}
+                                </span>
+                                <p className="text-sm font-bold text-emerald-950">
+                                    {currentQuestion.correctTextAnswers.join(', ')}
+                                </p>
                             </div>
-                        );
-                    })}
-                </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {currentQuestion.options.map((option) => {
+                            const isUserChoice = userAnswerId === option.id;
+                            const isCorrectChoice = option.id === currentQuestion.correctOptionId;
+
+                            let styleClasses = 'border-gray-200 bg-white text-gray-700';
+                            if (isCorrectChoice) {
+                                styleClasses = 'border-emerald-500 bg-emerald-50 text-emerald-950 font-bold ring-1 ring-emerald-400';
+                            } else if (isUserChoice && !isCorrectChoice) {
+                                styleClasses = 'border-red-400 bg-red-50 text-red-950 font-medium';
+                            }
+
+                            return (
+                                <div
+                                    key={option.id}
+                                    className={`p-4 rounded-xl border transition-all flex items-center justify-between ${styleClasses}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold shrink-0">
+                                            {option.label}
+                                        </span>
+                                        <span className="text-sm">{option.text}</span>
+                                    </div>
+
+                                    <div>
+                                        {isCorrectChoice && (
+                                            <span className="text-xs font-extrabold text-emerald-600 bg-emerald-100 px-2.5 py-1 rounded-md">
+                                                Correct Choice
+                                            </span>
+                                        )}
+                                        {isUserChoice && !isCorrectChoice && (
+                                            <span className="text-xs font-extrabold text-red-600 bg-red-100 px-2.5 py-1 rounded-md">
+                                                Your Answer
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* Explanation Box */}
                 {currentQuestion.explanation && (

@@ -76,9 +76,30 @@ export function TestDrillerCatalog({
             </div>
 
             {isLoading ? (
-                <div className="py-16 flex flex-col items-center justify-center gap-3">
-                    <Loader2 className="w-8 h-8 text-[#FF4801] animate-spin" />
-                    <p className="text-sm font-bold text-gray-500">Loading Test Driller bundles...</p>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                        <Loader2 className="w-4 h-4 text-[#FF4801] animate-spin" />
+                        <span>
+                            {activeTab === 'my-courses' ? 'Loading your purchased bundles...' : 'Loading available bundles...'}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[0, 1, 2].map((i) => (
+                            <div
+                                key={i}
+                                className="rounded-3xl border border-purple-100 bg-gradient-to-b from-[#F3E8FF] to-white p-6 space-y-4 animate-pulse"
+                            >
+                                <div className="w-11 h-11 rounded-2xl bg-purple-200/70" />
+                                <div className="space-y-2">
+                                    <div className="h-4 w-2/3 rounded-full bg-purple-200/70" />
+                                    <div className="h-3 w-full rounded-full bg-purple-100" />
+                                    <div className="h-3 w-4/5 rounded-full bg-purple-100" />
+                                </div>
+                                <div className="h-5 w-1/3 rounded-full bg-purple-200/70" />
+                                <div className="h-11 w-full rounded-xl bg-purple-200/70" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             ) : visibleProducts.length === 0 ? (
                 <div className="py-16 bg-white rounded-2xl border border-gray-200 text-center space-y-2">

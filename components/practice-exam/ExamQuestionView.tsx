@@ -10,6 +10,7 @@ import {
     Award,
     HelpCircle,
     CheckCircle2,
+    Loader2,
     Send
 } from 'lucide-react';
 
@@ -20,6 +21,7 @@ interface ExamQuestionViewProps {
     onSubmitExam: () => void;
     onBackToSelection: () => void;
     elapsedSeconds: number;
+    isSubmitting?: boolean;
 }
 
 export function ExamQuestionView({
@@ -28,7 +30,8 @@ export function ExamQuestionView({
     onAnswerSelect,
     onSubmitExam,
     onBackToSelection,
-    elapsedSeconds
+    elapsedSeconds,
+    isSubmitting = false
 }: ExamQuestionViewProps) {
     // Current selected topic in left sidebar
     const [selectedTopicId, setSelectedTopicId] = useState<string>(
@@ -95,11 +98,12 @@ export function ExamQuestionView({
 
                 <button
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() => setShowSubmitModal(true)}
-                    className="bg-[#FF4801] hover:bg-[#e03f00] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5"
+                    className="bg-[#FF4801] hover:bg-[#e03f00] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-60"
                 >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Submit Exam</span>
+                    {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                    <span>{isSubmitting ? 'Submitting...' : 'Submit Exam'}</span>
                 </button>
             </div>
 
@@ -173,7 +177,16 @@ export function ExamQuestionView({
 
                     {/* Question Card Container */}
                     {currentQuestion ? (
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-xs space-y-6">
+                        <div className="relative bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-xs space-y-6">
+
+                            {/* Full-card submitting overlay — makes it unmistakable a network
+                                request is in flight while the attempt is graded server-side. */}
+                            {isSubmitting && (
+                                <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] rounded-2xl flex flex-col items-center justify-center gap-3 z-10">
+                                    <Loader2 className="w-8 h-8 text-[#FF4801] animate-spin" />
+                                    <p className="text-sm font-extrabold text-gray-700">Submitting & grading your attempt...</p>
+                                </div>
+                            )}
 
                             {/* Sub Meta Line: Question Index & Marks matching Image 2 */}
                             <div className="space-y-2">
@@ -209,44 +222,59 @@ export function ExamQuestionView({
                                 )}
                             </div>
 
-                            {/* Options List matching rounded white boxes in Image 2 */}
-                            <div className="space-y-3 pt-2">
-                                {currentQuestion.options.map((option) => {
-                                    const isSelected =
-                                        userAnswers[currentQuestion.id] === option.id;
+                            {/* Answer Input: free-text textarea for short_text questions, otherwise
+                                the multiple-choice / true-false options list */}
+                            {currentQuestion.type === 'short_text' ? (
+                                <div className="pt-2">
+                                    <textarea
+                                        value={userAnswers[currentQuestion.id] || ''}
+                                        onChange={(e) => onAnswerSelect(currentQuestion.id, e.target.value)}
+                                        placeholder="Type your answer here..."
+                                        rows={4}
+                                        disabled={isSubmitting}
+                                        className="w-full p-4 rounded-xl border border-gray-300 bg-white text-gray-900 text-sm font-medium focus:outline-none focus:border-[#FF4801] focus:ring-2 focus:ring-[#FF4801]/20 transition-all resize-none disabled:opacity-60"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-3 pt-2">
+                                    {currentQuestion.options.map((option) => {
+                                        const isSelected =
+                                            userAnswers[currentQuestion.id] === option.id;
 
-                                    return (
-                                        <button
-                                            key={option.id}
-                                            type="button"
-                                            onClick={() =>
-                                                onAnswerSelect(currentQuestion.id, option.id)
-                                            }
-                                            className={`w-full text-left p-4 rounded-xl border transition-all duration-150 flex items-center gap-4 group ${isSelected
-                                                ? 'border-[#FF4801] bg-orange-50/30 text-gray-900 shadow-xs'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/60 text-gray-800'
-                                                }`}
-                                        >
-                                            {/* Radio Circle */}
-                                            <div
-                                                className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${isSelected
-                                                    ? 'border-[#FF4801] bg-[#FF4801]'
-                                                    : 'border-gray-400 group-hover:border-gray-500 bg-white'
+                                        return (
+                                            <button
+                                                key={option.id}
+                                                type="button"
+                                                disabled={isSubmitting}
+                                                onClick={() =>
+                                                    onAnswerSelect(currentQuestion.id, option.id)
+                                                }
+                                                className={`w-full text-left p-4 rounded-xl border transition-all duration-150 flex items-center gap-4 group disabled:opacity-60 ${isSelected
+                                                    ? 'border-[#FF4801] bg-orange-50/30 text-gray-900 shadow-xs'
+                                                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/60 text-gray-800'
                                                     }`}
                                             >
-                                                {isSelected && (
-                                                    <div className="w-2 h-2 rounded-full bg-white" />
-                                                )}
-                                            </div>
+                                                {/* Radio Circle */}
+                                                <div
+                                                    className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${isSelected
+                                                        ? 'border-[#FF4801] bg-[#FF4801]'
+                                                        : 'border-gray-400 group-hover:border-gray-500 bg-white'
+                                                        }`}
+                                                >
+                                                    {isSelected && (
+                                                        <div className="w-2 h-2 rounded-full bg-white" />
+                                                    )}
+                                                </div>
 
-                                            {/* Label + Text */}
-                                            <span className="text-sm font-semibold">
-                                                {option.label}. {option.text}
-                                            </span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                                                {/* Label + Text */}
+                                                <span className="text-sm font-semibold">
+                                                    {option.label}. {option.text}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
 
                             {/* Previous & Next buttons matching Image 2 */}
                             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
@@ -272,11 +300,21 @@ export function ExamQuestionView({
                                 ) : (
                                     <button
                                         type="button"
+                                        disabled={isSubmitting}
                                         onClick={() => setShowSubmitModal(true)}
-                                        className="px-6 py-2.5 rounded-xl bg-[#FF4801] hover:bg-[#e03f00] text-white font-bold text-sm transition-all flex items-center gap-2 shadow-sm"
+                                        className="px-6 py-2.5 rounded-xl bg-[#FF4801] hover:bg-[#e03f00] text-white font-bold text-sm transition-all flex items-center gap-2 shadow-sm disabled:opacity-60"
                                     >
-                                        <span>Finish & Submit</span>
-                                        <CheckCircle2 className="w-4 h-4" />
+                                        {isSubmitting ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <span>Submitting...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>Finish & Submit</span>
+                                                <CheckCircle2 className="w-4 h-4" />
+                                            </>
+                                        )}
                                     </button>
                                 )}
                             </div>
@@ -347,20 +385,22 @@ export function ExamQuestionView({
                         <div className="flex gap-3">
                             <button
                                 type="button"
+                                disabled={isSubmitting}
                                 onClick={() => setShowSubmitModal(false)}
-                                className="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all"
+                                className="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all disabled:opacity-60"
                             >
                                 Continue Exam
                             </button>
                             <button
                                 type="button"
+                                disabled={isSubmitting}
                                 onClick={() => {
-                                    setShowSubmitModal(false);
                                     onSubmitExam();
                                 }}
-                                className="flex-1 py-3 px-4 rounded-xl bg-[#FF4801] hover:bg-[#e03f00] text-white font-bold text-sm shadow-md transition-all"
+                                className="flex-1 py-3 px-4 rounded-xl bg-[#FF4801] hover:bg-[#e03f00] text-white font-bold text-sm shadow-md transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                             >
-                                Submit Now
+                                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                                <span>{isSubmitting ? 'Submitting...' : 'Submit Now'}</span>
                             </button>
                         </div>
                     </div>
