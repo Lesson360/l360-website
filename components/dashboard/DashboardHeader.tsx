@@ -1,41 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Search, ShoppingCart, User, Menu } from 'lucide-react';
-import { authApi } from '@/lib/api/auth';
+import React from 'react';
+import { Search, Menu } from 'lucide-react';
+import { ChildSwitcher } from './ChildSwitcher';
 
 interface DashboardHeaderProps {
     onOpenMobileSidebar?: () => void;
 }
 
 export function DashboardHeader({ onOpenMobileSidebar }: DashboardHeaderProps) {
-    const [userName, setUserName] = useState('User');
-
-    useEffect(() => {
-        // Read cached child profile if available
-        if (typeof window !== 'undefined') {
-            const cachedStr = localStorage.getItem('lesson360_active_child');
-            if (cachedStr) {
-                try {
-                    const cached = JSON.parse(cachedStr);
-                    if (cached.name || cached.childName) {
-                        setUserName(cached.name || cached.childName);
-                        return;
-                    }
-                } catch { }
-            }
-        }
-
-        authApi.getProfile().then((res: any) => {
-            const u = res?.data?.user || res?.data;
-            if (u?.childProfiles?.[0]?.name) {
-                setUserName(u.childProfiles[0].name);
-            } else if (u?.fullName || u?.name) {
-                setUserName(u.fullName || u.name);
-            }
-        }).catch(() => null);
-    }, []);
-
     return (
         <header className="w-full bg-white border-b border-gray-100 py-3.5 px-4 sm:px-8 flex items-center justify-between gap-3 sm:gap-6 sticky top-0 z-30 shadow-2xs">
 
@@ -64,17 +37,9 @@ export function DashboardHeader({ onOpenMobileSidebar }: DashboardHeaderProps) {
                 </div>
             </div>
 
-            {/* Right Action Icons & User Badge */}
+            {/* Right Action Icons & Child Profile Switcher */}
             <div className="flex items-center gap-3 sm:gap-6 shrink-0">
-               
-
-                {/* User Menu */}
-                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-800 cursor-pointer hover:text-brand-orange transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4" />
-                    </div>
-                    <span className="truncate max-w-[90px] sm:max-w-xs">{userName}</span>
-                </div>
+                <ChildSwitcher />
             </div>
 
         </header>

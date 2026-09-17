@@ -131,6 +131,27 @@ export interface TopicVideo {
     progressSeconds?: number;
 }
 
+// A topic's Case Study or Exam Video — a special Mux video separate from the normal
+// ordered lesson-video playlist (zero or one of each per topic).
+export interface TopicSpecialVideo {
+    id?: string;
+    _id?: string;
+    videoKind?: 'case_study' | 'exam_video';
+    title?: string;
+    description?: string;
+    durationSeconds?: number;
+    durationLabel?: string;
+    thumbnailUrl?: string;
+    thumbnailAccessUrl?: string;
+}
+
+export interface TopicVideosResponseData {
+    topic?: { id?: string; name?: string };
+    items?: TopicVideo[];
+    caseStudy?: TopicSpecialVideo | null;
+    examVideo?: TopicSpecialVideo | null;
+}
+
 export interface VideoPlaybackInfo {
     provider?: string;
     policy?: string;
@@ -357,9 +378,10 @@ export const contentApi = {
             `/content/subjects/${subjectId}/topics`
         ),
 
-    // Videos for a topic under a child profile (Student Endpoint)
+    // Videos for a topic under a child profile (Student Endpoint). Also returns the topic's
+    // Case Study and Exam Video attachments (each null if unavailable for this child).
     getTopicVideos: (profileId: string, topicId: string) =>
-        apiClient.get<{ message: string; data: TopicVideo[] | { items: TopicVideo[]; total: number } }>(
+        apiClient.get<{ message: string; data: TopicVideo[] | TopicVideosResponseData }>(
             `/content/child-profiles/${profileId}/topics/${topicId}/videos`
         ),
 
@@ -367,6 +389,18 @@ export const contentApi = {
     getVideoPlayback: (profileId: string, videoId: string) =>
         apiClient.post<{ message: string; data: VideoPlaybackResponseData }>(
             `/content/child-profiles/${profileId}/videos/${videoId}/playback`
+        ),
+
+    // Case Study / Exam Video playback — separate signed Mux sessions, requested fresh
+    // each time the child opens one (the URL is temporary and expires).
+    getCaseStudyPlayback: (profileId: string, caseStudyId: string) =>
+        apiClient.post<{ message: string; data: VideoPlaybackResponseData }>(
+            `/content/child-profiles/${profileId}/case-studies/${caseStudyId}/playback`
+        ),
+
+    getExamVideoPlayback: (profileId: string, examVideoId: string) =>
+        apiClient.post<{ message: string; data: VideoPlaybackResponseData }>(
+            `/content/child-profiles/${profileId}/exam-videos/${examVideoId}/playback`
         ),
 
     // Video progress tracking for student child profile

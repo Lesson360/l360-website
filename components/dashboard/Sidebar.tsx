@@ -30,7 +30,7 @@ const NAV_ITEMS = [
         icon: Video,
     },
     {
-        name: 'Practice Exam',
+        name: 'Test Driller',
         href: '/dashboard/practice-exam',
         icon: FileText,
     },

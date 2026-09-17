@@ -18,6 +18,7 @@ import {
     FileType,
     UserCheck,
     BarChart3,
+    Trophy,
     HelpCircle,
     CheckCircle2,
     XCircle,
@@ -26,12 +27,14 @@ import {
     Check,
     AlertCircle
 } from 'lucide-react';
-import { schoolStructureApi, ChildProfile } from '@/lib/api/school-structure';
+import { ChildProfile } from '@/lib/api/school-structure';
+import { useChildProfile } from '@/lib/context/ChildProfileContext';
 import {
     contentApi,
     SubjectItem,
     TopicItem,
     TopicVideo,
+    TopicSpecialVideo,
     NotesFileInfo,
     TopicWorksheetData,
     TopicAssessment,
@@ -44,10 +47,41 @@ import { CustomVideoPlayer } from '@/components/video-library/CustomVideoPlayer'
 
 const DEFAULT_SUBJECTS: SubjectItem[] = [];
 
+// Palette of subject card background colors (same variety used in the sample subject dataset)
+// so real, backend-driven subjects that don't specify their own bgColor still render with
+// varied, visually distinct card colors instead of a single flat fallback color.
+const SUBJECT_CARD_COLOR_PALETTE = [
+    'bg-purple-900',
+    'bg-orange-500',
+    'bg-purple-600',
+    'bg-blue-500',
+    'bg-emerald-500',
+    'bg-fuchsia-500',
+    'bg-teal-600',
+    'bg-slate-800',
+    'bg-rose-600',
+    'bg-indigo-600',
+    'bg-amber-600',
+    'bg-cyan-600',
+];
+
+// Deterministically pick a palette color per subject so the same subject always gets the
+// same color across renders/reloads, while different subjects get visually varied colors.
+function getSubjectCardColor(key: string | undefined, fallbackIndex: number): string {
+    if (!key) {
+        return SUBJECT_CARD_COLOR_PALETTE[fallbackIndex % SUBJECT_CARD_COLOR_PALETTE.length];
+    }
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+        hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+    }
+    return SUBJECT_CARD_COLOR_PALETTE[hash % SUBJECT_CARD_COLOR_PALETTE.length];
+}
+
 export default function VideoLibraryPage() {
-    // Child & Active Profile State
-    const [childrenList, setChildrenList] = useState<ChildProfile[]>([]);
-    const [activeChild, setActiveChild] = useState<ChildProfile | null>(null);
+    // Child & Active Profile State — sourced from the global, dashboard-wide child switcher
+    // so every page reacts to the same currently-selected child.
+    const { children: childrenList, activeChild, selectChild } = useChildProfile();
     const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null);
     const [subjects, setSubjects] = useState<SubjectItem[]>([]);
     const [continueWatchingList, setContinueWatchingList] = useState<ContinueWatchingItem[]>([]);
@@ -86,11 +120,17 @@ export default function VideoLibraryPage() {
     const [activeVideoIndex, setActiveVideoIndex] = useState<number>(0);
     const [activeVideo, setActiveVideo] = useState<TopicVideo | null>(null);
     const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
+    // Which kind of video is currently open in the full-screen player — special videos
+    // (Case Study / Exam Video) never track lesson progress or "next lesson" navigation.
+    const [activeVideoKind, setActiveVideoKind] = useState<'lesson' | 'case_study' | 'exam_video'>('lesson');
 
     // Topic Notes & Worksheet State
     const [topicNotes, setTopicNotes] = useState<NotesFileInfo | null>(null);
     const [worksheetData, setWorksheetData] = useState<TopicWorksheetData | null>(null);
     const [assessments, setAssessments] = useState<TopicAssessment[]>([]);
+    // Topic's Case Study / Exam Video special attachments (null = unavailable for this child)
+    const [topicCaseStudy, setTopicCaseStudy] = useState<TopicSpecialVideo | null>(null);
+    const [topicExamVideo, setTopicExamVideo] = useState<TopicSpecialVideo | null>(null);
 
     // Quiz Player State
     const [activeAssessment, setActiveAssessment] = useState<TopicAssessment | null>(null);
@@ -121,34 +161,10 @@ export default function VideoLibraryPage() {
         };
     }, [quizTimerRunning]);
 
-    // Fetch Dashboard Data & Enrolled Subjects
-    const loadDashboardOverview = useCallback(async () => {
+    // Fetch Dashboard Data & Enrolled Subjects for the currently active child
+    const loadDashboardOverview = useCallback(async (currentChild: ChildProfile | null) => {
         setLoadingData(true);
         try {
-            const resProfiles = await schoolStructureApi.getChildProfiles();
-            const rawProfiles = resProfiles?.data;
-            const profiles: ChildProfile[] = Array.isArray(rawProfiles)
-                ? rawProfiles
-                : (rawProfiles as any)?.items || [];
-
-            setChildrenList(profiles);
-            let currentChild: ChildProfile | null = profiles[0] || null;
-
-            if (typeof window !== 'undefined') {
-                const cachedStr = localStorage.getItem('lesson360_active_child');
-                if (cachedStr) {
-                    try {
-                        const cached = JSON.parse(cachedStr);
-                        const found = profiles.find((p) => p.id === cached.id || p._id === cached.id);
-                        if (found) currentChild = found;
-                    } catch { }
-                }
-                if (currentChild) {
-                    localStorage.setItem('lesson360_active_child', JSON.stringify(currentChild));
-                }
-            }
-
-            setActiveChild(currentChild);
             const childId = currentChild?.id || currentChild?._id;
 
             if (childId) {
@@ -186,6 +202,8 @@ export default function VideoLibraryPage() {
                     setSubjects(DEFAULT_SUBJECTS);
                 }
             } else {
+                setAnalytics(null);
+                setContinueWatchingList([]);
                 setSubjects(DEFAULT_SUBJECTS);
             }
         } catch (err) {
@@ -193,30 +211,24 @@ export default function VideoLibraryPage() {
             setSubjects(DEFAULT_SUBJECTS);
         } finally {
             setLoadingData(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        const init = async () => {
-            setIsInitializing(true);
-            await loadDashboardOverview();
             setIsInitializing(false);
-        };
-        init();
+        }
     }, []);
 
-    // Handle Active Child Switch
-    const handleSwitchChild = async (child: ChildProfile) => {
-        setActiveChild(child);
-        const cId = child.id || child._id;
-        if (cId) {
-            localStorage.setItem('lesson360_active_child', JSON.stringify(child));
-            schoolStructureApi.setActiveChild(cId).catch(() => null);
-        }
+    // Reload every time the globally-selected child changes (including on first load and
+    // when switched from the header ChildSwitcher or any other dashboard page).
+    useEffect(() => {
         setViewMode('library');
         setSelectedSubject(null);
         setIsChapterModalOpen(false);
-        loadDashboardOverview();
+        loadDashboardOverview(activeChild);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeChild?.id, activeChild?._id]);
+
+    // Handle Active Child Switch (kept for the inline "Learner" dropdown on this page;
+    // delegates to the shared context so the header switcher and every other page stay in sync)
+    const handleSwitchChild = (child: ChildProfile) => {
+        selectChild(child);
     };
 
     // NAVIGATE TO DEDICATED SUBJECT PAGE (Image 2 - Full Page, NOT Modal)
@@ -275,6 +287,8 @@ export default function VideoLibraryPage() {
         setTopicNotes(null);
         setWorksheetData(null);
         setAssessments([]);
+        setTopicCaseStudy(null);
+        setTopicExamVideo(null);
 
         // Load Live Topic Content from API
         const childId = activeChild?.id || activeChild?._id;
@@ -285,6 +299,10 @@ export default function VideoLibraryPage() {
                 const rawVids = res?.data;
                 const vList = Array.isArray(rawVids) ? rawVids : (rawVids as any)?.items || [];
                 if (vList.length > 0) setTopicVideos(vList);
+                if (!Array.isArray(rawVids)) {
+                    setTopicCaseStudy((rawVids as any)?.caseStudy || null);
+                    setTopicExamVideo((rawVids as any)?.examVideo || null);
+                }
             }).catch(() => null);
 
             contentApi.getTopicNotes(childId, topicId).then((res) => {
@@ -308,6 +326,7 @@ export default function VideoLibraryPage() {
     // LAUNCH DEDICATED FULL-SCREEN VIDEO PLAYER (Image 3)
     const handleLaunchVideoPlayer = async (video: TopicVideo, index: number) => {
         setIsChapterModalOpen(false);
+        setActiveVideoKind('lesson');
         setActiveVideoIndex(index);
         setActiveVideo(video);
         setPlaybackUrl(null);
@@ -334,8 +353,42 @@ export default function VideoLibraryPage() {
         }
     };
 
-    // Save video playback progress
+    // LAUNCH FULL-SCREEN PLAYER FOR A TOPIC'S CASE STUDY / EXAM VIDEO
+    // These are separate from the ordered lesson playlist: no progress tracking, no
+    // "next lesson" navigation, and each requires its own fresh signed playback session.
+    const handleLaunchSpecialVideo = async (video: TopicSpecialVideo, kind: 'case_study' | 'exam_video') => {
+        setIsChapterModalOpen(false);
+        setActiveVideoKind(kind);
+        setActiveVideo({
+            id: video.id || video._id,
+            title: video.title,
+            description: video.description,
+            durationSeconds: video.durationSeconds,
+            thumbnailUrl: video.thumbnailUrl || video.thumbnailAccessUrl
+        });
+        setPlaybackUrl(null);
+        setViewMode('player');
+
+        const childId = activeChild?.id || activeChild?._id;
+        const videoId = video.id || video._id;
+        if (!childId || !videoId) return;
+
+        try {
+            const res = kind === 'case_study'
+                ? await contentApi.getCaseStudyPlayback(childId, videoId)
+                : await contentApi.getExamVideoPlayback(childId, videoId);
+            const pbData = res.data;
+            const targetUrl = pbData?.playback?.url || pbData?.playbackUrl || pbData?.videoUrl;
+            setPlaybackUrl(targetUrl || null);
+        } catch (err) {
+            console.warn(`Failed to load ${kind} playback:`, err);
+        }
+    };
+
+    // Save video playback progress (lesson videos only — Case Study / Exam Video are
+    // intentionally excluded from lesson progress tracking per the topic content spec)
     const handleSaveVideoProgress = useCallback(async (lastPositionSeconds: number, durationSeconds: number) => {
+        if (activeVideoKind !== 'lesson') return;
         const childId = activeChild?.id || activeChild?._id;
         const videoId = activeVideo?.id || activeVideo?._id;
         if (childId && videoId) {
@@ -517,75 +570,83 @@ export default function VideoLibraryPage() {
         setIsSubmittingQuiz(true);
         setGradedAttempt(null);
 
-        let correctCount = 0;
-        quizQuestions.forEach((q) => {
-            const selectedOptId = quizAnswers[q.id || ''];
-            const correctOpt = q.options.find((o) => o.isCorrect || o.key === 'A');
-            if (selectedOptId && correctOpt && (selectedOptId === correctOpt.id || selectedOptId === correctOpt.key)) {
-                correctCount += 1;
-            }
-        });
-
-        const totalQ = quizQuestions.length;
-        let finalScore = correctCount;
-        let finalTotal = totalQ;
-        let scorePercent = Math.round((correctCount / totalQ) * 100);
-        const passMark = activeAssessment?.passMark || activeAssessment?.passingScore || 50;
-
         const childId = activeChild?.id || activeChild?._id;
         const assessmentId = activeAssessment?.id || activeAssessment?._id;
 
-        if (childId && assessmentId) {
-            try {
-                // Ensure EVERY question in quizQuestions has an answer entry sent to the backend
-                const formattedAnswers = quizQuestions.map((q, idx) => {
-                    const qId = q.id || q._id || `q${idx + 1}`;
-                    const userSelectedOpt = quizAnswers[qId] || quizAnswers[q.id || ''] || quizAnswers[q._id || ''];
-                    const defaultOptId = q.options[0]?.id || q.options[0]?._id || q.options[0]?.key || 'opt1';
-                    const finalOptId = userSelectedOpt || defaultOptId;
-
-                    return {
-                        questionId: qId,
-                        selectedOptionId: finalOptId,
-                        selectedOptionKeys: [finalOptId],
-                        selectedOptionIds: [finalOptId]
-                    };
-                });
-
-                const res = await contentApi.submitAssessmentAttempt(childId, assessmentId, {
-                    answers: formattedAnswers
-                });
-
-                const resPayload: any = res?.data;
-                const attemptData: QuizAttemptResult | undefined = resPayload?.attempt || (resPayload as any)?.data?.attempt || resPayload;
-
-                if (attemptData) {
-                    setGradedAttempt(attemptData);
-                    if (typeof attemptData.scoreEarned === 'number') finalScore = attemptData.scoreEarned;
-                    if (typeof attemptData.maxScore === 'number') finalTotal = attemptData.maxScore;
-                    if (typeof attemptData.percentageScore === 'number') scorePercent = attemptData.percentageScore;
-                }
-            } catch (err: any) {
-                console.warn('API submitAssessmentAttempt warning:', err);
-                const errMsg = err?.response?.data?.message || err?.message || '';
-                if (errMsg.toLowerCase().includes('one attempt') || errMsg.toLowerCase().includes('single')) {
-                    showToast('This assessment policy allows only 1 attempt per child profile.', 'info');
-                } else if (errMsg) {
-                    showToast(errMsg, 'info');
-                }
-            }
+        if (!childId || !assessmentId) {
+            setIsSubmittingQuiz(false);
+            showToast('Unable to submit quiz: missing child or assessment information.', 'error');
+            return;
         }
 
-        const isPassed = scorePercent >= passMark;
-        setQuizResult({
-            score: finalScore,
-            total: finalTotal,
-            percentage: scorePercent,
-            passed: isPassed
-        });
+        try {
+            // Ensure EVERY question in quizQuestions has an answer entry sent to the backend
+            const formattedAnswers = quizQuestions.map((q, idx) => {
+                const qId = q.id || q._id || `q${idx + 1}`;
+                const userSelectedOpt = quizAnswers[qId] || quizAnswers[q.id || ''] || quizAnswers[q._id || ''];
+                const defaultOptId = q.options[0]?.id || q.options[0]?._id || q.options[0]?.key || 'opt1';
+                const finalOptId = userSelectedOpt || defaultOptId;
 
-        setIsSubmittingQuiz(false);
-        setViewMode('quiz_result');
+                return {
+                    questionId: qId,
+                    selectedOptionId: finalOptId,
+                    selectedOptionKeys: [finalOptId],
+                    selectedOptionIds: [finalOptId]
+                };
+            });
+
+            const res = await contentApi.submitAssessmentAttempt(childId, assessmentId, {
+                answers: formattedAnswers
+            });
+
+            const resPayload: any = res?.data;
+            const attemptData: QuizAttemptResult | undefined = resPayload?.attempt || (resPayload as any)?.data?.attempt || resPayload;
+
+            if (!attemptData) {
+                throw new Error('The server did not return a graded result for this attempt.');
+            }
+
+            setGradedAttempt(attemptData);
+
+            const finalTotal = typeof attemptData.maxScore === 'number' ? attemptData.maxScore : quizQuestions.length;
+            const finalScore = typeof attemptData.scoreEarned === 'number' ? attemptData.scoreEarned : 0;
+            const scorePercent = typeof attemptData.percentageScore === 'number'
+                ? attemptData.percentageScore
+                : Math.round((finalScore / (finalTotal || 1)) * 100);
+            const passMark = activeAssessment?.passMark || activeAssessment?.passingScore || 50;
+            const isPassed = scorePercent >= passMark;
+
+            setQuizResult({
+                score: finalScore,
+                total: finalTotal,
+                percentage: scorePercent,
+                passed: isPassed
+            });
+
+            setIsSubmittingQuiz(false);
+            setViewMode('quiz_result');
+        } catch (err: any) {
+            console.warn('API submitAssessmentAttempt error:', err);
+            const errMsg = err?.response?.data?.message || err?.message || 'Failed to submit quiz. Please try again.';
+            const isAttemptLimitError = errMsg.toLowerCase().includes('one attempt')
+                || errMsg.toLowerCase().includes('single')
+                || errMsg.toLowerCase().includes('already')
+                || errMsg.toLowerCase().includes('maximum attempt');
+
+            showToast(
+                isAttemptLimitError
+                    ? 'This assessment allows only a limited number of attempts, and the child profile has already used them.'
+                    : errMsg,
+                isAttemptLimitError ? 'info' : 'error'
+            );
+
+            setIsSubmittingQuiz(false);
+            setQuizResult(null);
+            setGradedAttempt(null);
+            // Do NOT show the completed screen on failure — a completed screen must only reflect a real graded response.
+            setViewMode('subject');
+            setIsChapterModalOpen(true);
+        }
     };
 
     // Format Seconds to MM:SS
@@ -679,13 +740,18 @@ export default function VideoLibraryPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="p-5 rounded-2xl bg-white border border-gray-100 shadow-xs flex items-center gap-4">
                             <div className="w-12 h-12 rounded-xl bg-orange-100 text-[#FF4801] flex items-center justify-center shrink-0">
-                                <PlayCircle className="w-6 h-6" />
+                                <Trophy className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Videos Watched</p>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Learning Points</p>
                                 <p className="text-2xl font-black text-gray-900">
-                                    {analytics?.totalVideosWatched ?? 0}
+                                    {analytics?.progression?.totalPoints ?? 0}
                                 </p>
+                                {analytics?.progression?.currentBadge?.name && (
+                                    <p className="text-[11px] font-bold text-gray-400 mt-0.5">
+                                        {analytics.progression.currentBadge.name} Badge
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -873,8 +939,8 @@ export default function VideoLibraryPage() {
                             {filteredSubjects
                                 .slice()
                                 .sort((a, b) => (sortBy === 'name' ? a.name.localeCompare(b.name) : 0))
-                                .map((sub) => {
-                                    const subBg = sub.bgColor || 'bg-[#2B124C]';
+                                .map((sub, subIndex) => {
+                                    const subBg = sub.bgColor || getSubjectCardColor(sub.id || sub._id || sub.name, subIndex);
 
                                     return (
                                         <div
@@ -1118,6 +1184,46 @@ export default function VideoLibraryPage() {
                                     {/* TAB 1: LESSONS - SUPPORT THUMBNAIL ACCESS URL */}
                                     {modalTab === 'lessons' && (
                                         <div className="space-y-4">
+                                            {/* Case Study / Exam Video — special attachments, kept separate from the
+                                                ordered lesson playlist and from lesson progress/Continue Watching. */}
+                                            {(topicCaseStudy || topicExamVideo) && (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {topicCaseStudy && (
+                                                        <div
+                                                            onClick={() => handleLaunchSpecialVideo(topicCaseStudy, 'case_study')}
+                                                            className="p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-white border border-purple-200 hover:border-purple-400 hover:shadow-md transition-all cursor-pointer flex items-center gap-3 group"
+                                                        >
+                                                            <div className="w-12 h-12 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                                                                <BookOpen className="w-5 h-5" />
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <span className="text-[10px] font-black text-purple-600 uppercase tracking-wider">Case Study</span>
+                                                                <h5 className="text-sm font-extrabold text-gray-900 truncate group-hover:text-purple-700 transition-colors">
+                                                                    {topicCaseStudy.title}
+                                                                </h5>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {topicExamVideo && (
+                                                        <div
+                                                            onClick={() => handleLaunchSpecialVideo(topicExamVideo, 'exam_video')}
+                                                            className="p-4 rounded-2xl bg-gradient-to-br from-orange-50 to-white border border-orange-200 hover:border-[#FF4801] hover:shadow-md transition-all cursor-pointer flex items-center gap-3 group"
+                                                        >
+                                                            <div className="w-12 h-12 rounded-xl bg-[#FF4801] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                                                                <Award className="w-5 h-5" />
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <span className="text-[10px] font-black text-[#FF4801] uppercase tracking-wider">Exam Practice</span>
+                                                                <h5 className="text-sm font-extrabold text-gray-900 truncate group-hover:text-[#FF4801] transition-colors">
+                                                                    {topicExamVideo.title}
+                                                                </h5>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
                                             {topicVideos.length > 0 ? (
                                                 <div className="space-y-3">
                                                     {topicVideos.map((vid, idx) => {
@@ -1303,7 +1409,7 @@ export default function VideoLibraryPage() {
                         setIsChapterModalOpen(true);
                     }}
                     onNextLesson={handleNextLesson}
-                    hasNextLesson={activeVideoIndex < topicVideos.length - 1}
+                    hasNextLesson={activeVideoKind === 'lesson' && activeVideoIndex < topicVideos.length - 1}
                 />
             )}
 
@@ -1545,6 +1651,20 @@ export default function VideoLibraryPage() {
                                 className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#00C838] hover:bg-emerald-600 text-white font-black text-xs shadow-md cursor-pointer"
                             >
                                 Back to Episode Resources
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setQuizResult(null);
+                                    setGradedAttempt(null);
+                                    setActiveAssessment(null);
+                                    setSelectedSubject(null);
+                                    setViewMode('library');
+                                }}
+                                className="w-full sm:w-auto px-8 py-3 rounded-xl border border-gray-300 text-gray-700 font-extrabold text-xs shadow-xs hover:bg-gray-50 cursor-pointer"
+                            >
+                                Back to Video Library
                             </button>
                         </div>
                     </div>
