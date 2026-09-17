@@ -4,45 +4,71 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     testDrillerApi,
     ChildAccessResponse,
+    ChildEntitlement,
     ExamType,
     SubjectItem,
     Paper,
     StartAttemptResponse,
     SubmitAttemptResponse,
     AttemptItem,
-    SessionQuestion
+    SessionQuestion,
+    TestDrillerProductCatalogItem
 } from '@/lib/api/test-driller';
 
-// 1. CHANGE CHAPTERS TO EPISODES
-// 2. CHANGE TEST TO QUIZ
-
 import { authApi } from '@/lib/api/auth';
-import { schoolStructureApi, resolveAndSyncActiveChild } from '@/lib/api/school-structure';
+import { schoolStructureApi } from '@/lib/api/school-structure';
+import { useChildProfile } from '@/lib/context/ChildProfileContext';
 import { SubjectExam, PRACTICE_EXAMS, UserAnswerMap, ExamResultSummary } from '@/lib/data/practiceExamsData';
 
+import { TestDrillerCatalog } from '@/components/practice-exam/TestDrillerCatalog';
+import { PaperInstructions } from '@/components/practice-exam/PaperInstructions';
 import { ExamSelectionGrid } from '@/components/practice-exam/ExamSelectionGrid';
 import { ExamQuestionView } from '@/components/practice-exam/ExamQuestionView';
 import { ExamResultView } from '@/components/practice-exam/ExamResultView';
 import { ExamReviewView } from '@/components/practice-exam/ExamReviewView';
 import {
     Loader2,
-    Lock,
     AlertCircle,
     BookOpen,
     Calendar,
-    Sparkles,
     Play,
     RefreshCw,
     CheckCircle2,
-    Clock,
-    FileText,
     ArrowLeft,
     ChevronRight
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+// Fallback only: if an entitlement has no examTypeIdsSnapshot (see below), match a product
+// to the exam type(s) it covers by name/slug (e.g. "Jamb Combo" -> the "JAMB" exam type).
+function matchExamTypesForProduct(product: TestDrillerProductCatalogItem, examTypes: ExamType[]): ExamType[] {
+    const productKey = (product.slug || product.name || product.title || '').toLowerCase();
+    if (!productKey) return [];
+    return examTypes.filter((et) => {
+        const etKey = (et.slug || et.name || '').toLowerCase();
+        if (!etKey) return false;
+        return productKey.includes(etKey) || etKey.includes(productKey.split(/[\s-]+/)[0]);
+    });
+}
+
+// Restrict the year list to an entitlement's purchased year range, when it has one.
+function filterYearsByEntitlement(years: number[], entitlement: ChildEntitlement | null): number[] {
+    if (!entitlement || (entitlement.yearStartSnapshot == null && entitlement.yearEndSnapshot == null)) {
+        return years;
+    }
+    const start = entitlement.yearStartSnapshot ?? -Infinity;
+    const end = entitlement.yearEndSnapshot ?? Infinity;
+    return years.filter((y) => y >= start && y <= end);
+}
+
+type Stage = 'catalog' | 'filters' | 'papers' | 'instructions' | 'taking' | 'result' | 'review';
+
 export default function PracticeExamPage() {
     const router = useRouter();
+
+    // Globally-selected child (from the dashboard-wide child switcher) — every page reacts to
+    // this so switching a child on one page updates practice exam access/data as well.
+    const { activeChild: contextActiveChild } = useChildProfile();
 
     // 1. Child Profile & Access Context
     const [childProfileId, setChildProfileId] = useState<string>('');
@@ -50,8 +76,28 @@ export default function PracticeExamPage() {
     const [accessData, setAccessData] = useState<ChildAccessResponse | null>(null);
     const [isCheckingAccess, setIsCheckingAccess] = useState<boolean>(true);
 
-    // 2. Paper Hierarchy Filters & Data
+    // 2. Product Catalogue (landing screen)
+    const [stage, setStage] = useState<Stage>('catalog');
+    const [catalogTab, setCatalogTab] = useState<'explore' | 'my-courses'>('explore');
+    const [products, setProducts] = useState<TestDrillerProductCatalogItem[]>([]);
+    const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(true);
+    const [checkingOutProductId, setCheckingOutProductId] = useState<string | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<TestDrillerProductCatalogItem | null>(null);
+    // The specific entitlement/purchase behind the selected product — when it carries a
+    // snapshot scope (examTypeIdsSnapshot/subjectIdsSnapshot/year range), we use it to
+    // scope the filter screen precisely instead of the name/slug heuristic.
+    const [selectedEntitlement, setSelectedEntitlement] = useState<ChildEntitlement | null>(null);
+
+    // Purchased product IDs derived from the child's active Test Driller entitlements
+    const purchasedProductIds = new Set(
+        (accessData?.entitlements || [])
+            .filter((e) => e.status === 'active')
+            .map((e) => e.productId)
+    );
+
+    // 3. Filter Screen State (exam type -> year -> subject), scoped to the selected product
     const [examTypes, setExamTypes] = useState<ExamType[]>([]);
+    const [productExamTypes, setProductExamTypes] = useState<ExamType[]>([]);
     const [selectedExamTypeId, setSelectedExamTypeId] = useState<string>('');
 
     const [apiSubjects, setApiSubjects] = useState<SubjectItem[]>([]);
@@ -64,7 +110,7 @@ export default function PracticeExamPage() {
     const [isLoadingPapers, setIsLoadingPapers] = useState<boolean>(false);
     const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
-    // 3. Attempt State (Live API)
+    // 4. Attempt State (Live API)
     const [currentAttempt, setCurrentAttempt] = useState<AttemptItem | null>(null);
     const [sessionQuestions, setSessionQuestions] = useState<SessionQuestion[]>([]);
     const [activeAttemptId, setActiveAttemptId] = useState<string>('');
@@ -77,10 +123,7 @@ export default function PracticeExamPage() {
     // Live API Submit Response & Review
     const [apiSubmitResponse, setApiSubmitResponse] = useState<SubmitAttemptResponse | null>(null);
 
-    // 4. View Mode: 'selection' | 'taking' | 'result' | 'review' | 'locked'
-    const [viewMode, setViewMode] = useState<'selection' | 'taking' | 'result' | 'review' | 'locked'>('selection');
-
-    // 5. Fallback Mock Simulation States (used if backend API returns error/unreachable)
+    // 5. Fallback Mock Simulation States (used only if the backend has no exam types/papers at all)
     const [useMockFallback, setUseMockFallback] = useState<boolean>(false);
     const [selectedSubjectMock, setSelectedSubjectMock] = useState<SubjectExam | null>(null);
     const [userAnswersMock, setUserAnswersMock] = useState<UserAnswerMap>({});
@@ -94,19 +137,36 @@ export default function PracticeExamPage() {
     const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // ==========================================
-    // INIT & ACCESS CHECK WITH STALE CACHE PURGING
+    // INIT: RESOLVE CHILD, LOAD ACCESS + PRODUCT CATALOGUE
     // ==========================================
     useEffect(() => {
-        async function initAccess() {
+        async function init() {
             setIsCheckingAccess(true);
+            setIsLoadingProducts(true);
 
-            // Validate and sync cached child profile against real backend profiles
-            let activeChild = await resolveAndSyncActiveChild().catch(() => null);
+            // Reset any state scoped to the previously-active child before switching
+            setAccessData(null);
+            setExamTypes([]);
+            setProductExamTypes([]);
+            setSelectedExamTypeId('');
+            setApiSubjects([]);
+            setSelectedSubjectId('');
+            setYears([]);
+            setSelectedYear(undefined);
+            setPapers([]);
+            setSelectedPaper(null);
+            setSelectedProduct(null);
+            setSelectedEntitlement(null);
+            setUseMockFallback(false);
+            setStage('catalog');
+            setCatalogTab('explore');
 
+            // Use the globally-selected child from the dashboard-wide switcher
+            let activeChild = contextActiveChild;
             let resolvedChildId = activeChild?.id || activeChild?._id || '';
             let resolvedName = activeChild?.name || activeChild?.childName || '';
 
-            // Secondary fallback if resolveAndSyncActiveChild returned null
+            // Secondary fallback if the context hasn't resolved a child yet
             if (!resolvedChildId) {
                 const profileRes = await authApi.getProfile().catch(() => null);
                 const profileData = (profileRes as any)?.data;
@@ -122,6 +182,14 @@ export default function PracticeExamPage() {
                     resolvedName = altChild.name || altChild.childName || '';
                 }
             }
+
+            // Always load the product catalogue, independent of access/entitlement state —
+            // parents need to see what's available to buy even with zero entitlements.
+            // Scoped to the child's current class, matching the mobile app's implementation.
+            testDrillerApi.getProductCatalog(activeChild?.currentClassId)
+                .then((res) => setProducts(res.items || []))
+                .catch(() => setProducts([]))
+                .finally(() => setIsLoadingProducts(false));
 
             if (resolvedChildId) {
                 setChildProfileId(resolvedChildId);
@@ -163,40 +231,32 @@ export default function PracticeExamPage() {
 
                     setAccessData(accessRes);
 
-                    if (!accessRes.hasAccess) {
-                        setViewMode('locked');
-                        setIsCheckingAccess(false);
-                        return;
-                    }
-
-                    // Load Exam Types
+                    // Load exam types up-front so we can match them against products when the
+                    // parent taps "Practice" on a purchased combo.
                     const examTypesRes = await testDrillerApi.getExamTypes(resolvedChildId).catch(() => null);
-                    if (examTypesRes?.items && examTypesRes.items.length > 0) {
+                    if (examTypesRes?.items) {
                         setExamTypes(examTypesRes.items);
-                        const firstExamTypeId = examTypesRes.items[0].id;
-                        setSelectedExamTypeId(firstExamTypeId);
-
-                        // Load Subjects for first exam type
-                        loadSubjectsAndPapers(resolvedChildId, firstExamTypeId);
-                    } else {
-                        // Switch to UI simulation fallback if endpoint not active
-                        setUseMockFallback(true);
                     }
                 } catch (err) {
-                    console.warn('Test Driller access check warning, using simulation fallback:', err);
-                    setUseMockFallback(true);
+                    console.warn('Test Driller access check warning:', err);
                 }
-            } else {
-                // No child profile found, default to mock fallback for evaluation
-                setUseMockFallback(true);
             }
 
             setIsCheckingAccess(false);
         }
 
-        initAccess();
-    }, []);
+        init();
+    }, [contextActiveChild?.id, contextActiveChild?._id]);
 
+    // Pick up a `?tab=` query param (used when returning from the standalone checkout callback)
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab === 'my-courses' || tab === 'explore') {
+            setCatalogTab(tab);
+        }
+    }, []);
 
     // Load subjects, years, and papers for active filters
     const loadSubjectsAndPapers = async (cId: string, eTypeId?: string, sId?: string, y?: number) => {
@@ -211,49 +271,140 @@ export default function PracticeExamPage() {
             setApiSubjects(subjectsRes.items || []);
             setYears(yearsRes.items || []);
             setPapers(papersRes.items || []);
-
-            if ((!papersRes.items || papersRes.items.length === 0) && (!subjectsRes.items || subjectsRes.items.length === 0)) {
-                setUseMockFallback(true);
-            }
         } catch {
-            setUseMockFallback(true);
+            setPapers([]);
         } finally {
             setIsLoadingPapers(false);
         }
     };
 
-    // Filter updates
-    const handleExamTypeChange = (eTypeId: string) => {
-        setSelectedExamTypeId(eTypeId);
+    // ==========================================
+    // CATALOGUE ACTIONS
+    // ==========================================
+
+    // Parent taps "Subscribe" on a bundle they don't own yet — standalone checkout
+    const handleSubscribeProduct = async (product: TestDrillerProductCatalogItem) => {
+        const productId = product.id || (product as any)._id;
+        if (!childProfileId || !productId) return;
+
+        setCheckingOutProductId(productId);
+        try {
+            const res = await testDrillerApi.startProductCheckout({
+                childProfileId,
+                productId,
+                callbackUrl: `${window.location.origin}/payments/test-driller/callback`
+            });
+
+            const checkout = res?.data?.checkout;
+            if (checkout?.authorizationUrl) {
+                localStorage.setItem('pending_test_driller_checkout', JSON.stringify({
+                    reference: checkout.reference,
+                    productId,
+                    childProfileId,
+                    createdAt: new Date().toISOString()
+                }));
+                window.location.href = checkout.authorizationUrl;
+            } else {
+                alert('Could not start checkout: no payment authorization URL returned.');
+            }
+        } catch (err: any) {
+            console.error('Test Driller product checkout error:', err);
+            alert(err?.response?.data?.message || 'Failed to start checkout. Please try again.');
+        } finally {
+            setCheckingOutProductId(null);
+        }
+    };
+
+    // Parent taps "Practice" on a bundle they already own
+    const handlePracticeProduct = (product: TestDrillerProductCatalogItem) => {
+        if (!childProfileId) return;
+
+        const productId = product.id || (product as any)._id;
+        const entitlement = (accessData?.entitlements || []).find((e) => e.productId === productId) || null;
+
+        setSelectedProduct(product);
+        setSelectedEntitlement(entitlement);
         setSelectedSubjectId('');
         setSelectedYear(undefined);
-        if (childProfileId) {
-            loadSubjectsAndPapers(childProfileId, eTypeId, undefined, undefined);
+        setPapers([]);
+        setApiSubjects([]);
+        setYears([]);
+
+        // Prefer the entitlement's own scope snapshot (exact, ID-based) over the name/slug
+        // heuristic — it's only a fallback for entitlements that don't carry a snapshot.
+        const scopedExamTypeIds = entitlement?.examTypeIdsSnapshot;
+        const matches = scopedExamTypeIds && scopedExamTypeIds.length > 0
+            ? examTypes.filter((et) => scopedExamTypeIds.includes(et.id))
+            : matchExamTypesForProduct(product, examTypes);
+        setProductExamTypes(matches.length > 0 ? matches : examTypes);
+
+        if (matches.length === 1) {
+            const onlyExamType = matches[0].id;
+            setSelectedExamTypeId(onlyExamType);
+            testDrillerApi.getYears(childProfileId, onlyExamType).then((res) => {
+                setYears(filterYearsByEntitlement(res.items || [], entitlement));
+            }).catch(() => setYears([]));
+        } else {
+            setSelectedExamTypeId('');
         }
+
+        if (examTypes.length === 0 && matches.length === 0) {
+            // Backend has no exam-type/paper data at all for this child — fall back to the
+            // local practice-exam simulation so the page is never a dead end.
+            setUseMockFallback(true);
+            setStage('taking');
+            return;
+        }
+
+        setStage('filters');
     };
 
-    const handleSubjectChange = (sId: string) => {
-        setSelectedSubjectId(sId);
+    // Filter screen selections
+    const handleFilterExamTypeChange = (eTypeId: string) => {
+        setSelectedExamTypeId(eTypeId);
         setSelectedYear(undefined);
+        setSelectedSubjectId('');
+        setYears([]);
+        setApiSubjects([]);
         if (childProfileId) {
-            loadSubjectsAndPapers(childProfileId, selectedExamTypeId, sId, undefined);
+            testDrillerApi.getYears(childProfileId, eTypeId).then((res) => {
+                setYears(filterYearsByEntitlement(res.items || [], selectedEntitlement));
+            }).catch(() => setYears([]));
         }
     };
 
-    const handleYearChange = (yr?: number) => {
+    const handleFilterYearChange = (yr?: number) => {
         setSelectedYear(yr);
-        if (childProfileId) {
-            loadSubjectsAndPapers(childProfileId, selectedExamTypeId, selectedSubjectId, yr);
+        setSelectedSubjectId('');
+        if (childProfileId && selectedExamTypeId) {
+            testDrillerApi.getSubjects(childProfileId, selectedExamTypeId).then((res) => {
+                const scopedSubjectIds = selectedEntitlement?.subjectIdsSnapshot;
+                const subjects = scopedSubjectIds && scopedSubjectIds.length > 0
+                    ? (res.items || []).filter((s) => scopedSubjectIds.includes(s.id))
+                    : (res.items || []);
+                setApiSubjects(subjects);
+            }).catch(() => setApiSubjects([]));
         }
+    };
+
+    const handleContinueToPapers = () => {
+        if (!childProfileId || !selectedExamTypeId || !selectedYear || !selectedSubjectId) return;
+        loadSubjectsAndPapers(childProfileId, selectedExamTypeId, selectedSubjectId, selectedYear);
+        setStage('papers');
     };
 
     // ==========================================
     // START / RESUME ATTEMPT (LIVE API)
     // ==========================================
-    const handleStartApiPaper = async (paper: Paper) => {
-        if (!childProfileId) return;
-        setIsStartingAttempt(true);
+    const handleOpenInstructions = (paper: Paper) => {
         setSelectedPaper(paper);
+        setStage('instructions');
+    };
+
+    const handleStartApiPaper = async () => {
+        const paper = selectedPaper;
+        if (!childProfileId || !paper) return;
+        setIsStartingAttempt(true);
 
         try {
             const res: StartAttemptResponse = await testDrillerApi.startPaperAttempt(
@@ -279,7 +430,7 @@ export default function PracticeExamPage() {
 
                 setElapsedSeconds(0);
                 setIsTimerRunning(true);
-                setViewMode('taking');
+                setStage('taking');
             } else {
                 alert('Failed to start paper attempt: No session data returned from server.');
             }
@@ -351,7 +502,7 @@ export default function PracticeExamPage() {
             );
 
             setApiSubmitResponse(res);
-            setViewMode('result');
+            setStage('result');
         } catch (err: any) {
             console.error('API submission failed:', err);
             alert(err?.response?.data?.message || 'Submission error. Please check network.');
@@ -359,7 +510,8 @@ export default function PracticeExamPage() {
     };
 
     // ==========================================
-    // MOCK SIMULATION HANDLERS (Fallback mode)
+    // MOCK SIMULATION HANDLERS (Fallback mode — only reached if the backend has zero exam
+    // types/papers configured for this child, so the page is never a dead end)
     // ==========================================
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -376,7 +528,7 @@ export default function PracticeExamPage() {
         setUserAnswersMock({});
         setElapsedSeconds(0);
         setIsTimerRunning(true);
-        setViewMode('taking');
+        setStage('taking');
     };
 
     const handleAnswerSelectMock = (questionId: string, optionId: string) => {
@@ -415,16 +567,19 @@ export default function PracticeExamPage() {
             attemptedCount
         });
 
-        setViewMode('result');
+        setStage('result');
     };
 
-    const handleBackToSelection = () => {
+    const handleBackToCatalog = () => {
         setIsTimerRunning(false);
-        setViewMode('selection');
+        setStage('catalog');
+        setSelectedProduct(null);
+        setSelectedEntitlement(null);
         setSelectedSubjectMock(null);
         setSelectedPaper(null);
         setUserAnswersMock({});
         setLiveAnswers({});
+        setUseMockFallback(false);
     };
 
     const handleBackToDashboard = () => {
@@ -436,34 +591,8 @@ export default function PracticeExamPage() {
         return (
             <div className="p-12 bg-white rounded-3xl border border-gray-100 shadow-md text-center space-y-4 max-w-xl mx-auto my-12">
                 <Loader2 className="w-10 h-10 animate-spin text-[#FF4801] mx-auto" />
-                <p className="text-gray-700 font-bold text-base">Verifying Test Driller Entitlement & Access...</p>
-                <p className="text-xs text-gray-500">Checking active subscriptions for {childName || 'learner'}...</p>
-            </div>
-        );
-    }
-
-    // Locked state (if access is false)
-    if (viewMode === 'locked') {
-        return (
-            <div className="p-8 sm:p-12 bg-white rounded-3xl border border-gray-200 shadow-md text-center space-y-6 max-w-2xl mx-auto my-8">
-                <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto shadow-inner">
-                    <Lock className="w-8 h-8" />
-                </div>
-                <div className="space-y-2">
-                    <h2 className="text-2xl font-extrabold text-gray-900">Test Driller Access Locked</h2>
-                    <p className="text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
-                        {childName || 'Your child profile'} does not currently have an active Test Driller entitlement. Purchase access to unlock JAMB, WAEC, and NECO past question drills.
-                    </p>
-                </div>
-                <div className="pt-4 flex items-center justify-center gap-4">
-                    <button
-                        type="button"
-                        onClick={() => router.push('/pricing')}
-                        className="px-8 py-3.5 rounded-2xl bg-[#FF4801] hover:bg-[#e03f00] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all"
-                    >
-                        Unlock Test Driller Subscription
-                    </button>
-                </div>
+                <p className="text-gray-700 font-bold text-base">Loading Test Driller...</p>
+                <p className="text-xs text-gray-500">Checking bundles for {childName || 'learner'}...</p>
             </div>
         );
     }
@@ -471,261 +600,219 @@ export default function PracticeExamPage() {
     return (
         <div className="space-y-6">
 
-            {/* Header Title */}
-            {viewMode === 'selection' && (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#FF4801] tracking-tight">
-                            Practice Exam / Test Driller
-                        </h1>
-                        <p className="text-sm text-gray-500 font-medium">
-                            Access subject mock exams, past questions, and real-time timed test simulations.
-                        </p>
+            {/* STAGE 1: PRODUCT CATALOGUE (Explore / My Courses) */}
+            {stage === 'catalog' && (
+                <TestDrillerCatalog
+                    activeTab={catalogTab}
+                    onTabChange={setCatalogTab}
+                    products={products}
+                    purchasedProductIds={purchasedProductIds}
+                    isLoading={isLoadingProducts}
+                    isCheckingOutProductId={checkingOutProductId}
+                    onSubscribe={handleSubscribeProduct}
+                    onPractice={handlePracticeProduct}
+                />
+            )}
+
+            {/* STAGE 2: FILTERS — Exam Type -> Year -> Subject, scoped to the selected product */}
+            {stage === 'filters' && selectedProduct && (
+                <div className="max-w-3xl mx-auto space-y-5">
+                    <button
+                        type="button"
+                        onClick={handleBackToCatalog}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-[#FF4801] transition-colors cursor-pointer"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Back to Test Drillers</span>
+                    </button>
+
+                    <div className="bg-gradient-to-br from-[#4A154B] to-[#2D0C2E] text-white rounded-3xl p-6 space-y-1">
+                        <h1 className="text-xl font-black">{selectedProduct.name || selectedProduct.title}</h1>
+                        <p className="text-sm text-purple-200">Everything you need to ace {selectedProduct.name || 'this exam'}.</p>
                     </div>
 
+                    {/* Exam Type (only shown when the product covers more than one exam board) */}
+                    {productExamTypes.length > 1 && (
+                        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-3">
+                            <h2 className="text-sm font-bold text-gray-900">Select Exam Type</h2>
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                {productExamTypes.map((et) => (
+                                    <button
+                                        key={et.id}
+                                        type="button"
+                                        onClick={() => handleFilterExamTypeChange(et.id)}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${selectedExamTypeId === et.id ? 'bg-[#FF4801] text-white shadow-xs' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        <BookOpen className="w-3.5 h-3.5" />
+                                        <span>{et.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
+                    {/* Year — required */}
+                    {selectedExamTypeId && (
+                        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-3">
+                            <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-[#FF4801]" />
+                                Exam Setting (Year) <span className="text-[#FF4801]">*</span>
+                            </h2>
+                            {years.length > 0 ? (
+                                <select
+                                    value={selectedYear || ''}
+                                    onChange={(e) => handleFilterYearChange(e.target.value ? Number(e.target.value) : undefined)}
+                                    className="px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 bg-white shadow-2xs focus:ring-2 focus:ring-[#FF4801] cursor-pointer"
+                                >
+                                    <option value="">Select a year</option>
+                                    {years.map((y) => (
+                                        <option key={y} value={y}>{y}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <p className="text-xs text-gray-500">Loading available years...</p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Subject — required, shown once a year is chosen */}
+                    {selectedYear && (
+                        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-sm font-bold text-gray-900">Subjects</h2>
+                                <span className="text-xs text-gray-500 font-semibold">{apiSubjects.length} available</span>
+                            </div>
+                            {apiSubjects.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {apiSubjects.map((sub) => {
+                                        const isSelected = selectedSubjectId === sub.id;
+                                        return (
+                                            <button
+                                                key={sub.id}
+                                                type="button"
+                                                onClick={() => setSelectedSubjectId(sub.id)}
+                                                className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${isSelected
+                                                    ? 'border-[#FF4801] bg-orange-50 ring-2 ring-[#FF4801]/30'
+                                                    : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                            >
+                                                <p className="text-xs font-bold text-gray-900">{sub.name}</p>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gray-500">Loading subjects for this year...</p>
+                            )}
+                        </div>
+                    )}
+
+                    <button
+                        type="button"
+                        disabled={!selectedExamTypeId || !selectedYear || !selectedSubjectId}
+                        onClick={handleContinueToPapers}
+                        className="w-full py-3.5 rounded-2xl bg-[#FF4801] hover:bg-orange-600 text-white font-black text-sm shadow-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        Continue
+                    </button>
                 </div>
             )}
 
-            {/* VIEW 1: SELECTION GRID */}
-            {viewMode === 'selection' && (
-                <>
-                    {/* Live API Paper Selector vs Mock Fallback */}
-                    {!useMockFallback ? (
-                        <div className="space-y-6">
-                            {/* Exam Type Header & Filter Bar */}
-                            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-xs space-y-4">
-                                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4">
-                                    <div>
-                                        <h2 className="text-lg font-bold text-gray-900">Select Exam Type</h2>
-                                        <p className="text-xs text-gray-500">Choose your targeted examination board to explore subjects and past papers.</p>
-                                    </div>
-                                    {selectedSubjectId && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setSelectedSubjectId('');
-                                                setSelectedYear(undefined);
-                                                if (childProfileId && selectedExamTypeId) {
-                                                    loadSubjectsAndPapers(childProfileId, selectedExamTypeId, undefined, undefined);
-                                                }
-                                            }}
-                                            className="text-xs font-bold text-[#FF4801] hover:underline flex items-center gap-1"
-                                        >
-                                            <ArrowLeft className="w-3.5 h-3.5" />
-                                            Back to Subject Selection
-                                        </button>
-                                    )}
-                                </div>
+            {/* STAGE 3: PAPERS LIST */}
+            {stage === 'papers' && (
+                <div className="max-w-4xl mx-auto space-y-5">
+                    <button
+                        type="button"
+                        onClick={() => setStage('filters')}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-[#FF4801] transition-colors cursor-pointer"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Back to Subject Selection</span>
+                    </button>
 
-                                <div className="flex flex-wrap items-center gap-3">
-                                    {examTypes.map((et) => (
-                                        <button
-                                            key={et.id}
-                                            type="button"
-                                            onClick={() => handleExamTypeChange(et.id)}
-                                            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${selectedExamTypeId === et.id
-                                                ? 'bg-[#FF4801] text-white shadow-xs'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                }`}
-                                        >
-                                            <BookOpen className="w-4 h-4" />
-                                            <span>{et.name}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                    <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-wrap items-center gap-3">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Papers For:</span>
+                        <span className="px-3 py-1 bg-orange-100 text-[#FF4801] text-xs font-bold rounded-lg">
+                            {apiSubjects.find((s) => s.id === selectedSubjectId)?.name} &middot; {selectedYear}
+                        </span>
+                    </div>
 
-                            {/* STEP 2: SUBJECT SELECTION GRID (when no subject is selected yet) */}
-                            {!selectedSubjectId ? (
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                                            <BookOpen className="w-5 h-5 text-[#FF4801]" />
-                                            <span>Select Subject</span>
+                    {isLoadingPapers ? (
+                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
+                            <Loader2 className="w-8 h-8 animate-spin text-[#FF4801] mx-auto" />
+                            <p className="text-sm font-semibold text-gray-600">Loading Available Past Papers...</p>
+                        </div>
+                    ) : papers.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {papers.map((paper) => (
+                                <div
+                                    key={paper.id}
+                                    className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                                >
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF4801] text-xs font-bold uppercase">
+                                                {paper.year || 'Practice'}
+                                            </span>
+                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                {paper.attemptMode} Mode
+                                            </span>
+                                        </div>
+                                        <h3 className="text-lg font-bold text-gray-900 leading-snug">
+                                            {paper.title}
                                         </h3>
-                                        <span className="text-xs text-gray-500 font-semibold">{apiSubjects.length} Subjects Available</span>
                                     </div>
 
-                                    {isLoadingPapers ? (
-                                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
-                                            <Loader2 className="w-8 h-8 animate-spin text-[#FF4801] mx-auto" />
-                                            <p className="text-sm font-semibold text-gray-600">Loading Available Subjects...</p>
-                                        </div>
-                                    ) : apiSubjects.length > 0 ? (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                                            {apiSubjects.map((sub) => (
-                                                <button
-                                                    key={sub.id}
-                                                    type="button"
-                                                    onClick={() => handleSubjectChange(sub.id)}
-                                                    className="bg-white hover:bg-orange-50/50 rounded-2xl border border-gray-200 hover:border-orange-300 p-5 text-left transition-all shadow-xs hover:shadow-md flex flex-col justify-between group space-y-4"
-                                                >
-                                                    <div className="flex items-start justify-between w-full">
-                                                        <div className="w-10 h-10 rounded-xl bg-orange-100 text-[#FF4801] font-bold flex items-center justify-center text-sm shadow-xs group-hover:scale-105 transition-transform">
-                                                            {sub.name.substring(0, 2).toUpperCase()}
-                                                        </div>
-                                                        <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full group-hover:bg-orange-100 group-hover:text-[#FF4801] transition-colors">
-                                                            {sub.code || 'Driller'}
-                                                        </span>
-                                                    </div>
-
-                                                    <div>
-                                                        <h4 className="text-base font-bold text-gray-900 group-hover:text-[#FF4801] transition-colors">
-                                                            {sub.name}
-                                                        </h4>
-                                                        <p className="text-xs text-gray-500 mt-1">
-                                                            Select to view all examination papers & practice tests.
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between w-full text-xs font-bold text-[#FF4801]">
-                                                        <span>View Papers</span>
-                                                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="p-8 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
-                                            <p className="text-sm font-semibold text-gray-600">No subjects found for this exam type.</p>
-                                            <button
-                                                type="button"
-                                                onClick={() => setUseMockFallback(true)}
-                                                className="text-xs font-bold text-[#FF4801] hover:underline"
-                                            >
-                                                Switch to Exam Simulation Mode
-                                            </button>
-                                        </div>
-                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleOpenInstructions(paper)}
+                                        className="w-full bg-[#FF4801] hover:bg-orange-600 active:scale-[0.98] text-white font-bold text-sm py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <span>Get Started</span>
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
                                 </div>
-                            ) : (
-                                /* STEP 3: PAPERS LIST FOR SELECTED SUBJECT WITH YEAR FILTER */
-                                <div className="space-y-4">
-                                    <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Filtered By Subject:</span>
-                                            <span className="px-3 py-1 bg-orange-100 text-[#FF4801] text-xs font-bold rounded-lg">
-                                                {apiSubjects.find((s) => s.id === selectedSubjectId)?.name || 'Selected Subject'}
-                                            </span>
-                                        </div>
-
-                                        {/* Year Filter Dropdown & Pills */}
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
-                                                <Calendar className="w-4 h-4 text-gray-400" />
-                                                Filter Year:
-                                            </span>
-                                            <select
-                                                value={selectedYear || ''}
-                                                onChange={(e) => handleYearChange(e.target.value ? Number(e.target.value) : undefined)}
-                                                className="px-3 py-1.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-700 bg-white shadow-2xs focus:ring-2 focus:ring-[#FF4801]"
-                                            >
-                                                <option value="">All Available Years</option>
-                                                {years.map((y) => (
-                                                    <option key={y} value={y}>{y}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {/* Papers List */}
-                                    {isLoadingPapers ? (
-                                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
-                                            <Loader2 className="w-8 h-8 animate-spin text-[#FF4801] mx-auto" />
-                                            <p className="text-sm font-semibold text-gray-600">Loading Available Past Papers...</p>
-                                        </div>
-                                    ) : papers.length > 0 ? (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {papers.map((paper) => (
-                                                <div
-                                                    key={paper.id}
-                                                    className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
-                                                >
-                                                    <div className="space-y-2">
-                                                        <div className="flex items-center justify-between">
-                                                            <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF4801] text-xs font-bold uppercase">
-                                                                {paper.year || 'Practice'}
-                                                            </span>
-                                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                                                {paper.attemptMode} Mode
-                                                            </span>
-                                                        </div>
-                                                        <h3 className="text-lg font-bold text-gray-900 leading-snug">
-                                                            {paper.title}
-                                                        </h3>
-                                                        <p className="text-xs text-gray-500 line-clamp-2">
-                                                            {paper.instructions || 'Standard test driller examination paper.'}
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="pt-4 border-t border-gray-100 space-y-3">
-                                                        <div className="flex items-center justify-between text-xs text-gray-600 font-semibold">
-                                                            <span className="flex items-center gap-1">
-                                                                <FileText className="w-3.5 h-3.5 text-gray-400" />
-                                                                {paper.totalQuestions} Questions
-                                                            </span>
-                                                            <span className="flex items-center gap-1">
-                                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                                {paper.durationMinutes} Mins
-                                                            </span>
-                                                        </div>
-
-                                                        <button
-                                                            type="button"
-                                                            disabled={isStartingAttempt}
-                                                            onClick={() => handleStartApiPaper(paper)}
-                                                            className="w-full bg-[#CBE9FF] hover:bg-[#b5e0ff] active:scale-[0.98] text-gray-900 font-bold text-sm py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                                        >
-                                                            {isStartingAttempt && selectedPaper?.id === paper.id ? (
-                                                                <>
-                                                                    <Loader2 className="w-4 h-4 animate-spin text-gray-800" />
-                                                                    <span>Launching Exam...</span>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <span>Start Paper</span>
-                                                                    <Play className="w-3.5 h-3.5 fill-current" />
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
-                                            <p className="text-base font-bold text-gray-800">No examination papers found for this subject and year filter.</p>
-                                            <p className="text-xs text-gray-500">Try selecting "All Available Years" or choosing another subject.</p>
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedYear(undefined)}
-                                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors"
-                                            >
-                                                Clear Year Filter
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            ))}
                         </div>
                     ) : (
-                        <ExamSelectionGrid onSelectSubject={handleSelectSubjectMock} />
+                        <div className="p-12 bg-white rounded-2xl border border-gray-200 text-center space-y-3">
+                            <p className="text-base font-bold text-gray-800">No examination papers found for this subject and year.</p>
+                            <button
+                                type="button"
+                                onClick={() => setStage('filters')}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors"
+                            >
+                                Change Filters
+                            </button>
+                        </div>
                     )}
-                </>
+                </div>
             )}
 
-            {/* VIEW 2: TAKING EXAM */}
-            {viewMode === 'taking' && (
+            {/* STAGE 4: INSTRUCTIONS */}
+            {stage === 'instructions' && selectedPaper && (
+                <PaperInstructions
+                    paper={selectedPaper}
+                    isStarting={isStartingAttempt}
+                    onBack={() => setStage('papers')}
+                    onStart={handleStartApiPaper}
+                />
+            )}
+
+            {/* STAGE 5: TAKING EXAM */}
+            {stage === 'taking' && (
                 <>
                     {useMockFallback || !selectedPaper ? (
-                        selectedSubjectMock && (
+                        !selectedSubjectMock ? (
+                            <ExamSelectionGrid onSelectSubject={handleSelectSubjectMock} />
+                        ) : (
                             <ExamQuestionView
                                 subject={selectedSubjectMock}
                                 userAnswers={userAnswersMock}
                                 onAnswerSelect={handleAnswerSelectMock}
                                 onSubmitExam={handleSubmitExamMock}
-                                onBackToSelection={handleBackToSelection}
+                                onBackToSelection={handleBackToCatalog}
                                 elapsedSeconds={elapsedSeconds}
                             />
                         )
@@ -800,7 +887,7 @@ export default function PracticeExamPage() {
                                 )}
                                 onAnswerSelect={(qId, optId) => handleApiAnswerSelect(qId, optId)}
                                 onSubmitExam={handleApiSubmit}
-                                onBackToSelection={handleBackToSelection}
+                                onBackToSelection={handleBackToCatalog}
                                 elapsedSeconds={elapsedSeconds}
                             />
                         </div>
@@ -808,8 +895,8 @@ export default function PracticeExamPage() {
                 </>
             )}
 
-            {/* VIEW 3: RESULT */}
-            {viewMode === 'result' && (
+            {/* STAGE 6: RESULT */}
+            {stage === 'result' && (
                 <>
                     {apiSubmitResponse?.item ? (
                         <ExamResultView
@@ -834,7 +921,7 @@ export default function PracticeExamPage() {
                                 totalTimeMinutes: selectedPaper?.durationMinutes || 60,
                                 attemptedCount: apiSubmitResponse.item.answers?.length || 0
                             }}
-                            onReviewAnswers={() => setViewMode('review')}
+                            onReviewAnswers={() => setStage('review')}
                             onBackToDashboard={handleBackToDashboard}
                         />
                     ) : (
@@ -842,7 +929,7 @@ export default function PracticeExamPage() {
                             <ExamResultView
                                 subject={selectedSubjectMock}
                                 result={resultSummaryMock}
-                                onReviewAnswers={() => setViewMode('review')}
+                                onReviewAnswers={() => setStage('review')}
                                 onBackToDashboard={handleBackToDashboard}
                             />
                         )
@@ -850,8 +937,8 @@ export default function PracticeExamPage() {
                 </>
             )}
 
-            {/* VIEW 4: ANSWER REVIEW */}
-            {viewMode === 'review' && (
+            {/* STAGE 7: ANSWER REVIEW */}
+            {stage === 'review' && (
                 <>
                     {apiSubmitResponse?.review?.questions ? (
                         <ExamReviewView
@@ -897,7 +984,7 @@ export default function PracticeExamPage() {
                             userAnswers={Object.fromEntries(
                                 Object.entries(liveAnswers).map(([k, v]) => [k, v[0] || ''])
                             )}
-                            onBackToResult={() => setViewMode('result')}
+                            onBackToResult={() => setStage('result')}
                             onBackToDashboard={handleBackToDashboard}
                         />
                     ) : (
@@ -905,7 +992,7 @@ export default function PracticeExamPage() {
                             <ExamReviewView
                                 subject={selectedSubjectMock}
                                 userAnswers={userAnswersMock}
-                                onBackToResult={() => setViewMode('result')}
+                                onBackToResult={() => setStage('result')}
                                 onBackToDashboard={handleBackToDashboard}
                             />
                         )

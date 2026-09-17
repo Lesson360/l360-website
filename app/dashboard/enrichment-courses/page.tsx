@@ -3,14 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import {
     GraduationCap,
-    X,
     BookOpen,
     PlayCircle,
     Download,
     FileText,
     CheckCircle2,
-    Lock,
-    Sparkles,
     ChevronRight,
     Search,
     Filter,
@@ -30,8 +27,8 @@ import {
     CourseSectionItem,
     SectionVideoItem
 } from '@/lib/api/enrichment-courses';
-import { schoolStructureApi } from '@/lib/api/school-structure';
 import { CustomVideoPlayer } from '@/components/video-library/CustomVideoPlayer';
+import { useChildProfile } from '@/lib/context/ChildProfileContext';
 
 interface ChildProfile {
     id: string;
@@ -46,9 +43,11 @@ export default function EnrichmentCoursesPage() {
     const [activeTab, setActiveTab] = useState<'catalogue' | 'my-courses'>('catalogue');
     const [viewMode, setViewMode] = useState<'grid' | 'detail' | 'player'>('grid');
 
-    // 2. Child Profile State
-    const [childProfiles, setChildProfiles] = useState<ChildProfile[]>([]);
-    const [selectedChild, setSelectedChild] = useState<ChildProfile | null>(null);
+    // 2. Child Profile State — sourced from the global, dashboard-wide child switcher
+    // so every page reacts to the same currently-selected child.
+    const { children: contextChildren, activeChild, selectChild } = useChildProfile();
+    const childProfiles = contextChildren as unknown as ChildProfile[];
+    const selectedChild = activeChild as unknown as ChildProfile | null;
 
     // 3. Catalogue & Category State
     const [categories, setCategories] = useState<StandaloneCourseCategory[]>([]);
@@ -80,12 +79,11 @@ export default function EnrichmentCoursesPage() {
 
     const [isInitializing, setIsInitializing] = useState(true);
 
-    // Load Child Profiles and Categories on mount
+    // Load Categories & Public Catalogue on mount (child profiles come from the shared context)
     useEffect(() => {
         const init = async () => {
             setIsInitializing(true);
             await Promise.all([
-                loadChildProfiles(),
                 loadCategories(),
                 loadPublicCourses()
             ]);
@@ -94,93 +92,9 @@ export default function EnrichmentCoursesPage() {
         init();
     }, []);
 
-    // Load child's purchased courses when selected child changes or when activeTab switches to 'my-courses'
+    // Reload child-scoped course data, and reset any cached course/video state, whenever the
+    // globally-selected child changes (including on first load and when switched from another page).
     useEffect(() => {
-        if (selectedChild) {
-            loadChildCourses(selectedChild.id || (selectedChild as any)._id);
-        }
-    }, [selectedChild, activeTab]);
-
-    const loadChildProfiles = async () => {
-        try {
-            // 1. Try fetching real profiles from server first
-            const res = await schoolStructureApi.getChildProfiles().catch(() => null);
-            console.log("child profile: ", res)
-
-            let serverProfiles: any[] = [];
-            if (Array.isArray(res?.data)) {
-                serverProfiles = res.data;
-            } else if (Array.isArray((res?.data as any)?.items)) {
-                serverProfiles = (res?.data as any).items;
-            } else if (Array.isArray((res as any)?.items)) {
-                serverProfiles = (res as any).items;
-            } else if (Array.isArray(res)) {
-                serverProfiles = res;
-            }
-
-            if (serverProfiles.length > 0) {
-                const normalized: ChildProfile[] = serverProfiles.map((p: any) => ({
-                    id: String(p.id || p._id),
-                    name: p.name || p.childName || 'Learner',
-                    avatarUrl: p.avatarUrl,
-                    currentClassName: p.currentClassName || p.className
-                }));
-                setChildProfiles(normalized);
-                localStorage.setItem('child_profiles', JSON.stringify(normalized));
-
-                const activeProfileId = localStorage.getItem('activeChildProfileId');
-                const match = normalized.find(p => p.id === activeProfileId) || normalized[0];
-                setSelectedChild(match);
-                return;
-            }
-
-            // 2. Fallback to reading from local storage
-            const rawStored = localStorage.getItem('child_profiles');
-            if (rawStored) {
-                const parsed = JSON.parse(rawStored);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    const normalized = parsed.map((p: any) => ({
-                        ...p,
-                        id: String(p.id || p._id)
-                    }));
-                    setChildProfiles(normalized);
-
-                    const activeProfileId = localStorage.getItem('activeChildProfileId');
-                    const match = normalized.find(p => p.id === activeProfileId) || normalized[0];
-                    setSelectedChild(match);
-                    return;
-                }
-            }
-
-            // 3. Fallback to stored individual keys if present and valid
-            const storedId = localStorage.getItem('childprofileId') || localStorage.getItem('activeChildProfileId') || '';
-            const storedName = localStorage.getItem('childProfileName') || 'Child Learner';
-
-            if (storedId && isValidMongoId(storedId)) {
-                const fallback: ChildProfile = {
-                    id: storedId,
-                    name: storedName,
-                    currentClassName: 'Learner'
-                };
-                setChildProfiles([fallback]);
-                setSelectedChild(fallback);
-            } else {
-                setChildProfiles([]);
-                setSelectedChild(null);
-            }
-        } catch (e) {
-            console.error('Error loading child profiles:', e);
-        }
-    };
-
-    const isValidMongoId = (id: string): boolean => {
-        return typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
-    };
-
-    const handleSelectChild = (child: ChildProfile) => {
-        setSelectedChild(child);
-        localStorage.setItem('activeChildProfileId', child.id);
-        // Clear cached course/video state when child switches
         setSelectedCourse(null);
         setSections([]);
         setActiveSection(null);
@@ -188,7 +102,11 @@ export default function EnrichmentCoursesPage() {
         setActiveVideo(null);
         setPlaybackUrl(null);
         setViewMode('grid');
-    };
+
+        if (selectedChild) {
+            loadChildCourses(selectedChild.id || (selectedChild as any)._id);
+        }
+    }, [selectedChild?.id, (selectedChild as any)?._id, activeTab]);
 
     const loadCategories = async () => {
         try {
@@ -220,6 +138,10 @@ export default function EnrichmentCoursesPage() {
         } finally {
             setLoadingCatalogue(false);
         }
+    };
+
+    const isValidMongoId = (id: string): boolean => {
+        return typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
     };
 
     const loadChildCourses = async (childId: string) => {
@@ -324,14 +246,14 @@ export default function EnrichmentCoursesPage() {
     const handleStartCheckout = async () => {
         console.log("Clicked!", checkoutCourse, selectedChild);
         // If no child is selected, attempt to default to the first available child profile
-        if (!selectedChild && childProfiles.length > 0) {
-            const fallback = childProfiles[0];
-            setSelectedChild(fallback);
-            console.log('Fallback to first child profile', fallback);
+        let effectiveChild = selectedChild;
+        if (!effectiveChild && contextChildren.length > 0) {
+            effectiveChild = contextChildren[0] as unknown as ChildProfile;
+            selectChild(contextChildren[0]);
         }
-        if (!checkoutCourse || !selectedChild) return;
+        if (!checkoutCourse || !effectiveChild) return;
         setInitiatingCheckout(true);
-        const childId = selectedChild.id || (selectedChild as any)._id;
+        const childId = effectiveChild.id || (effectiveChild as any)._id;
         const courseId = checkoutCourse.id || (checkoutCourse as any)._id;
 
 
