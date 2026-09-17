@@ -583,9 +583,17 @@ export default function VideoLibraryPage() {
             // Ensure EVERY question in quizQuestions has an answer entry sent to the backend
             const formattedAnswers = quizQuestions.map((q, idx) => {
                 const qId = q.id || q._id || `q${idx + 1}`;
-                const userSelectedOpt = quizAnswers[qId] || quizAnswers[q.id || ''] || quizAnswers[q._id || ''];
+                const userAnswer = quizAnswers[qId] || quizAnswers[q.id || ''] || quizAnswers[q._id || ''];
+
+                if (q.type === 'short_text') {
+                    return {
+                        questionId: qId,
+                        textAnswer: userAnswer || ''
+                    };
+                }
+
                 const defaultOptId = q.options[0]?.id || q.options[0]?._id || q.options[0]?.key || 'opt1';
-                const finalOptId = userSelectedOpt || defaultOptId;
+                const finalOptId = userAnswer || defaultOptId;
 
                 return {
                     questionId: qId,
@@ -1449,7 +1457,7 @@ export default function VideoLibraryPage() {
                         const selectedOptionId = quizAnswers[currentQ.id || ''];
 
                         return (
-                            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm space-y-6">
+                            <div className="relative bg-white rounded-3xl p-8 border border-gray-200 shadow-sm space-y-6">
                                 <div className="space-y-2">
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
                                         Question {currentQuizQuestionIndex + 1}
@@ -1459,46 +1467,64 @@ export default function VideoLibraryPage() {
                                     </h3>
                                 </div>
 
-                                {/* Options List */}
-                                <div className="space-y-3">
-                                    {currentQ.options.map((opt) => {
-                                        const optId = opt.id || opt.key || opt.text;
-                                        const isSelected = selectedOptionId === optId;
+                                {/* Answer Input: free-text textarea for short_text questions, otherwise
+                                    the multiple-choice options list */}
+                                {currentQ.type === 'short_text' ? (
+                                    <textarea
+                                        value={selectedOptionId || ''}
+                                        onChange={(e) => {
+                                            setQuizAnswers((prev) => ({
+                                                ...prev,
+                                                [currentQ.id || '']: e.target.value
+                                            }));
+                                        }}
+                                        disabled={isSubmittingQuiz}
+                                        placeholder="Type your answer here..."
+                                        rows={4}
+                                        className="w-full p-4 rounded-2xl border-2 border-gray-200 bg-white text-gray-900 text-sm font-medium focus:outline-none focus:border-[#00C838] transition-all resize-none disabled:opacity-60"
+                                    />
+                                ) : (
+                                    <div className="space-y-3">
+                                        {currentQ.options.map((opt) => {
+                                            const optId = opt.id || opt.key || opt.text;
+                                            const isSelected = selectedOptionId === optId;
 
-                                        return (
-                                            <div
-                                                key={optId}
-                                                onClick={() => {
-                                                    setQuizAnswers((prev) => ({
-                                                        ...prev,
-                                                        [currentQ.id || '']: optId
-                                                    }));
-                                                }}
-                                                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${isSelected
-                                                    ? 'border-[#00C838] bg-emerald-50/50 shadow-xs'
-                                                    : 'border-gray-200 bg-white hover:border-gray-300'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center transition-colors ${isSelected
-                                                        ? 'bg-[#00C838] text-white'
-                                                        : 'bg-gray-100 text-gray-600'
-                                                        }`}>
+                                            return (
+                                                <div
+                                                    key={optId}
+                                                    onClick={() => {
+                                                        if (isSubmittingQuiz) return;
+                                                        setQuizAnswers((prev) => ({
+                                                            ...prev,
+                                                            [currentQ.id || '']: optId
+                                                        }));
+                                                    }}
+                                                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${isSelected
+                                                        ? 'border-[#00C838] bg-emerald-50/50 shadow-xs'
+                                                        : 'border-gray-200 bg-white hover:border-gray-300'
+                                                        } ${isSubmittingQuiz ? 'opacity-60 pointer-events-none' : ''}`}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center transition-colors ${isSelected
+                                                            ? 'bg-[#00C838] text-white'
+                                                            : 'bg-gray-100 text-gray-600'
+                                                            }`}>
+                                                        </div>
+                                                        <span className="text-sm font-extrabold text-gray-800">{opt.text}</span>
                                                     </div>
-                                                    <span className="text-sm font-extrabold text-gray-800">{opt.text}</span>
-                                                </div>
 
-                                                {isSelected && <Check className="w-5 h-5 text-[#00C838]" />}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                                    {isSelected && <Check className="w-5 h-5 text-[#00C838]" />}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
 
                                 {/* Navigation Bar */}
                                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                                     <button
                                         type="button"
-                                        disabled={currentQuizQuestionIndex === 0}
+                                        disabled={currentQuizQuestionIndex === 0 || isSubmittingQuiz}
                                         onClick={() => setCurrentQuizQuestionIndex((prev) => prev - 1)}
                                         className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-xs font-extrabold disabled:opacity-40 cursor-pointer"
                                     >
@@ -1508,8 +1534,9 @@ export default function VideoLibraryPage() {
                                     {currentQuizQuestionIndex < quizQuestions.length - 1 ? (
                                         <button
                                             type="button"
+                                            disabled={isSubmittingQuiz}
                                             onClick={() => setCurrentQuizQuestionIndex((prev) => prev + 1)}
-                                            className="px-6 py-2.5 rounded-xl bg-[#FF4801] hover:bg-orange-600 text-white text-xs font-black shadow-xs cursor-pointer"
+                                            className="px-6 py-2.5 rounded-xl bg-[#FF4801] hover:bg-orange-600 text-white text-xs font-black shadow-xs cursor-pointer disabled:opacity-40"
                                         >
                                             Next Question →
                                         </button>
@@ -1518,13 +1545,22 @@ export default function VideoLibraryPage() {
                                             type="button"
                                             onClick={handleSubmitQuiz}
                                             disabled={isSubmittingQuiz}
-                                            className="px-6 py-2.5 rounded-xl bg-[#00C838] hover:bg-emerald-600 text-white text-xs font-black shadow-md cursor-pointer flex items-center gap-2"
+                                            className="px-6 py-2.5 rounded-xl bg-[#00C838] hover:bg-emerald-600 text-white text-xs font-black shadow-md cursor-pointer flex items-center gap-2 disabled:opacity-70"
                                         >
                                             {isSubmittingQuiz && <Loader2 className="w-4 h-4 animate-spin" />}
-                                            <span>Submit Quiz</span>
+                                            <span>{isSubmittingQuiz ? 'Submitting Quiz...' : 'Submit Quiz'}</span>
                                         </button>
                                     )}
                                 </div>
+
+                                {/* Full-card submitting overlay — makes it unmistakable a network
+                                    request is in flight while the quiz is graded server-side. */}
+                                {isSubmittingQuiz && (
+                                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] rounded-3xl flex flex-col items-center justify-center gap-3 z-10">
+                                        <Loader2 className="w-8 h-8 text-[#00C838] animate-spin" />
+                                        <p className="text-sm font-extrabold text-gray-700">Submitting & grading your quiz...</p>
+                                    </div>
+                                )}
                             </div>
                         );
                     })()}

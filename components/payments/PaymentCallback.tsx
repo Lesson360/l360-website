@@ -10,9 +10,7 @@ import {
     Calendar,
     UserCheck,
     Check,
-    Sparkles,
     ArrowRight,
-    AlertCircle,
 } from 'lucide-react';
 import {
     supportServicesApi,
@@ -23,75 +21,13 @@ import { subscriptionsApi } from '@/lib/api/subscriptions';
 import { authApi } from '@/lib/api/auth';
 
 // Fallback Mock Slots for Demo / Offline resilience
-const FALLBACK_SLOTS: SupportServiceSlot[] = [
-    {
-        id: 'slot-1',
-        offeringId: 'fallback-group-live',
-        levelId: 'default',
-        teacherUserId: 't-1',
-        serviceType: 'group_live',
-        dayOfWeek: 'Monday',
-        startTime: '16:00',
-        endTime: '17:00',
-        timezone: 'Africa/Lagos',
-        capacity: 10,
-        bookedCount: 4,
-        remainingCapacity: 6,
-        isActive: true,
-        teacher: {
-            id: 't-1',
-            fullName: 'Mrs. Adebayo Funke',
-            email: 'adebayo@lesson360.com',
-        },
-    },
-    {
-        id: 'slot-2',
-        offeringId: 'fallback-group-live',
-        levelId: 'default',
-        teacherUserId: 't-2',
-        serviceType: 'group_live',
-        dayOfWeek: 'Wednesday',
-        startTime: '17:00',
-        endTime: '18:00',
-        timezone: 'Africa/Lagos',
-        capacity: 8,
-        bookedCount: 3,
-        remainingCapacity: 5,
-        isActive: true,
-        teacher: {
-            id: 't-2',
-            fullName: 'Mr. Chukwuemeka David',
-            email: 'david@lesson360.com',
-        },
-    },
-    {
-        id: 'slot-3',
-        offeringId: 'fallback-one-on-one',
-        levelId: 'default',
-        teacherUserId: 't-3',
-        serviceType: 'one_on_one',
-        dayOfWeek: 'Saturday',
-        startTime: '10:00',
-        endTime: '11:00',
-        timezone: 'Africa/Lagos',
-        capacity: 1,
-        bookedCount: 0,
-        remainingCapacity: 1,
-        isActive: true,
-        teacher: {
-            id: 't-3',
-            fullName: 'Dr. Sarah Jenkins',
-            email: 'sarah@lesson360.com',
-        },
-    },
-];
+const FALLBACK_SLOTS: SupportServiceSlot[] = [];
 
 export default function PaymentCallback() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const reference = searchParams.get('reference') || searchParams.get('trxref') || '';
-
-    // Overall Status: 'verifying' | 'slot_selection' | 'success' | 'failed'
+    
     const [status, setStatus] = useState<'verifying' | 'slot_selection' | 'success' | 'failed'>('verifying');
     const [message, setMessage] = useState('Verifying your payment...');
     const [paymentType, setPaymentType] = useState<'support' | 'subscription'>('subscription');
@@ -100,6 +36,7 @@ export default function PaymentCallback() {
     const [enrollment, setEnrollment] = useState<SupportEnrollment | null>(null);
     const [slots, setSlots] = useState<SupportServiceSlot[]>([]);
     const [selectedSlotId, setSelectedSlotId] = useState<string>('');
+
     const [isFetchingSlots, setIsFetchingSlots] = useState(false);
     const [isBookingSlot, setIsBookingSlot] = useState(false);
 

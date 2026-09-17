@@ -10,10 +10,22 @@ export interface Question {
     text: string;
     expression?: string; // Optional math expression e.g. "3x² + 5x - 2 - (2x - 3x + 1)"
     marks: number;
+    // 'short_text' renders a free-text textarea instead of the multiple-choice options list.
+    type?: 'single_choice' | 'multiple_choice' | 'true_false' | 'short_text' | string;
     options: Option[];
     correctOptionId: string;
+    // Reference answer(s) for short_text questions, shown in review.
+    correctTextAnswers?: string[];
     explanation?: string;
     topicId: string;
+    // Ground-truth grading from the backend (Test Driller attempt / quiz submission), when
+    // available. Preferred over recomputing correctness client-side from `options`/
+    // `correctOptionId`, which isn't possible at all for short_text answers.
+    backendGraded?: {
+        isCorrect: boolean;
+        scoreAwarded?: number;
+        userTextAnswer?: string;
+    };
 }
 
 export interface Topic {
