@@ -105,6 +105,15 @@ export const subscriptionsApi = {
             )
         ).catch(() => ({ data: [] as TestDrillerProduct[] })),
 
+    // Fetch TestDriller products included in a specific plan, scoped to the child's level and
+    // class — used by the onboarding plan-picker so a student is never offered a Test Driller
+    // bundle meant for another class/level.
+    getPlanTestDrillerProducts: (planId: string, levelId?: string, classId?: string) =>
+        apiClient.get<{ message: string; data: TestDrillerProduct[] | { items: TestDrillerProduct[] } }>(
+            `/subscription-plans/${planId}/test-driller-products`,
+            { params: { levelId, classId } }
+        ),
+
     // Preferred Checkout endpoint: POST /api/v1/subscriptions/checkout
     checkout: (payload: CheckoutPayload) =>
         apiClient.post<CheckoutResponse>(

@@ -9,12 +9,13 @@ import {
     Video,
     FileText,
     GraduationCap,
-    Library,
+    HeartHandshake,
     CreditCard,
     Settings,
     LogOut,
     X,
     Loader2,
+    CalendarClock,
 } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 
@@ -40,9 +41,14 @@ const NAV_ITEMS = [
         icon: GraduationCap,
     },
     {
-        name: 'My Library',
-        href: '/dashboard/my-library',
-        icon: Library,
+        name: 'Live Classes',
+        href: '/dashboard/live-classes',
+        icon: CalendarClock,
+    },
+    {
+        name: 'Support Services',
+        href: '/dashboard/support-services',
+        icon: HeartHandshake,
     },
     {
         name: 'Settings',

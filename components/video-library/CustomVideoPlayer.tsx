@@ -64,12 +64,22 @@ export function CustomVideoPlayer({
 
         let hlsInstance: any = null;
         const isHls = src.includes('.m3u8');
+        const videoEl = videoRef.current;
 
         const applyInitialSeek = () => {
-            if (videoRef.current && initialPosition > 0 && !hasSeekedInitialRef.current) {
-                videoRef.current.currentTime = initialPosition;
+            if (videoEl && initialPosition > 0 && !hasSeekedInitialRef.current) {
+                videoEl.currentTime = initialPosition;
                 hasSeekedInitialRef.current = true;
             }
+        };
+
+        // Setting `.src` alone doesn't mean metadata (and a seekable duration) is ready yet —
+        // seeking before `loadedmetadata` fires is silently ignored by the browser. Defer the
+        // initial seek to that event for plain MP4 / native-HLS (Safari) playback.
+        const handleLoadedMetadata = () => {
+            setIsLoading(false);
+            applyInitialSeek();
+            videoEl.play().catch(() => null);
         };
 
         if (isHls) {
@@ -83,21 +93,18 @@ export function CustomVideoPlayer({
                         applyInitialSeek();
                         videoRef.current?.play().catch(() => null);
                     });
-                } else if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
-                    videoRef.current.src = src;
-                    setIsLoading(false);
-                    applyInitialSeek();
-                    videoRef.current.play().catch(() => null);
+                } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoEl.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+                    videoEl.src = src;
                 }
             });
         } else {
-            videoRef.current.src = src;
-            setIsLoading(false);
-            applyInitialSeek();
-            videoRef.current.play().catch(() => null);
+            videoEl.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+            videoEl.src = src;
         }
 
         return () => {
+            videoEl.removeEventListener('loadedmetadata', handleLoadedMetadata);
             if (hlsInstance) {
                 hlsInstance.destroy();
             }

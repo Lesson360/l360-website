@@ -20,9 +20,6 @@ import {
 import { subscriptionsApi } from '@/lib/api/subscriptions';
 import { authApi } from '@/lib/api/auth';
 
-// Fallback Mock Slots for Demo / Offline resilience
-const FALLBACK_SLOTS: SupportServiceSlot[] = [];
-
 export default function PaymentCallback() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -39,6 +36,8 @@ export default function PaymentCallback() {
 
     const [isFetchingSlots, setIsFetchingSlots] = useState(false);
     const [isBookingSlot, setIsBookingSlot] = useState(false);
+    const [slotsError, setSlotsError] = useState('');
+    const [bookingError, setBookingError] = useState('');
 
     useEffect(() => {
         if (!reference) {
@@ -85,54 +84,46 @@ export default function PaymentCallback() {
                 setEnrollment(fetchedEnrollment);
             }
 
-            // Check if slot selection is needed
-            const activeId = paidEnrollmentId || (fetchedEnrollment ? fetchedEnrollment.id : 'demo-enrollment');
-            await loadSlotsForEnrollment(activeId);
+            if (!paidEnrollmentId) {
+                setStatus('failed');
+                setMessage(verifyObj?.message || 'We could not confirm this payment. Please contact support if you were charged.');
+                return;
+            }
 
+            await loadSlotsForEnrollment(paidEnrollmentId);
         } catch (err: any) {
-            console.warn('Support payment verification note:', err);
-            // Graceful fallback for demo/test mode
-            const mockEnrollmentId = `demo-enrollment-${Date.now()}`;
-            setEnrollment({
-                id: mockEnrollmentId,
-                userId: 'u-1',
-                childProfileId: 'c-1',
-                offeringId: 'fallback-group-live',
-                levelId: 'default',
-                serviceType: 'group_live',
-                offeringTitle: 'Group Live Masterclass Support',
-                priceAmount: 15000,
-                sessionsIncluded: 8,
-                currency: 'NGN',
-                status: 'paid',
-                scheduleStatus: 'unbooked',
-                accessStatus: 'active',
-                sessionsUsed: 0,
-                sessionsRemaining: 8,
-            });
-
-            await loadSlotsForEnrollment(mockEnrollmentId);
+            console.warn('Support payment verification error:', err);
+            setStatus('failed');
+            setMessage(err?.response?.data?.message || 'We could not verify this payment. Please try again or contact support.');
         }
     };
 
-    // Load available schedule slots for enrollment
+    // Load available schedule slots. Response: { data: { offering: { title, requiresSlotSelection }, items: [], total } }
     const loadSlotsForEnrollment = async (enrollmentId: string) => {
         setIsFetchingSlots(true);
+        setSlotsError('');
+        setBookingError('');
         setStatus('slot_selection');
-        setMessage('Payment confirmed! Select your child\'s weekly class schedule below.');
+        setMessage("Payment confirmed! Select your child's weekly class schedule below.");
 
         try {
             const slotsRes = await supportServicesApi.getSlots(enrollmentId);
-            const slotsObj: any = slotsRes;
-            const slotItems = slotsObj?.data?.items || slotsObj?.items || [];
-            if (slotItems.length > 0) {
-                setSlots(slotItems);
-            } else {
-                setSlots(FALLBACK_SLOTS);
+            const body: any = (slotsRes as any)?.data ?? slotsRes;
+            const offering = body?.offering;
+
+            if (offering?.title) {
+                setEnrollment((prev) => (prev ? { ...prev, offeringTitle: prev.offeringTitle || offering.title } : prev));
             }
-        } catch (err) {
-            console.warn('Could not fetch slots from API, using fallback slots:', err);
-            setSlots(FALLBACK_SLOTS);
+
+            if (offering?.requiresSlotSelection === false) {
+                setStatus('success');
+                setMessage('Payment confirmed! Your support service is active.');
+                return;
+            }
+
+            setSlots(body?.items || []);
+        } catch (err: any) {
+            setSlotsError(err?.response?.data?.message || 'Could not load the available schedule slots. Please try again.');
         } finally {
             setIsFetchingSlots(false);
         }
@@ -142,12 +133,13 @@ export default function PaymentCallback() {
     const handleConfirmSlot = async () => {
         if (!selectedSlotId || !enrollment) return;
         setIsBookingSlot(true);
+        setBookingError('');
 
         try {
             await supportServicesApi.selectSlot(enrollment.id, selectedSlotId);
-            const bookedSlot = slots.find(s => s.id === selectedSlotId);
+            const bookedSlot = slots.find((sl) => sl.id === selectedSlotId);
             if (bookedSlot) {
-                setEnrollment(prev => prev ? {
+                setEnrollment((prev) => prev ? {
                     ...prev,
                     selectedSlotId,
                     scheduleStatus: 'booked',
@@ -157,20 +149,8 @@ export default function PaymentCallback() {
             }
             setStatus('success');
             setMessage('Your support service enrollment and schedule are officially confirmed!');
-        } catch (err) {
-            console.warn('Slot booking fallback:', err);
-            const bookedSlot = slots.find(s => s.id === selectedSlotId);
-            if (bookedSlot) {
-                setEnrollment(prev => prev ? {
-                    ...prev,
-                    selectedSlotId,
-                    scheduleStatus: 'booked',
-                    slot: bookedSlot,
-                    teacher: bookedSlot.teacher,
-                } : null);
-            }
-            setStatus('success');
-            setMessage('Your support service enrollment and schedule are officially confirmed!');
+        } catch (err: any) {
+            setBookingError(err?.response?.data?.message || 'Could not book this slot. Please try again or choose another.');
         } finally {
             setIsBookingSlot(false);
         }
@@ -267,6 +247,21 @@ export default function PaymentCallback() {
                             <Loader2 className="w-8 h-8 animate-spin text-brand-orange mx-auto" />
                             <p className="text-xs font-semibold text-gray-500">Loading available tutor schedule slots...</p>
                         </div>
+                    ) : slotsError ? (
+                        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium space-y-2">
+                            <p>{slotsError}</p>
+                            <button
+                                type="button"
+                                onClick={() => enrollment && loadSlotsForEnrollment(enrollment.id)}
+                                className="text-xs font-black underline cursor-pointer"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : slots.length === 0 ? (
+                        <div className="p-6 rounded-2xl bg-gray-50 border border-gray-200 text-center text-sm font-semibold text-gray-600">
+                            No schedule slots are available yet. Our team will reach out to arrange your class times.
+                        </div>
                     ) : (
                         <div className="space-y-3">
                             {slots.map((slot) => {
@@ -312,6 +307,12 @@ export default function PaymentCallback() {
                                     </button>
                                 );
                             })}
+                        </div>
+                    )}
+
+                    {bookingError && (
+                        <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-medium">
+                            {bookingError}
                         </div>
                     )}
 

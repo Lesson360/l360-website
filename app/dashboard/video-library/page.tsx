@@ -306,7 +306,7 @@ export default function VideoLibraryPage() {
             }).catch(() => null);
 
             contentApi.getTopicNotes(childId, topicId).then((res) => {
-                setTopicNotes(res.data?.notes || (res.data as any));
+                setTopicNotes(res.data?.notes || null);
             }).catch(() => null);
 
             contentApi.getTopicWorksheet(childId, topicId).then((res) => {
@@ -412,98 +412,56 @@ export default function VideoLibraryPage() {
         }
     };
 
-    // Helper to reliably trigger file download without popup blocker issues
-    const triggerBlobOrUrlDownload = (url?: string, defaultFilename: string = 'document.txt', fallbackContent?: string) => {
-        if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:'))) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            link.download = defaultFilename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else {
-            // Fallback: Generate downloadable text file blob if backend has no file URL attached yet
-            const content = fallbackContent || 'Lesson360 Study Material Document';
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const blobUrl = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = defaultFilename.endsWith('.txt') || defaultFilename.endsWith('.pdf') || defaultFilename.endsWith('.docx')
-                ? defaultFilename
-                : `${defaultFilename}.txt`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-        }
+    // The download endpoints respond with { data: { download: { method: 'GET', downloadUrl,
+    // expiresInSeconds } } } — a short-lived signed S3 URL whose response headers already force
+    // an attachment with the correct filename and content type, so navigating to it downloads
+    // the real, openable file. Nothing is generated client-side.
+    const startSignedDownload = (res: { data?: any }): boolean => {
+        const url = res?.data?.download?.downloadUrl;
+        if (typeof url !== 'string' || !/^https?:\/\//.test(url)) return false;
+        const link = document.createElement('a');
+        link.href = url;
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return true;
     };
 
     // Handle Study Notes Download
     const handleDownloadNotes = async () => {
-        if (!selectedTopic) return;
         const childId = activeChild?.id || activeChild?._id;
-        const topicId = selectedTopic.id || selectedTopic._id;
-        const topicTitle = selectedChapterInfo?.title || selectedTopic.name || 'Chapter';
-        const filename = `${topicTitle.replace(/[^a-zA-Z0-9]/g, '_')}_Study_Notes.txt`;
+        const topicId = selectedTopic?.id || selectedTopic?._id;
+        if (!childId || !topicId || !topicNotes?.fileName) return;
 
-        let targetUrl: string | undefined = undefined;
-
-        if (childId && topicId) {
-            try {
-                const res = await contentApi.getTopicNotesDownload(childId, topicId);
-                const rawData = res?.data;
-                targetUrl = rawData?.downloadUrl || (rawData as any)?.url || (rawData as any)?.fileUrl;
-            } catch (err) {
-                console.warn('API getTopicNotesDownload error:', err);
+        try {
+            const res = await contentApi.getTopicNotesDownload(childId, topicId);
+            if (startSignedDownload(res)) {
+                showToast('Study Notes download started.', 'success');
+            } else {
+                showToast('The study notes file could not be retrieved. Please try again later.', 'error');
             }
+        } catch (err: any) {
+            showToast(err?.response?.data?.message || 'Failed to download study notes. Please try again later.', 'error');
         }
-
-        if (!targetUrl) {
-            targetUrl = topicNotes?.fileUrl || topicNotes?.downloadUrl || (topicNotes as any)?.url;
-        }
-
-        const noteContent = topicNotes?.content
-            ? `LESSON360 STUDY NOTES\nSubject: ${selectedSubject?.name || 'Subject'}\nTopic: ${topicTitle}\n\n${topicNotes.content}`
-            : `LESSON360 STUDY NOTES\nSubject: ${selectedSubject?.name || 'Subject'}\nTopic: ${topicTitle}\n\nComprehensive revision notes and reference material for ${topicTitle}.\nGenerated for ${activeChild?.name || 'Learner'}.`;
-
-        triggerBlobOrUrlDownload(targetUrl, filename, noteContent);
-        showToast('Study Notes downloaded successfully!', 'success');
     };
 
-    // Handle Worksheet Download
+    // Handle Worksheet Download. The endpoint takes no body (it rejects a `format` field).
     const handleDownloadWorksheet = async (format: 'pdf' | 'word') => {
-        if (!selectedTopic) return;
         const childId = activeChild?.id || activeChild?._id;
-        const topicId = selectedTopic.id || selectedTopic._id;
-        const topicTitle = selectedChapterInfo?.title || selectedTopic.name || 'Chapter';
-        const ext = format === 'pdf' ? 'pdf' : 'docx';
-        const filename = `${topicTitle.replace(/[^a-zA-Z0-9]/g, '_')}_Worksheet.${ext}`;
+        const topicId = selectedTopic?.id || selectedTopic?._id;
+        if (!childId || !topicId) return;
 
-        let targetUrl: string | undefined = undefined;
-
-        if (childId && topicId) {
-            try {
-                const res = await contentApi.getTopicWorksheetDownload(childId, topicId, format);
-                const rawData = res?.data;
-                targetUrl = rawData?.downloadUrl || (rawData as any)?.url || (rawData as any)?.fileUrl;
-            } catch (err) {
-                console.warn('API getTopicWorksheetDownload error:', err);
+        try {
+            const res = await contentApi.getTopicWorksheetDownload(childId, topicId);
+            if (startSignedDownload(res)) {
+                showToast(`Worksheet (${format.toUpperCase()}) download started.`, 'success');
+            } else {
+                showToast('The worksheet file could not be retrieved. Please try again later.', 'error');
             }
+        } catch (err: any) {
+            showToast(err?.response?.data?.message || 'Failed to download worksheet. Please try again later.', 'error');
         }
-
-        if (!targetUrl) {
-            const fileObj = format === 'pdf'
-                ? (worksheetData?.worksheetPdf || worksheetData?.worksheets?.pdf || worksheetData?.worksheet)
-                : (worksheetData?.worksheetWord || worksheetData?.worksheets?.word);
-            targetUrl = fileObj?.fileUrl || (fileObj as any)?.downloadUrl || (fileObj as any)?.url;
-        }
-
-        const worksheetContent = `LESSON360 PRACTICE WORKSHEET (${format.toUpperCase()})\nSubject: ${selectedSubject?.name || 'Subject'}\nTopic: ${topicTitle}\n\nQuestions & Exercises:\n1. Explain the primary concept covered in ${topicTitle}.\n2. Solve 5 practice drills relating to ${topicTitle}.\n3. Complete the revision summary questions.`;
-
-        triggerBlobOrUrlDownload(targetUrl, filename, worksheetContent);
-        showToast(`Worksheet (${format.toUpperCase()}) downloaded successfully!`, 'success');
     };
 
     // START INTERACTIVE CHAPTER QUIZ
@@ -826,6 +784,16 @@ export default function VideoLibraryPage() {
                                         <div
                                             key={cwItem.id || cwItem._id || idx}
                                             onClick={() => {
+                                                // Load the subject context in the background so the
+                                                // player's "Back" button has somewhere real to return to
+                                                // (otherwise it renders a blank screen — see onBack above).
+                                                if (cwItem.subjectId) {
+                                                    handleOpenSubjectPage({
+                                                        id: cwItem.subjectId,
+                                                        name: cwItem.subjectName || 'Subject'
+                                                    } as SubjectItem);
+                                                }
+
                                                 const targetVideo: TopicVideo = {
                                                     id: cwItem.videoId || cwItem.id || cwItem._id || '',
                                                     title: titleStr,
@@ -838,6 +806,7 @@ export default function VideoLibraryPage() {
                                                 if (cwItem.playback?.url) {
                                                     setPlaybackUrl(cwItem.playback.url);
                                                     setActiveVideo(targetVideo);
+                                                    setActiveVideoKind('lesson');
                                                     setViewMode('player');
                                                 } else {
                                                     handleLaunchVideoPlayer(targetVideo, 0);
@@ -1295,68 +1264,94 @@ export default function VideoLibraryPage() {
                                     {/* TAB 2: STUDY NOTES (SEPARATE TAB) */}
                                     {modalTab === 'notes' && (
                                         <div className="space-y-4">
-                                            <div className="p-6 rounded-2xl bg-white border border-gray-200 space-y-4 shadow-2xs">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2 text-gray-900 font-black text-base">
-                                                        <FileText className="w-5 h-5 text-[#FF4801]" />
-                                                        <span>Episode Revision Study Notes</span>
+                                            {topicNotes?.fileName ? (
+                                                <div className="p-6 rounded-2xl bg-white border border-gray-200 space-y-4 shadow-2xs">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2 text-gray-900 font-black text-base">
+                                                            <FileText className="w-5 h-5 text-[#FF4801]" />
+                                                            <span>Episode Revision Study Notes</span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleDownloadNotes}
+                                                            className="px-4 py-2 rounded-xl bg-[#FF4801] hover:bg-orange-600 text-white font-extrabold text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
+                                                        >
+                                                            <Download className="w-4 h-4" />
+                                                            <span>Download Notes</span>
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleDownloadNotes}
-                                                        className="px-4 py-2 rounded-xl bg-[#FF4801] hover:bg-orange-600 text-white font-extrabold text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
-                                                    >
-                                                        <Download className="w-4 h-4" />
-                                                        <span>Download Notes</span>
-                                                    </button>
-                                                </div>
 
-                                                <p className="text-xs text-gray-600 font-medium leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                                    {topicNotes?.content || `Comprehensive episode revision summary notes for ${selectedChapterInfo.title}. Download notes file for offline revision.`}
-                                                </p>
-                                            </div>
+                                                    <p className="text-xs text-gray-600 font-medium bg-slate-50 p-4 rounded-xl border border-slate-200 break-all">
+                                                        {topicNotes.fileName}
+                                                        {typeof topicNotes.sizeBytes === 'number' && (
+                                                            <span className="text-gray-400"> · {(topicNotes.sizeBytes / 1024).toFixed(1)} KB</span>
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <div className="p-8 text-center bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
+                                                    <FileText className="w-8 h-8 text-gray-400 mx-auto" />
+                                                    <p className="text-sm font-bold text-gray-700">No study notes available for this episode yet.</p>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
                                     {/* TAB 3: WORKSHEETS (SEPARATE TAB) */}
-                                    {modalTab === 'worksheets' && (
-                                        <div className="space-y-4">
+                                    {modalTab === 'worksheets' && (() => {
+                                        const pdfFile = worksheetData?.worksheetPdf || worksheetData?.worksheets?.pdf || worksheetData?.worksheet;
+                                        const wordFile = worksheetData?.worksheetWord || worksheetData?.worksheets?.word;
+
+                                        if (!pdfFile && !wordFile) {
+                                            return (
+                                                <div className="p-8 text-center bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
+                                                    <FileCode className="w-8 h-8 text-gray-400 mx-auto" />
+                                                    <p className="text-sm font-bold text-gray-700">No worksheets available for this episode yet.</p>
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
                                             <div className="p-6 rounded-2xl bg-white border border-gray-200 space-y-4 shadow-2xs">
                                                 <h4 className="text-base font-black text-gray-900">Class Worksheets & Downloads</h4>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                    <div className="p-4 rounded-xl bg-red-50/60 border border-red-200 space-y-3 flex items-center justify-between">
-                                                        <div className="flex items-center gap-2 text-red-700">
-                                                            <FileCode className="w-5 h-5" />
-                                                            <span className="text-xs font-extrabold uppercase">PDF Format</span>
+                                                    {pdfFile && (
+                                                        <div className="p-4 rounded-xl bg-red-50/60 border border-red-200 space-y-3 flex items-center justify-between">
+                                                            <div className="flex items-center gap-2 text-red-700">
+                                                                <FileCode className="w-5 h-5" />
+                                                                <span className="text-xs font-extrabold uppercase">PDF Format</span>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDownloadWorksheet('pdf')}
+                                                                className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                                                            >
+                                                                <Download className="w-3.5 h-3.5" />
+                                                                <span>Download PDF</span>
+                                                            </button>
                                                         </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleDownloadWorksheet('pdf')}
-                                                            className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                                                        >
-                                                            <Download className="w-3.5 h-3.5" />
-                                                            <span>Download PDF</span>
-                                                        </button>
-                                                    </div>
+                                                    )}
 
-                                                    <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-3 flex items-center justify-between">
-                                                        <div className="flex items-center gap-2 text-blue-700">
-                                                            <FileType className="w-5 h-5" />
-                                                            <span className="text-xs font-extrabold uppercase">Word Format</span>
+                                                    {wordFile && (
+                                                        <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-3 flex items-center justify-between">
+                                                            <div className="flex items-center gap-2 text-blue-700">
+                                                                <FileType className="w-5 h-5" />
+                                                                <span className="text-xs font-extrabold uppercase">Word Format</span>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDownloadWorksheet('word')}
+                                                                className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                                                            >
+                                                                <Download className="w-3.5 h-3.5" />
+                                                                <span>Download Word</span>
+                                                            </button>
                                                         </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleDownloadWorksheet('word')}
-                                                            className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                                                        >
-                                                            <Download className="w-3.5 h-3.5" />
-                                                            <span>Download Word</span>
-                                                        </button>
-                                                    </div>
+                                                    )}
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
 
                                     {/* TAB 4: TESTS (IMAGE 4) */}
                                     {modalTab === 'tests' && (
@@ -1413,8 +1408,17 @@ export default function VideoLibraryPage() {
                     initialPosition={activeVideo.progressSeconds || (activeVideo as any).lastPositionSeconds || 0}
                     onProgressUpdate={handleSaveVideoProgress}
                     onBack={() => {
-                        setViewMode('subject');
-                        setIsChapterModalOpen(true);
+                        // Videos launched from "Continue Watching" never populate selectedSubject/
+                        // selectedChapterInfo, so blindly going to 'subject' (with no subject loaded)
+                        // rendered nothing. Fall back to the main library in that case.
+                        if (selectedSubject) {
+                            setViewMode('subject');
+                            if (selectedChapterInfo) {
+                                setIsChapterModalOpen(true);
+                            }
+                        } else {
+                            setViewMode('library');
+                        }
                     }}
                     onNextLesson={handleNextLesson}
                     hasNextLesson={activeVideoKind === 'lesson' && activeVideoIndex < topicVideos.length - 1}
