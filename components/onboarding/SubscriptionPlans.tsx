@@ -111,13 +111,15 @@ export default function SubscriptionPlans() {
     const [levelId, setLevelId] = useState<string>('');
     const [classId, setClassId] = useState<string>('');
 
-    // Plans & TestDriller State
+    // Plans State
     const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-    const [testDrillerProducts, setTestDrillerProducts] = useState<TestDrillerProduct[]>([]);
 
-    // Modal State for TestDriller Package Selection
+    // Modal State for TestDriller Package Selection — products are fetched fresh per plan
+    // click, scoped to that plan + the child's level/class (never a global, unscoped list).
     const [activeModalPlan, setActiveModalPlan] = useState<SubscriptionPlan | null>(null);
     const [modalSelectedTdId, setModalSelectedTdId] = useState<string>('');
+    const [modalTdProducts, setModalTdProducts] = useState<TestDrillerProduct[]>([]);
+    const [isLoadingModalTd, setIsLoadingModalTd] = useState(false);
 
     const [selectedCycle, setSelectedCycle] = useState<string>('all');
     const [selectedPlanId, setSelectedPlanId] = useState<string>('');
@@ -249,27 +251,9 @@ export default function SubscriptionPlans() {
                 } else {
                     setPlans(FALLBACK_PLANS);
                 }
-
-                // Fetch TestDriller Products
-                const tdRes = await subscriptionsApi.getTestDrillerProducts().catch(() => null);
-                let tdItems: TestDrillerProduct[] = [];
-                if (tdRes?.data) {
-                    if (Array.isArray(tdRes.data)) {
-                        tdItems = tdRes.data;
-                    } else if (Array.isArray((tdRes.data as any).items)) {
-                        tdItems = (tdRes.data as any).items;
-                    }
-                }
-
-                if (tdItems.length > 0) {
-                    setTestDrillerProducts(tdItems);
-                } else {
-                    setTestDrillerProducts(DEFAULT_TEST_DRILLER_PRODUCTS);
-                }
             } catch (err) {
                 console.warn('Could not fetch subscription plans from API, using fallback data:', err);
                 setPlans(FALLBACK_PLANS);
-                setTestDrillerProducts(DEFAULT_TEST_DRILLER_PRODUCTS);
             } finally {
                 setIsFetchingPlans(false);
             }
@@ -279,13 +263,41 @@ export default function SubscriptionPlans() {
     }, []);
 
     // Primary Subscribe Button Handler
-    const handlePlanClick = (plan: SubscriptionPlan) => {
+    const handlePlanClick = async (plan: SubscriptionPlan) => {
         setErrorMessage('');
 
-        // If plan includes TestDriller, open selection modal first!
+        // If plan includes TestDriller, fetch the bundles available for THIS plan and THIS
+        // child's level/class before opening the picker — never show every product globally,
+        // which let a student pick a bundle meant for another class/level entirely.
         if (plan.includesTestDriller) {
             setActiveModalPlan(plan);
             setModalSelectedTdId('');
+            setModalTdProducts([]);
+            setIsLoadingModalTd(true);
+
+            try {
+                const academicInfo = await resolveChildAndAcademicInfo();
+                const planId = plan.id || plan._id || '';
+                const res = await subscriptionsApi.getPlanTestDrillerProducts(
+                    planId,
+                    academicInfo.levelId,
+                    academicInfo.classId
+                );
+
+                let items: TestDrillerProduct[] = [];
+                if (Array.isArray(res.data)) {
+                    items = res.data;
+                } else if (Array.isArray((res.data as any)?.items)) {
+                    items = (res.data as any).items;
+                }
+
+                setModalTdProducts(items.length > 0 ? items : DEFAULT_TEST_DRILLER_PRODUCTS);
+            } catch (err) {
+                console.warn('Could not fetch level/class-scoped Test Driller products:', err);
+                setModalTdProducts(DEFAULT_TEST_DRILLER_PRODUCTS);
+            } finally {
+                setIsLoadingModalTd(false);
+            }
         } else {
             // Trigger checkout directly for plans without TestDriller
             executeCheckout(plan, undefined);
@@ -394,15 +406,10 @@ export default function SubscriptionPlans() {
         ? plans
         : plans.filter((p) => (p.billingPeriod || '').toLowerCase() === selectedCycle.toLowerCase());
 
-    // Filter allowed TestDriller products for active modal plan
-    const modalAvailableTdProducts = activeModalPlan && activeModalPlan.includedTestDrillerProductIds && activeModalPlan.includedTestDrillerProductIds.length > 0
-        ? testDrillerProducts.filter((p) => {
-            const pId = p.id || p._id;
-            return pId && activeModalPlan.includedTestDrillerProductIds?.includes(pId);
-        })
-        : testDrillerProducts;
-
-    const modalTdList = modalAvailableTdProducts.length > 0 ? modalAvailableTdProducts : testDrillerProducts;
+    // modalTdProducts is already scoped server-side to this plan + the child's level/class
+    // (GET /subscription-plans/:planId/test-driller-products), so no further client-side
+    // filtering is needed here.
+    const modalTdList = modalTdProducts;
 
     return (
         <div className="w-full max-w-6xl mx-auto space-y-8 bg-white p-6 sm:p-10 rounded-3xl border border-gray-100 shadow-md relative">
@@ -667,7 +674,16 @@ export default function SubscriptionPlans() {
 
                             {/* Product Selection Options List */}
                             <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                                {modalTdList.map((tdProd) => {
+                                {isLoadingModalTd ? (
+                                    <div className="py-8 flex flex-col items-center justify-center gap-2">
+                                        <Loader2 className="w-6 h-6 text-brand-orange animate-spin" />
+                                        <p className="text-xs font-comic text-gray-500">Finding packages for this class...</p>
+                                    </div>
+                                ) : modalTdList.length === 0 ? (
+                                    <p className="text-xs font-comic text-gray-500 text-center py-8">
+                                        No TestDriller packages are available for this class yet.
+                                    </p>
+                                ) : modalTdList.map((tdProd) => {
                                     const tdId = tdProd.id || tdProd._id || '';
                                     const isSelected = modalSelectedTdId === tdId;
 
@@ -704,7 +720,7 @@ export default function SubscriptionPlans() {
                             <div className="pt-2 space-y-2">
                                 <button
                                     type="button"
-                                    disabled={!modalSelectedTdId || isInitializing}
+                                    disabled={!modalSelectedTdId || isInitializing || isLoadingModalTd}
                                     onClick={() => executeCheckout(activeModalPlan, modalSelectedTdId)}
                                     className="w-full py-4 px-6 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-comic font-bold text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 >

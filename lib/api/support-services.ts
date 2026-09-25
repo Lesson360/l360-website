@@ -208,6 +208,12 @@ export const supportServicesApi = {
         );
     },
 
+    // 9. Browse support offerings (Postman documents this list route with these filters; it is
+    // shown under the admin section, so parent access is unconfirmed — callers must handle 403).
+    getOfferings: async (params: { levelId?: string; classId?: string; type?: string; status?: string } = {}) => {
+        return apiClient.get<any>('/support-services/offerings', { params: { status: 'active', ...params } });
+    },
+
     // 8. Get single enrollment details
     getEnrollmentDetails: async (enrollmentId: string) => {
         return apiClient.get<{ item: SupportEnrollment }>(

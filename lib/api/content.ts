@@ -199,6 +199,17 @@ export interface NotesFileInfo {
     downloadUrl?: string;
 }
 
+export interface TopicDownloadResponse {
+    message: string;
+    data: {
+        download?: {
+            method?: string;
+            downloadUrl?: string;
+            expiresInSeconds?: number;
+        };
+    };
+}
+
 export interface TopicNotesData {
     topic?: any;
     notes?: NotesFileInfo;
@@ -427,7 +438,7 @@ export const contentApi = {
         ),
 
     getTopicNotesDownload: (profileId: string, topicId: string) =>
-        apiClient.post<{ message: string; data: { downloadUrl: string } }>(
+        apiClient.post<TopicDownloadResponse>(
             `/content/child-profiles/${profileId}/topics/${topicId}/notes/download`
         ),
 
@@ -437,10 +448,11 @@ export const contentApi = {
             `/content/child-profiles/${profileId}/topics/${topicId}/worksheet`
         ),
 
-    getTopicWorksheetDownload: (profileId: string, topicId: string, format: 'pdf' | 'word' = 'pdf') =>
-        apiClient.post<{ message: string; data: { downloadUrl: string } }>(
-            `/content/child-profiles/${profileId}/topics/${topicId}/worksheet/download`,
-            { format }
+    // NOTE: the backend rejects any body on this endpoint ({"message":"Unexpected field: format."})
+    // — it returns whichever worksheet file(s) are attached to the topic, not a specific format.
+    getTopicWorksheetDownload: (profileId: string, topicId: string) =>
+        apiClient.post<TopicDownloadResponse>(
+            `/content/child-profiles/${profileId}/topics/${topicId}/worksheet/download`
         ),
 
     // Assessments / Quizzes for a topic
