@@ -4,6 +4,7 @@ import { Hero } from '@/components/landing/Hero';
 import { ShowcaseSection } from '@/components/landing/ShowcaseSection';
 import { Features } from '@/components/landing/Features';
 import { Testimonials } from '@/components/landing/Testimonials';
+import { AffiliateCta } from '@/components/landing/AffiliateCta';
 import { ExploreOur } from '@/components/landing/ExploreOur';
 import { VideoLibrary } from '@/components/landing/VideoLibrary';
 import { ClassLevels } from '@/components/landing/ClassLevels';
@@ -19,6 +20,7 @@ export default function Home() {
             <ShowcaseSection />
             <Features />
             <Testimonials />
+            <AffiliateCta />
             <ExploreOur />
             <VideoLibrary />
             <ClassLevels />

@@ -278,10 +278,11 @@ export default function SubscriptionPlans() {
             try {
                 const academicInfo = await resolveChildAndAcademicInfo();
                 const planId = plan.id || plan._id || '';
+                // Scope to the plan + the child's level only (not class) — a class-level filter
+                // was excluding Test Driller products meant for the whole level.
                 const res = await subscriptionsApi.getPlanTestDrillerProducts(
                     planId,
-                    academicInfo.levelId,
-                    academicInfo.classId
+                    academicInfo.levelId
                 );
 
                 let items: TestDrillerProduct[] = [];

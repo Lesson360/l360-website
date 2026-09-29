@@ -1,8 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BookOpen, CheckCircle2, Loader2, Sparkles, ClipboardList } from 'lucide-react';
 import { TestDrillerProductCatalogItem } from '@/lib/api/test-driller';
+
+// Wide banner across the top of the card — like the admin preview — instead of a small
+// avatar-style icon. Falls back to a plain icon banner for products with no image, an empty
+// imageUrl, or a broken/expired image link.
+function ProductImage({ product }: { product: TestDrillerProductCatalogItem }) {
+    const src = product.imageAccessUrl || product.imageUrl;
+    const [failed, setFailed] = useState(false);
+
+    if (!src || failed) {
+        return (
+            <div className="w-full aspect-video rounded-2xl bg-[#4A154B] text-white flex items-center justify-center shadow-xs">
+                <BookOpen className="w-8 h-8" />
+            </div>
+        );
+    }
+
+    return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+            src={src}
+            alt={product.imageAltText || product.name || product.title || 'Test Driller bundle'}
+            onError={() => setFailed(true)}
+            className="w-full aspect-video rounded-2xl object-cover shadow-xs bg-[#4A154B]"
+        />
+    );
+}
 
 interface TestDrillerCatalogProps {
     activeTab: 'explore' | 'my-courses';
@@ -128,20 +154,20 @@ export function TestDrillerCatalog({
                                 key={productId}
                                 className="rounded-3xl border border-purple-100 bg-gradient-to-b from-[#F3E8FF] to-white p-6 space-y-4 shadow-xs hover:shadow-md transition-all"
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="w-11 h-11 rounded-2xl bg-[#4A154B] text-white flex items-center justify-center shadow-xs">
-                                        <BookOpen className="w-5 h-5" />
+                                <div className="relative">
+                                    <ProductImage product={product} />
+                                    <div className="absolute top-3 right-3 flex items-center gap-2">
+                                        {product.isMostPopular && (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-[#FF4801] text-[10px] font-black uppercase shadow-xs">
+                                                <Sparkles className="w-3 h-3" /> Most Popular
+                                            </span>
+                                        )}
+                                        {isOwned && (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase shadow-xs">
+                                                <CheckCircle2 className="w-3 h-3" /> Active
+                                            </span>
+                                        )}
                                     </div>
-                                    {product.isMostPopular && (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-[#FF4801] text-[10px] font-black uppercase">
-                                            <Sparkles className="w-3 h-3" /> Most Popular
-                                        </span>
-                                    )}
-                                    {isOwned && (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase">
-                                            <CheckCircle2 className="w-3 h-3" /> Active
-                                        </span>
-                                    )}
                                 </div>
 
                                 <div>

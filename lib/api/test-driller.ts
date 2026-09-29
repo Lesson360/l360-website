@@ -160,6 +160,11 @@ export interface TestDrillerProductCatalogItem {
     durationMonths?: number;
     isMostPopular?: boolean;
     status?: string;
+    // imageAccessUrl is a short-lived signed URL (confirmed ~5 min expiry); imageUrl is the raw
+    // stored key/URL. Prefer imageAccessUrl for display, both may be empty.
+    imageUrl?: string;
+    imageAccessUrl?: string;
+    imageAltText?: string;
 }
 
 export interface TestDrillerProductCheckoutPayload {

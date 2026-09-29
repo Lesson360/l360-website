@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Menu, X, User } from 'lucide-react';
 
+const AFFILIATE_URL = process.env.NEXT_PUBLIC_AFFILIATE_URL || '';
+
 export function Header() {
     const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -31,6 +33,16 @@ export function Header() {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center space-x-4">
+                    {AFFILIATE_URL && (
+                        <a
+                            href={AFFILIATE_URL}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-gray-800 font-semibold hover:text-brand-orange transition-colors px-3 py-2"
+                        >
+                            Become a Partner
+                        </a>
+                    )}
                     {user ? (
                         <Link
                             href="/dashboard"
@@ -120,6 +132,17 @@ export function Header() {
                             </Link>
                         ) : (
                             <>
+                                {AFFILIATE_URL && (
+                                    <a
+                                        href={AFFILIATE_URL}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        onClick={closeSidebar}
+                                        className="text-gray-800 font-semibold hover:text-brand-orange transition-colors py-2"
+                                    >
+                                        Become a Partner
+                                    </a>
+                                )}
                                 <a
                                     href="https://www.instagram.com/lesson_360/"
                                     target="_blank"
