@@ -32,12 +32,19 @@ export function ChildSwitcher() {
             <button
                 type="button"
                 onClick={() => setIsOpen((v) => !v)}
-                className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-800 cursor-pointer hover:text-brand-orange transition-colors"
+                className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-800 cursor-pointer hover:text-brand-orange transition-colors text-left"
             >
                 <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
                     <User className="w-4 h-4" />
                 </div>
-                <span className="truncate max-w-[90px] sm:max-w-xs">{activeName}</span>
+                <div className="flex flex-col items-start leading-tight">
+                    <span className="truncate max-w-[90px] sm:max-w-xs">{activeName}</span>
+                    {(activeChild?.className || activeChild?.currentClassName) && (
+                        <span className="text-[10px] text-gray-500 font-medium truncate capitalize">
+                            {activeChild.className || activeChild.currentClassName}
+                        </span>
+                    )}
+                </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -65,8 +72,15 @@ export function ChildSwitcher() {
                                 className={`w-full text-left px-4 py-2.5 text-sm font-semibold flex items-center justify-between gap-2 cursor-pointer transition-colors ${isActive ? 'bg-orange-50 text-brand-orange' : 'text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
-                                <span className="truncate">{child.name || child.childName}</span>
-                                {isActive && <span className="text-[10px] font-black uppercase">Active</span>}
+                                <div className="flex flex-col items-start leading-tight truncate">
+                                    <span className="truncate">{child.name || child.childName}</span>
+                                    {(child.className || child.currentClassName) && (
+                                        <span className={`text-[10px] font-medium truncate capitalize ${isActive ? 'text-brand-orange/80' : 'text-gray-500'}`}>
+                                            {child.className || child.currentClassName}
+                                        </span>
+                                    )}
+                                </div>
+                                {isActive && <span className="text-[10px] font-black uppercase shrink-0">Active</span>}
                             </button>
                         );
                     })}
