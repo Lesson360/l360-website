@@ -187,30 +187,31 @@ export const enrichmentCoursesApi = {
 
     // 3. Child-Scoped Course Library
     getChildCourses: (childProfileId: string) =>
-        apiClient.get<{data: { items: StandaloneCourseItem[]; total: number }}>(
+        apiClient.get<{ data: { items: StandaloneCourseItem[]; total: number } }>(
             `/child-profiles/${childProfileId}/standalone-courses`
         ),
 
     getChildCourseDetail: (childProfileId: string, courseId: string) =>
-        apiClient.get<{data: { item: StandaloneCourseItem }}>(
+        apiClient.get<{ data: { item: StandaloneCourseItem } }>(
             `/child-profiles/${childProfileId}/standalone-courses/${courseId}`
         ),
 
     // 4. Sections, Videos & Downloads
     getSections: (childProfileId: string, courseId: string) =>
-        apiClient.get<{data: { items: CourseSectionItem[]; total: number} }>(
+        apiClient.get<{ data: { items: CourseSectionItem[]; total: number } }>(
             `/child-profiles/${childProfileId}/standalone-courses/${courseId}/sections`
         ),
 
     getSectionVideos: (childProfileId: string, sectionId: string) =>
-        apiClient.get<{data: { items: SectionVideoItem[]; total: number} }>(
+        apiClient.get<{ data: { items: SectionVideoItem[]; total: number } }>(
             `/child-profiles/${childProfileId}/standalone-sections/${sectionId}/videos`
         ),
 
     createVideoPlayback: (childProfileId: string, videoId: string) =>
-        apiClient.post<{data: VideoPlaybackSession}>(
+        apiClient.post<{ data: VideoPlaybackSession }>(
             `/child-profiles/${childProfileId}/standalone-videos/${videoId}/playback`,
-            {}
+            {},
+            { withCredentials: true }
         ),
 
     getNotesDownload: (childProfileId: string, sectionId: string) =>

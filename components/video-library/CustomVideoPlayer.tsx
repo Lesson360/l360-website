@@ -24,6 +24,8 @@ interface CustomVideoPlayerProps {
     hasNextLesson?: boolean;
     initialPosition?: number;
     onProgressUpdate?: (lastPositionSeconds: number, durationSeconds: number) => void;
+    /** Refreshes a short-lived signed stream after CloudFront rejects it. */
+    onPlaybackExpired?: () => void;
 }
 
 export function CustomVideoPlayer({
@@ -33,7 +35,8 @@ export function CustomVideoPlayer({
     onNextLesson,
     hasNextLesson = false,
     initialPosition = 0,
-    onProgressUpdate
+    onProgressUpdate,
+    onPlaybackExpired
 }: CustomVideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +66,7 @@ export function CustomVideoPlayer({
         hasSeekedInitialRef.current = false;
 
         let hlsInstance: any = null;
+        let hasRequestedRefresh = false;
         const isHls = src.includes('.m3u8');
         const videoEl = videoRef.current;
 
@@ -85,13 +89,26 @@ export function CustomVideoPlayer({
         if (isHls) {
             import('hls.js').then(({ default: Hls }) => {
                 if (Hls.isSupported() && videoRef.current) {
-                    hlsInstance = new Hls();
+                    hlsInstance = new Hls({
+                        // CloudFront signed cookies are sent with every manifest and
+                        // segment request. The CDN must allow credentialed CORS.
+                        xhrSetup: (xhr) => {
+                            xhr.withCredentials = true;
+                        },
+                    });
                     hlsInstance.loadSource(src);
                     hlsInstance.attachMedia(videoRef.current);
                     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                         setIsLoading(false);
                         applyInitialSeek();
                         videoRef.current?.play().catch(() => null);
+                    });
+                    hlsInstance.on(Hls.Events.ERROR, (_event: string, data: { fatal?: boolean; response?: { code?: number } }) => {
+                        const status = data?.response?.code;
+                        if (data?.fatal && status === 403 && !hasRequestedRefresh) {
+                            hasRequestedRefresh = true;
+                            onPlaybackExpired?.();
+                        }
                     });
                 } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
                     videoEl.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
@@ -246,6 +263,7 @@ export function CustomVideoPlayer({
                 {/* Video Element */}
                 <video
                     ref={videoRef}
+                    crossOrigin="use-credentials"
                     onTimeUpdate={handleTimeUpdate}
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}

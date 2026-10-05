@@ -122,6 +122,7 @@ export interface TopicVideo {
     description?: string;
     duration?: number;
     durationSeconds?: number;
+    durationLabel?: string;
     thumbnailUrl?: string;
     thumbnailAccessUrl?: string;
     videoUrl?: string;
@@ -159,6 +160,8 @@ export interface VideoPlaybackInfo {
     token?: string;
     url?: string;
     expiresAt?: string;
+    /** Returned for native/mobile clients. Browsers must use Set-Cookie instead. */
+    cookieHeader?: string;
 }
 
 export interface VideoPlaybackResponseData {
@@ -399,19 +402,19 @@ export const contentApi = {
     // Get video playback URL / Mux ID for student child profile
     getVideoPlayback: (profileId: string, videoId: string) =>
         apiClient.post<{ message: string; data: VideoPlaybackResponseData }>(
-            `/content/child-profiles/${profileId}/videos/${videoId}/playback`
+            `/content/child-profiles/${profileId}/videos/${videoId}/playback`, undefined, { withCredentials: true }
         ),
 
     // Case Study / Exam Video playback — separate signed Mux sessions, requested fresh
     // each time the child opens one (the URL is temporary and expires).
     getCaseStudyPlayback: (profileId: string, caseStudyId: string) =>
         apiClient.post<{ message: string; data: VideoPlaybackResponseData }>(
-            `/content/child-profiles/${profileId}/case-studies/${caseStudyId}/playback`
+            `/content/child-profiles/${profileId}/case-studies/${caseStudyId}/playback`, undefined, { withCredentials: true }
         ),
 
     getExamVideoPlayback: (profileId: string, examVideoId: string) =>
         apiClient.post<{ message: string; data: VideoPlaybackResponseData }>(
-            `/content/child-profiles/${profileId}/exam-videos/${examVideoId}/playback`
+            `/content/child-profiles/${profileId}/exam-videos/${examVideoId}/playback`, undefined, { withCredentials: true }
         ),
 
     // Video progress tracking for student child profile

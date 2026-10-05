@@ -120,6 +120,9 @@ export default function VideoLibraryPage() {
     const [activeVideoIndex, setActiveVideoIndex] = useState<number>(0);
     const [activeVideo, setActiveVideo] = useState<TopicVideo | null>(null);
     const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
+    // Forces a clean player mount when a refreshed CloudFront session reuses
+    // the same manifest URL but supplies new signed cookies.
+    const [playbackSessionId, setPlaybackSessionId] = useState(0);
     // Which kind of video is currently open in the full-screen player — special videos
     // (Case Study / Exam Video) never track lesson progress or "next lesson" navigation.
     const [activeVideoKind, setActiveVideoKind] = useState<'lesson' | 'case_study' | 'exam_video'>('lesson');
@@ -330,6 +333,7 @@ export default function VideoLibraryPage() {
         setActiveVideoIndex(index);
         setActiveVideo(video);
         setPlaybackUrl(null);
+        setPlaybackSessionId((id) => id + 1);
         setViewMode('player');
 
         const childId = activeChild?.id || activeChild?._id;
@@ -342,14 +346,11 @@ export default function VideoLibraryPage() {
                 const targetUrl =
                     pbData?.playback?.url ||
                     pbData?.playbackUrl ||
-                    pbData?.videoUrl ||
-                    video.videoUrl;
-                setPlaybackUrl(targetUrl || video.videoUrl || null);
+                    pbData?.videoUrl;
+                setPlaybackUrl(targetUrl || null);
             } catch {
-                setPlaybackUrl(video.videoUrl || null);
+                setPlaybackUrl(null);
             }
-        } else {
-            setPlaybackUrl(video.videoUrl || null);
         }
     };
 
@@ -367,6 +368,7 @@ export default function VideoLibraryPage() {
             thumbnailUrl: video.thumbnailUrl || video.thumbnailAccessUrl
         });
         setPlaybackUrl(null);
+        setPlaybackSessionId((id) => id + 1);
         setViewMode('player');
 
         const childId = activeChild?.id || activeChild?._id;
@@ -403,6 +405,25 @@ export default function VideoLibraryPage() {
             }
         }
     }, [activeChild, activeVideo]);
+
+    const refreshPlayback = useCallback(async () => {
+        const childId = activeChild?.id || activeChild?._id;
+        const videoId = activeVideo?.id || activeVideo?._id;
+        if (!childId || !videoId) return;
+
+        try {
+            const res = activeVideoKind === 'case_study'
+                ? await contentApi.getCaseStudyPlayback(childId, videoId)
+                : activeVideoKind === 'exam_video'
+                    ? await contentApi.getExamVideoPlayback(childId, videoId)
+                    : await contentApi.getVideoPlayback(childId, videoId);
+            const data = res.data;
+            setPlaybackUrl(data?.playback?.url || data?.playbackUrl || data?.videoUrl || null);
+            setPlaybackSessionId((id) => id + 1);
+        } catch (err) {
+            console.warn('Failed to refresh signed video playback:', err);
+        }
+    }, [activeChild, activeVideo, activeVideoKind]);
 
     // Play Next Lesson Video
     const handleNextLesson = () => {
@@ -1239,7 +1260,7 @@ export default function VideoLibraryPage() {
                                                                         {(vid.duration || vid.durationSeconds) && (
                                                                             <p className="text-[11px] text-gray-400 font-semibold mt-0.5 flex items-center gap-1">
                                                                                 <Clock className="w-3 h-3" />
-                                                                                <span>{Math.round((vid.duration || vid.durationSeconds || 0) / 60)} mins</span>
+                                                                                <span>{vid.durationLabel}</span>
                                                                             </p>
                                                                         )}
                                                                     </div>
@@ -1401,12 +1422,14 @@ export default function VideoLibraryPage() {
             {/* ==========================================
                 VIEW 3: DEDICATED FULL-SCREEN VIDEO PLAYER (IMAGE 3)
                ========================================== */}
-            {viewMode === 'player' && activeVideo && (
+            {viewMode === 'player' && activeVideo && playbackUrl && (
                 <CustomVideoPlayer
-                    src={playbackUrl || 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'}
+                    key={`${activeVideo.id || activeVideo._id || 'video'}-${playbackSessionId}`}
+                    src={playbackUrl}
                     title={activeVideo.title || 'Expressing numbers in index form'}
                     initialPosition={activeVideo.progressSeconds || (activeVideo as any).lastPositionSeconds || 0}
                     onProgressUpdate={handleSaveVideoProgress}
+                    onPlaybackExpired={refreshPlayback}
                     onBack={() => {
                         // Videos launched from "Continue Watching" never populate selectedSubject/
                         // selectedChapterInfo, so blindly going to 'subject' (with no subject loaded)
@@ -1423,6 +1446,11 @@ export default function VideoLibraryPage() {
                     onNextLesson={handleNextLesson}
                     hasNextLesson={activeVideoKind === 'lesson' && activeVideoIndex < topicVideos.length - 1}
                 />
+            )}
+            {viewMode === 'player' && activeVideo && !playbackUrl && (
+                <div className="max-w-6xl mx-auto rounded-3xl  p-6 text-sm font-medium ">
+                    Loading...
+                </div>
             )}
 
             {/* ==========================================
