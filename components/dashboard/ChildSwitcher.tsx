@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronDown, Plus, User } from 'lucide-react';
 import { useChildProfile } from '@/lib/context/ChildProfileContext';
 import { AddChildModal } from './AddChildModal';
+import { schoolStructureApi } from '@/lib/api/school-structure';
 
 function useOnClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
     React.useEffect(() => {
@@ -20,12 +21,61 @@ export function ChildSwitcher() {
     const { children, activeChild, selectChild, isLoading } = useChildProfile();
     const [isOpen, setIsOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [classNames, setClassNames] = useState<Record<string, string>>({});
+    const classMapCache = useRef<Record<string, string>>({});
     const containerRef = useRef<HTMLDivElement>(null);
 
     useOnClickOutside(containerRef, () => setIsOpen(false));
 
+    useEffect(() => {
+        const fetchClasses = async () => {
+            const newNames: Record<string, string> = { ...classNames };
+            let hasChanges = false;
+
+            for (const child of children) {
+                const classId = child.currentClassId;
+                const levelId = child.currentLevelId;
+
+                if (!classId || !levelId || newNames[classId] || classMapCache.current[classId]) {
+                    if (classId && classMapCache.current[classId] && !newNames[classId]) {
+                        newNames[classId] = classMapCache.current[classId];
+                        hasChanges = true;
+                    }
+                    continue;
+                }
+
+                try {
+                    const res = await schoolStructureApi.getClassesByLevel(levelId);
+                    const raw = res.data;
+                    const items: any[] = Array.isArray(raw) ? raw : (raw as any)?.items || [];
+                    for (const cls of items) {
+                        const id = cls.id || cls._id || '';
+                        if (id) {
+                            classMapCache.current[id] = cls.name;
+                            newNames[id] = cls.name;
+                            hasChanges = true;
+                        }
+                    }
+                } catch {
+                    // silently fail and try again later if needed
+                }
+            }
+
+            if (hasChanges) {
+                setClassNames(newNames);
+            }
+        };
+
+        if (children.length > 0) {
+            fetchClasses();
+        }
+    }, [children, classNames]);
+
     const activeName = activeChild?.name || activeChild?.childName || (isLoading ? 'Loading...' : 'Add a Child');
     const activeId = activeChild?.id || activeChild?._id;
+    const activeClassNameStr = activeChild?.currentClassId ? classNames[activeChild.currentClassId] : null;
+
+    console.log(activeChild)
 
     return (
         <div className="relative" ref={containerRef}>
@@ -39,9 +89,9 @@ export function ChildSwitcher() {
                 </div>
                 <div className="flex flex-col items-start leading-tight">
                     <span className="truncate max-w-[90px] sm:max-w-xs">{activeName}</span>
-                    {(activeChild?.className || activeChild?.currentClassName) && (
+                    {activeClassNameStr && (
                         <span className="text-[10px] text-gray-500 font-medium truncate capitalize">
-                            {activeChild.className || activeChild.currentClassName}
+                            {activeClassNameStr}
                         </span>
                     )}
                 </div>
@@ -61,6 +111,8 @@ export function ChildSwitcher() {
                     {children.map((child) => {
                         const id = child.id || child._id;
                         const isActive = id === activeId;
+                        const childClassNameStr = child.currentClassId ? classNames[child.currentClassId] : null;
+
                         return (
                             <button
                                 key={id}
@@ -74,9 +126,9 @@ export function ChildSwitcher() {
                             >
                                 <div className="flex flex-col items-start leading-tight truncate">
                                     <span className="truncate">{child.name || child.childName}</span>
-                                    {(child.className || child.currentClassName) && (
+                                    {childClassNameStr && (
                                         <span className={`text-[10px] font-medium truncate capitalize ${isActive ? 'text-brand-orange/80' : 'text-gray-500'}`}>
-                                            {child.className || child.currentClassName}
+                                            {childClassNameStr}
                                         </span>
                                     )}
                                 </div>

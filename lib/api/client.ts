@@ -9,6 +9,10 @@ export class ApiClient {
   constructor() {
     this.axiosInstance = axios.create({
       baseURL: API_BASE_URL,
+      // Playback responses may set short-lived CloudFront cookies for the
+      // sibling video host. Without this, browsers discard cross-origin
+      // Set-Cookie headers and protected HLS manifests cannot be loaded.
+      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },

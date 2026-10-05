@@ -129,7 +129,6 @@ export default function EnrichmentCoursesPage() {
         try {
             const cat = categorySlug && categorySlug !== 'all' ? categorySlug : undefined;
             const res = await enrichmentCoursesApi.getPublicCourses(cat);
-            console.log("public courses: ", res);
             if (res?.data?.items) {
                 setPublicCourses(res.data?.items);
             }
@@ -244,7 +243,6 @@ export default function EnrichmentCoursesPage() {
     };
 
     const handleStartCheckout = async () => {
-        console.log("Clicked!", checkoutCourse, selectedChild);
         // If no child is selected, attempt to default to the first available child profile
         let effectiveChild = selectedChild;
         if (!effectiveChild && contextChildren.length > 0) {
@@ -263,7 +261,6 @@ export default function EnrichmentCoursesPage() {
                 courseId: courseId,
                 callbackUrl: `${window.location.origin}/dashboard/enrichment-courses/callback`
             });
-            console.log("res: ", res)
 
             if (res?.data.checkout?.authorizationUrl) {
                 // Save pending checkout in local state
