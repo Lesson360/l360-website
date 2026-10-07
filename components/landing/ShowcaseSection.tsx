@@ -75,7 +75,7 @@ export function ShowcaseSection() {
                         initial={{ opacity: 0, x: -20, rotate: -14 }}
                         animate={{ opacity: 1, x: 0, rotate: -10 }}
                         transition={{ duration: 0.7, ease: 'easeOut' }}
-                        className="absolute z-10 w-[140px]  xs:w-[175px] sm:w-[220px] md:w-[220px] top-10 drop-shadow-xl select-none pointer-events-none -mr-8 xs:-mr-12 sm:-mr-16 left-52"
+                        className="hidden md:block absolute z-10 w-[140px]  xs:w-[175px] sm:w-[220px] md:w-[220px] top-10 drop-shadow-xl select-none pointer-events-none -mr-8 xs:-mr-12 sm:-mr-16 left-52"
                     >
                         <Image
                             src="/showcase-phone-left.png"
@@ -92,7 +92,7 @@ export function ShowcaseSection() {
                         initial={{ opacity: 0, x: 20, rotate: 16 }}
                         animate={{ opacity: 1, x: 0, rotate: 12 }}
                         transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
-                        className="relative z-20 w-[150px] xs:w-[185px] -left-36 bottom-10 sm:w-[235px] md:w-[416px] drop-shadow-2xl select-none pointer-events-none"
+                        className="relative z-20 w-[220px] xs:w-[260px] sm:w-[320px] md:w-[416px] drop-shadow-2xl select-none pointer-events-none md:-left-36 md:bottom-10"
                     >
                         <Image
                             src="/showcase-phone-right.png"
@@ -108,7 +108,7 @@ export function ShowcaseSection() {
                 {/* 4. Floating Elements & Cards */}
 
                 {/* Top-Left: "Take Quiz" Card with Cyan Dashed Border */}
-                <Link href="/signup" className="absolute top-2 left-2 sm:top-6 sm:left-4 md:top-8 md:left-10 lg:left-60 z-30">
+                <Link href="/signup" className="hidden md:block absolute top-2 left-2 sm:top-6 sm:left-4 md:top-8 md:left-10 lg:left-60 z-30">
                     <motion.div
                         initial={{ opacity: 0, y: -15, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -143,7 +143,7 @@ export function ShowcaseSection() {
                 </Link>
 
                 {/* Bottom-Left: Video Film Strip Preview Card */}
-                <Link href="/signup" className="absolute bottom-12 left-2 sm:bottom-14 sm:left-4 md:bottom-16 md:left-10 lg:left-16 z-30">
+                <Link href="/signup" className="hidden md:block absolute bottom-12 left-2 sm:bottom-14 sm:left-4 md:bottom-16 md:left-10 lg:left-16 z-30">
                     <motion.div
                         initial={{ opacity: 0, y: 15, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -188,7 +188,7 @@ export function ShowcaseSection() {
                     initial={{ opacity: 0, x: 15, scale: 0.95 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.25 }}
-                    className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 md:right-8 lg:right-14 z-30 w-[190px] xs:w-[220px] sm:w-[270px] md:w-[320px] bg-white/20 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-300/80 shadow-lg p-2 sm:p-3.5 space-y-1.5 sm:space-y-2.5"
+                    className="hidden md:block absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 md:right-8 lg:right-14 z-30 w-[190px] xs:w-[220px] sm:w-[270px] md:w-[320px] bg-white/20 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-300/80 shadow-lg p-2 sm:p-3.5 space-y-1.5 sm:space-y-2.5"
                 >
                     {/* Item 1: Performance Assessment */}
                     <Link href="/signup" className="block">
@@ -290,7 +290,7 @@ export function ShowcaseSection() {
                     <span className="absolute inset-0 bg-[#2d284b] rounded-xl transition-transform duration-300 rotate-3 group-hover:rotate-0" />
 
                     {/* Orange button on top */}
-                    <span className="inline-block w-full h-full bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-bold px-7 py-3.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 relative font-comic text-center text-xl sm:text-2xl flex items-center justify-center">
+                    <span className="w-full h-full bg-brand-orange hover:bg-brand-orange-deep transition-colors text-white font-bold px-7 py-3.5 rounded-xl shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 relative font-comic text-center text-xl sm:text-2xl flex items-center justify-center">
                         View All
                     </span>
                 </Link>

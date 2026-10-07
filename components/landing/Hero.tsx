@@ -56,7 +56,7 @@ export function Hero() {
                     <div className="absolute bottom-[8%] right-[2%] w-8 h-8 md:w-10 md:h-10 bg-[#00FF00] rounded-full z-30" />
 
                     {/* Floating ABC Block (Top-Left - No Shadow) */}
-                    <div className="absolute -top-6 -left-12 md:-top-6 md:-left-[360px] w-24 h-24 md:w-32 md:h-32 z-20 select-none pointer-events-none">
+                    <div className="hidden md:block absolute -top-6 -left-12 md:-top-6 md:-left-[360px] w-24 h-24 md:w-32 md:h-32 z-20 select-none pointer-events-none">
                         <motion.div
                             animate={{ y: [0, -12, 0] }}
                             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -73,7 +73,7 @@ export function Hero() {
                     </div>
 
                     {/* Floating Blue Star Balloon (Bottom-Left Dip - No Shadow) */}
-                    <div className="absolute bottom-6 -left-16 md:bottom-12 md:-left-60 w-20 h-20 md:w-28 md:h-28 z-20 select-none">
+                    <div className="hidden md:block absolute bottom-6 -left-16 md:bottom-12 md:-left-60 w-20 h-20 md:w-28 md:h-28 z-20 select-none">
                         <motion.div
                             transition={{
                                 y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
@@ -92,7 +92,7 @@ export function Hero() {
                     </div>
 
                     {/* Video Lessons Badge */}
-                    <Link href="/signup" className="absolute top-[32%] -left-12 xs:-left-16 md:-left-24 z-30">
+                    <Link href="/signup" className="hidden md:flex absolute top-[32%] -left-12 xs:-left-16 md:-left-24 z-30">
                         <motion.div
                             className="flex items-center gap-2 md:gap-3 bg-[#ffeb149c] border-[2px] border-[#0018CF] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
                             whileHover={{ scale: 1.05, y: -2 }}
@@ -115,7 +115,7 @@ export function Hero() {
                     </Link>
 
                     {/* Quizzes Badge */}
-                    <Link href="/signup" className="absolute bottom-[28%] -right-12 xs:-right-16 md:-right-24 z-30">
+                    <Link href="/signup" className="hidden md:flex absolute bottom-[28%] -right-12 xs:-right-16 md:-right-24 z-30">
                         <motion.div
                             className="flex items-center gap-2 md:gap-3 bg-[#4E3BFF99] border-[2px] border-[#1E1B4B] px-3 py-2 md:px-5 md:py-3 rounded-2xl md:rounded-[24px] cursor-pointer"
                             whileHover={{ scale: 1.05, y: -2 }}
@@ -138,7 +138,7 @@ export function Hero() {
                     </Link>
 
                     {/* Enrichment Courses Card */}
-                    <Link href="/signup" className="absolute top-0 -right-20 md:top-0 md:-right-80 z-30">
+                    <Link href="/signup" className="hidden md:flex absolute top-0 -right-20 md:top-0 md:-right-80 z-30">
                         <motion.div
                             className="w-40 h-44 md:w-[180px] md:h-[180px] bg-[#E8F5E9] border-[2.5px] border-black rounded-[24px] rounded-tr-[70px] md:rounded-tr-[90px] p-3 md:p-4 flex flex-col items-center justify-between cursor-pointer"
                             whileHover={{ scale: 1.05, y: -2 }}

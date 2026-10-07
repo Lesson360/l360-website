@@ -64,7 +64,7 @@ export function ExploreOur() {
                             </div>
 
                             {/* Photo 1 (Left, Pink Border) */}
-                            <div className="relative z-10 w-36 xs:w-44 sm:w-52 h-56 xs:h-64 sm:h-72 border-[6px] border-[#FFB2B2] rounded-[28px] overflow-hidden shadow-lg -mr-6 sm:-mr-8 translate-y-8">
+                            <div className="hidden lg:block relative z-10 w-36 xs:w-44 sm:w-52 h-56 xs:h-64 sm:h-72 border-[6px] border-[#FFB2B2] rounded-[28px] overflow-hidden shadow-lg -mr-6 sm:-mr-8 translate-y-8">
                                 <Image
                                     src="/secondary-student.jpg"
                                     alt="Student studying with phone"
@@ -86,7 +86,7 @@ export function ExploreOur() {
                             </div>
 
                             {/* Photo 3 (Right, Green Border) */}
-                            <div className="relative z-10 w-40 xs:w-48 sm:w-56 h-60 xs:h-68 sm:h-76 border-[6px] border-[#10B981] rounded-[32px] overflow-hidden shadow-xl -ml-6 sm:-ml-8">
+                            <div className="hidden lg:block relative z-10 w-40 xs:w-48 sm:w-56 h-60 xs:h-68 sm:h-76 border-[6px] border-[#10B981] rounded-[32px] overflow-hidden shadow-xl -ml-6 sm:-ml-8">
                                 <Image
                                     src="/secondary-student.jpg"
                                     alt="Online video lesson on laptop"
