@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Comic Sans MS"', '"Comic Sans"', '"Comic Neue"', 'cursive', 'sans-serif'],
-        display: ['"Comic Sans MS"', '"Comic Sans"', '"Comic Neue"', 'cursive', 'sans-serif'],
-        comic: ['"Comic Sans MS"', '"Comic Sans"', '"Comic Neue"', 'cursive', 'sans-serif'],
+        sans: ['"Comic Sans MS"', '"Comic Sans"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
+        display: ['"Comic Sans MS"', '"Comic Sans"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
+        comic: ['"Comic Sans MS"', '"Comic Sans"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
       },
       colors: {
         brand: {

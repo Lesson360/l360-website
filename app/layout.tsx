@@ -1,7 +1,15 @@
 import type { Metadata } from 'next';
 import { ReactNode, Suspense } from 'react'
 import { TopLoader } from '@/components/shared/TopLoader';
+import { Comic_Neue } from 'next/font/google';
 import './globals.css';
+
+const comicNeue = Comic_Neue({
+  weight: ['300', '400', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-comic-neue',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lesson360.org'),
@@ -59,7 +67,7 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${comicNeue.variable}`}>
       <body>
         <Suspense fallback={null}>
           <TopLoader />

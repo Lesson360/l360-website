@@ -27,14 +27,14 @@
 html,
 body {
   height: 100%;
-  font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive, sans-serif;
+  font-family: 'Comic Sans MS', 'Comic Sans', var(--font-comic-neue), 'Comic Neue', cursive, sans-serif;
   color: #2D3748;
 }
 
 .font-sans,
 .font-display,
 .font-comic {
-  font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive, sans-serif !important;
+  font-family: 'Comic Sans MS', 'Comic Sans', var(--font-comic-neue), 'Comic Neue', cursive, sans-serif !important;
 }
 
 /* Custom branded scrollbar across the entire website */
