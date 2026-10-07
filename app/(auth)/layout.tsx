@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { BackButton } from '@/components/shared/BackButton';
 
 export default function AuthLayout({
     children,
@@ -9,6 +10,7 @@ export default function AuthLayout({
 }) {
     return (
         <div className="min-h-screen lg:h-screen w-full bg-white flex items-center justify-center p-4 md:p-6 lg:p-8 font-sans overflow-y-auto ">
+            <BackButton />
             <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center my-auto">
 
                 {/* Left Column: Visual Mock Card constrained to viewport height */}
