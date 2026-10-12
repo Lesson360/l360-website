@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { authApi } from '@/lib/api/auth';
+import { getSafeRedirect, REDIRECT_PARAM } from '@/lib/redirect';
 import { PhoneOrEmailInput, InputMode } from '@/components/auth/PhoneOrEmailInput';
 import { COUNTRY_CODES, CountryCode } from '@/components/auth/CountryCodeSelect';
 
@@ -76,7 +77,19 @@ export default function LoginPage() {
         (profileRes as any)?.data?.progress?.screen ||
         (profileRes as any)?.data?.user?.childInfo?.[0]?.nextScreen;
 
-      // 3. Route according to backend progress screen
+      // 3. Send the user back to the page that bounced them to login. Onboarding
+      // still takes priority, except for payment callbacks, which must run to
+      // verify a payment the user has already made.
+      const returnTo = getSafeRedirect(
+        new URLSearchParams(window.location.search).get(REDIRECT_PARAM)
+      );
+      const onboardingComplete = !progressScreen || progressScreen === 'home';
+      if (returnTo && (onboardingComplete || returnTo.startsWith('/payments/'))) {
+        router.push(returnTo);
+        return;
+      }
+
+      // 4. Route according to backend progress screen
       switch (progressScreen) {
         case 'academic_level_home':
           router.push('/onboarding/child-setup');

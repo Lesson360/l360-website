@@ -1,31 +1,31 @@
-'use client';
-
+import { LandingStage } from '@/components/landing/stage/LandingStage';
+import { LandingNav } from '@/components/landing/LandingNav';
 import { Hero } from '@/components/landing/Hero';
-import { ShowcaseSection } from '@/components/landing/ShowcaseSection';
-import { Features } from '@/components/landing/Features';
-import { Testimonials } from '@/components/landing/Testimonials';
-import { AffiliateCta } from '@/components/landing/AffiliateCta';
-import { ExploreOur } from '@/components/landing/ExploreOur';
-import { VideoLibrary } from '@/components/landing/VideoLibrary';
-import { ClassLevels } from '@/components/landing/ClassLevels';
-import { Pricing } from '@/components/landing/Pricing';
-import { Footer } from '@/components/landing/Footer';
-import { Header } from '@/components/shared/Header';
+import {
+    AppSection, PreschoolSection, ReviewsSection, AffiliateSection, VideosSection, QuizzesSection, ExamsSection, LevelsSection,
+} from '@/components/landing/FeatureSections';
+import { FamiliesSection, CommunitySection } from '@/components/landing/PhotoSections';
+import { SubscriptionSection } from '@/components/landing/SubscriptionSection';
 
 export default function Home() {
     return (
-        <>
-            <Header />
-            <Hero />
-            <ShowcaseSection />
-            <Features />
-            <Testimonials />
-            <AffiliateCta />
-            <ExploreOur />
-            <VideoLibrary />
-            <ClassLevels />
-            <Pricing />
-            <Footer />
-        </>
+        <LandingStage>
+            <LandingNav />
+            {/* Content ignores the pointer so hovering the 3D phones works; interactive blocks opt back in. */}
+            <main id="top" className="pointer-events-none relative z-[2]">
+                <Hero />
+                <AppSection />
+                <PreschoolSection />
+                <FamiliesSection />
+                <ReviewsSection />
+                <AffiliateSection />
+                <VideosSection />
+                <QuizzesSection />
+                <ExamsSection />
+                <LevelsSection />
+                <CommunitySection />
+                <SubscriptionSection />
+            </main>
+        </LandingStage>
     );
 }
