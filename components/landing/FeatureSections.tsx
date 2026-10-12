@@ -1,7 +1,7 @@
 import { AFFILIATE_URL, APP_STORE_URL, PLAY_STORE_URL } from './links';
 import { StoreBadges } from './StoreBadges';
 import {
-    Button, Chip, EASE, Eyebrow, FeatureSection, GhostNumber, Heading, Lede, ListRow, StartButton,
+    Button, Chip, EASE, Eyebrow, FeatureSection, Heading, Lede, ListRow, StartButton,
 } from './primitives';
 
 const card = `flex flex-col rounded-3xl p-6 transition-transform duration-500 ${EASE}`;
@@ -15,8 +15,7 @@ export function AppSection() {
     ];
     return (
         <FeatureSection id="app" index={0} bg="#FDE9E0" slot="right">
-            <GhostNumber n="01" stroke="rgba(242,118,90,.35)" />
-            <Eyebrow color="oklch(0.52 0.19 35)">01 · THE APP</Eyebrow>
+            <Eyebrow color="oklch(0.52 0.19 35)">THE APP</Eyebrow>
             <Heading>Everything they need to learn, in one app.</Heading>
             <div className="flex flex-col">
                 {steps.map(([title, sub], i) => (
@@ -34,8 +33,7 @@ export function AppSection() {
 export function PreschoolSection() {
     return (
         <FeatureSection index={1} bg="#E6ECFB" slot="left">
-            <GhostNumber n="02" stroke="rgba(91,123,234,.35)" />
-            <Eyebrow color="oklch(0.48 0.17 265)">02 · PRE-SCHOOL</Eyebrow>
+            <Eyebrow color="oklch(0.48 0.17 265)">PRE-SCHOOL</Eyebrow>
             <Heading>Why children love us!</Heading>
             <Lede className="text-ink-soft">Every pre-school topic in one app, with fun worksheets and activities that adapt to each child’s progress.</Lede>
             <div data-reveal="" data-delay="200" className="flex flex-wrap gap-2">
@@ -55,8 +53,7 @@ const REVIEWS = [
 export function ReviewsSection() {
     return (
         <FeatureSection id="reviews" index={2} bg="#E2F3E8" slot="right">
-            <GhostNumber n="03" stroke="rgba(63,181,122,.4)" />
-            <Eyebrow color="oklch(0.45 0.13 155)">03 · TESTIMONIALS</Eyebrow>
+            <Eyebrow color="oklch(0.45 0.13 155)">TESTIMONIALS</Eyebrow>
             <Heading>Check out what guardians are saying.</Heading>
             <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))]">
                 {REVIEWS.map((r, i) => (
@@ -78,8 +75,7 @@ export function ReviewsSection() {
 export function AffiliateSection() {
     return (
         <FeatureSection id="partner" index={3} bg="#1C1A45" slot="left" className="text-[#F7F2EA]">
-            <GhostNumber n="04" stroke="rgba(138,99,224,.55)" />
-            <Eyebrow color="oklch(0.8 0.12 295)">04 · AFFILIATE PROGRAM</Eyebrow>
+            <Eyebrow color="oklch(0.8 0.12 295)">AFFILIATE PROGRAM</Eyebrow>
             <Heading>Start earning instantly.</Heading>
             <Lede className="text-[#CFCBE8]">Join our affiliate program and earn while you inspire learning. Share education. Earn rewards.</Lede>
             <div data-reveal="" data-delay="200" className="flex flex-wrap gap-2">
@@ -97,8 +93,7 @@ export function AffiliateSection() {
 export function VideosSection() {
     return (
         <FeatureSection id="explore" index={4} bg="#FFF1C9" slot="right">
-            <GhostNumber n="05" stroke="rgba(214,150,20,.45)" />
-            <Eyebrow color="oklch(0.5 0.12 70)">05 · EXPLORE OUR VIDEOS</Eyebrow>
+            <Eyebrow color="oklch(0.5 0.12 70)">EXPLORE OUR VIDEOS</Eyebrow>
             <Heading>Your classroom, one tap away.</Heading>
             <Lede className="text-ink-soft">Interactive video lessons designed for success — plus a full video library to pause, replay and master every topic.</Lede>
             <div data-reveal="" data-delay="200" className="flex flex-wrap gap-2">
@@ -121,8 +116,7 @@ export function QuizzesSection() {
     ];
     return (
         <FeatureSection id="quizzes" index={5} bg="#DDF2F1" slot="left">
-            <GhostNumber n="06" stroke="rgba(47,175,170,.45)" />
-            <Eyebrow color="oklch(0.45 0.09 195)">06 · QUIZZES</Eyebrow>
+            <Eyebrow color="oklch(0.45 0.09 195)">QUIZZES</Eyebrow>
             <Heading>Test your knowledge.</Heading>
             <Lede className="text-ink-soft">Monitor your progress and turn knowledge into rewards.</Lede>
             <div className="flex flex-col">
@@ -142,8 +136,7 @@ export function ExamsSection() {
     ];
     return (
         <FeatureSection id="exams" index={6} bg="#FCE4EE" slot="right">
-            <GhostNumber n="07" stroke="rgba(236,111,160,.45)" />
-            <Eyebrow color="oklch(0.5 0.17 355)">07 · EXAMS</Eyebrow>
+            <Eyebrow color="oklch(0.5 0.17 355)">EXAMS</Eyebrow>
             <Heading>Explore a variety of subjects.</Heading>
             <Lede className="text-ink-soft">Exam practice that tests your knowledge, one subject at a time.</Lede>
             <div className="flex flex-col">
@@ -164,8 +157,7 @@ export function LevelsSection() {
     ];
     return (
         <FeatureSection id="levels" index={7} bg="#FFE4D3" slot="left">
-            <GhostNumber n="08" stroke="rgba(255,138,61,.45)" />
-            <Eyebrow color="oklch(0.52 0.17 45)">08 · LEARNING LEVELS</Eyebrow>
+            <Eyebrow color="oklch(0.52 0.17 45)">LEARNING LEVELS</Eyebrow>
             <Heading>Support for every learning level.</Heading>
             <Lede className="text-ink-soft">Lesson360 is structured for early years, nursery, primary, and secondary learners.</Lede>
             <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))]">

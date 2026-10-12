@@ -33,20 +33,6 @@ export function Lede({ children, className, delay = 140 }: { children: ReactNode
     );
 }
 
-/** Large outlined section number that drifts with scroll. */
-export function GhostNumber({ n, stroke }: { n: string; stroke: string }) {
-    return (
-        <div
-            aria-hidden="true"
-            data-speed="-0.18"
-            className="pointer-events-none absolute -left-3 -top-[120px] select-none font-grotesk text-[clamp(150px,18vw,220px)] font-extrabold leading-none text-transparent"
-            style={{ WebkitTextStroke: `1.5px ${stroke}` }}
-        >
-            {n}
-        </div>
-    );
-}
-
 export function Chip({ children, className, href }: { children: ReactNode; className?: string; href?: string }) {
     const cls = cx('rounded-full px-4 py-2.5 text-sm font-bold', className);
     return href ? <a href={href} className={cls}>{children}</a> : <span className={cls}>{children}</span>;
