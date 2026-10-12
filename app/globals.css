@@ -69,6 +69,36 @@ html {
   transition-duration: 150ms;
 }
 
+/* ── Landing page ── */
+.landing ::selection {
+  background: #FFC2A6;
+}
+
+/* No WebGL: drop the empty device slots so sections don't show blank space. */
+.landing[data-stage='off'] [data-slot] {
+  display: none;
+}
+
+.landing-mosaic {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: clamp(150px, 17vw, 250px);
+  gap: 14px;
+}
+
+.landing-mosaic > .is-big {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+@media (max-width: 760px) {
+  .landing-mosaic {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 170px;
+    gap: 10px;
+  }
+}
+
 .site-shell {
   width: min(90%, 1600px);
   margin-left: auto;

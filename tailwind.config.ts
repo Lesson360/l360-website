@@ -11,8 +11,15 @@ module.exports = {
         sans: ['"Comic Sans MS"', '"Comic Sans"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
         display: ['"Comic Sans MS"', '"Comic Sans"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
         comic: ['"Comic Sans MS"', '"Comic Sans"', 'var(--font-comic-neue)', '"Comic Neue"', 'cursive', 'sans-serif'],
+        // Landing page typefaces (loaded in components/landing/fonts.ts)
+        grotesk: ['var(--font-grotesk)', 'sans-serif'],
+        dm: ['var(--font-dm)', 'system-ui', 'sans-serif'],
+        jetbrains: ['var(--font-jetbrains)', 'monospace'],
       },
       colors: {
+        ink: { DEFAULT: '#17153A', soft: '#3A3760', muted: '#57547A', night: '#1C1A45' },
+        cream: '#FFF8EC',
+        flame: '#FF4A00',
         brand: {
           orange: '#FFB085',
           'orange-deep': '#F4976C',
