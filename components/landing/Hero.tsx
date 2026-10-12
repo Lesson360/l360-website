@@ -60,7 +60,6 @@ export function Hero() {
 
                 <div data-reveal="" data-delay="260" className="flex flex-wrap items-center gap-3">
                     <Button href="/signup" className="px-[30px] py-[18px] text-[17px]">Sign up free →</Button>
-                    <Button href="#explore" tone="outline" className="px-[26px] py-[17px] text-[17px]">Explore lessons</Button>
                 </div>
 
                 <StoreBadges delay={300} />

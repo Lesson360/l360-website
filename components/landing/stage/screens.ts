@@ -1,7 +1,7 @@
 // Screen artwork painted onto the 3D devices' canvas textures.
 // Ported from the Lesson360 landing design; coordinates are in texture pixels.
 
-export const PHONE_COLORS = ['#FF4A00', '#5B7BEA', '#3FB57A', '#8A63E0', '#F5B935', '#2FAFAA', '#EC6FA0', '#FF8A3D'];
+export const PHONE_COLORS = ['#FF4A00', '#5B7BEA', '#3FB57A', '#8A63E0', '#F5B935', '#6FAF2E', '#2FAFAA', '#EC6FA0', '#FF8A3D'];
 export const SW = 600;
 export const SH = 1316;
 
@@ -152,6 +152,39 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
     });
   }
   if (i === 5) {
+    // Digital library — search, book shelf, continue reading
+    ctx.fillStyle = CREAM; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = c; ctx.fillRect(0, 0, W, 430);
+    status(INK);
+    tx('DIGITAL LIBRARY', 48, 168, `700 22px ${FM}`, INK);
+    wrap('Read, learn and download', 48, 240, 500, 64, `800 56px ${FD}`, INK);
+    rr(36, 330, 528, 76, 38, CREAM);
+    circ(84, 368, 14, null, GREY, 4);
+    ctx.beginPath(); ctx.moveTo(94, 378); ctx.lineTo(106, 390); ctx.strokeStyle = GREY; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.stroke();
+    tx('Search books, notes, worksheets', 124, 378, `500 25px ${FS}`, GREY);
+    // book shelf
+    const books: [string, string, string][] = [['Basic Science', 'PRIMARY 4', '#5B7BEA'], ['English Grammar', 'JSS 1', '#EC6FA0'], ['Fun with Maths', 'PRIMARY 2', '#F5B935']];
+    books.forEach(([t, lvl, col], k) => {
+      const x = 36 + k * 180;
+      rr(x, 450, 168, 230, 22, col);
+      rr(x, 450, 22, 230, 0, 'rgba(23,21,58,.14)');
+      tx(lvl, x + 38, 492, `700 17px ${FM}`, INK);
+      wrap(t, x + 36, 596, 118, 30, `800 25px ${FD}`, INK);
+    });
+    tx('Continue reading', 48, 748, `800 34px ${FD}`, INK);
+    const reading: [string, string, number, string][] = [['Basic Science · Ch. 3', 'Living things', 0.62, '#5B7BEA'], ['English · Notes', 'Parts of speech', 0.35, '#EC6FA0']];
+    reading.forEach(([t, s, p, col], k) => {
+      const y = 780 + k * 170;
+      rr(36, y, 528, 150, 30, '#FFFFFF');
+      rr(64, y + 26, 70, 98, 12, col);
+      tx(t, 160, y + 58, `700 27px ${FS}`, INK);
+      tx(s, 160, y + 94, `500 23px ${FS}`, GREY);
+      rr(160, y + 116, 300, 10, 5, '#E7E3D6'); rr(160, y + 116, 300 * p, 10, 5, c);
+      tx(`${Math.round(p * 100)}%`, 532, y + 126, `700 22px ${FS}`, INK, 'right');
+    });
+    button('Open library', 1150, INK, CREAM);
+  }
+  if (i === 6) {
     // Maths quiz question
     ctx.fillStyle = '#E6F6F5'; ctx.fillRect(0, 0, W, H);
     status(INK);
@@ -171,7 +204,7 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
     wrap('7 groups of 8 make 56. Great work — keep going!', 70, 1026, 460, 40, `500 30px ${FS}`, INK);
     rr(36, 1160, 528, 90, 45, INK); tx('+10 reward points', 300, 1216, `700 28px ${FS}`, CREAM, 'center');
   }
-  if (i === 6) {
+  if (i === 7) {
     // Exams — subject list
     ctx.fillStyle = '#FFF0F5'; ctx.fillRect(0, 0, W, H);
     status(INK);
@@ -189,7 +222,7 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
     });
     button('Test your knowledge', 1150, INK, CREAM);
   }
-  if (i === 7) {
+  if (i === 8) {
     // Learning level picker
     ctx.fillStyle = CREAM; ctx.fillRect(0, 0, W, H);
     status(INK);
