@@ -1,14 +1,20 @@
 import type { Metadata } from 'next';
 import { ReactNode, Suspense } from 'react'
 import { TopLoader } from '@/components/shared/TopLoader';
-import { Comic_Neue } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 
-const comicNeue = Comic_Neue({
-  weight: ['300', '400', '700'],
-  subsets: ['latin'],
+// Self-hosted (latin subset from Google Fonts): next/font/google in Next 14.2.5
+// can crash the build when Google returns a font URL without a file extension.
+const comicNeue = localFont({
+  src: [
+    { path: './fonts/comic-neue-300.woff2', weight: '300', style: 'normal' },
+    { path: './fonts/comic-neue-400.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/comic-neue-700.woff2', weight: '700', style: 'normal' },
+  ],
   display: 'swap',
   variable: '--font-comic-neue',
+  fallback: ['cursive', 'sans-serif'],
 });
 
 export const metadata: Metadata = {

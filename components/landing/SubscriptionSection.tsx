@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { CONTACT } from './links';
 import { PlanCards } from './PlanCards';
-import { StoreBadges } from './primitives';
+import { StoreBadges } from './StoreBadges';
 
 export function SubscriptionSection() {
     return (
@@ -46,7 +46,7 @@ export function SubscriptionSection() {
 
             <PlanCards />
 
-            <StoreBadges className="justify-center" delay={120} />
+            <StoreBadges align="center" delay={120} />
 
             <footer className="pointer-events-auto mt-auto grid w-full max-w-[1360px] gap-6 border-t border-ink/15 pt-12 text-left text-sm leading-normal text-[#2D2A52] [grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))]">
                 <div className="flex flex-col gap-3">

@@ -1,6 +1,7 @@
-import { AFFILIATE_URL } from './links';
+import { AFFILIATE_URL, APP_STORE_URL, PLAY_STORE_URL } from './links';
+import { StoreBadges } from './StoreBadges';
 import {
-    Button, Chip, EASE, Eyebrow, FeatureSection, GhostNumber, Heading, Lede, ListRow, StartButton, StoreBadges, hasStoreLinks,
+    Button, Chip, EASE, Eyebrow, FeatureSection, GhostNumber, Heading, Lede, ListRow, StartButton,
 } from './primitives';
 
 const card = `flex flex-col rounded-3xl p-6 transition-transform duration-500 ${EASE}`;
@@ -22,7 +23,9 @@ export function AppSection() {
                     <ListRow key={title} lead={i + 1} leadColor="oklch(0.55 0.19 35)" title={title} sub={sub} delay={120 + i * 60} last={i === steps.length - 1} />
                 ))}
             </div>
-            {hasStoreLinks && <div data-reveal="" className="text-[15px] font-bold">Available on iOS and the Google Play Store</div>}
+            <div data-reveal="" className="text-[15px] font-bold">
+                {APP_STORE_URL && PLAY_STORE_URL ? 'Available on iOS and the Google Play Store' : 'Coming soon to iOS and the Google Play Store'}
+            </div>
             <StoreBadges delay={80} />
         </FeatureSection>
     );

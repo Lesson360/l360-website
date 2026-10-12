@@ -1,4 +1,5 @@
-import { Button, StoreBadges } from './primitives';
+import { Button } from './primitives';
+import { StoreBadges } from './StoreBadges';
 
 const CHIPS = [
     { label: '3,000+ VIDEO LESSONS', href: '#explore' },
