@@ -1,7 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { APP_STORE_URL, PLAY_STORE_URL } from './links';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
@@ -103,35 +101,6 @@ export function StartButton({ href = '/signup', label = 'Start' }: { href?: stri
         <Link href={href} className="whitespace-nowrap rounded-full bg-ink px-4 py-2.5 text-sm font-bold text-cream transition-colors hover:bg-flame hover:text-cream">
             {label}
         </Link>
-    );
-}
-
-export const hasStoreLinks = Boolean(APP_STORE_URL || PLAY_STORE_URL);
-
-export function StoreBadges({ className, delay }: { className?: string; delay?: number }) {
-    if (!hasStoreLinks) return null;
-    const badge = cx('flex min-w-[170px] items-center gap-3 rounded-[14px] bg-ink py-2.5 pl-3.5 pr-5 leading-[1.05] text-cream transition-[transform,background-color] duration-300 hover:-translate-y-0.5 hover:bg-flame hover:text-cream', EASE);
-    return (
-        <div data-reveal="" data-delay={delay} className={cx('flex flex-wrap gap-2.5', className)}>
-            {APP_STORE_URL && (
-                <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className={badge}>
-                    <Image src="/landing/app-store-icon.png" alt="" width={30} height={30} className="h-[30px] w-[30px] flex-none" />
-                    <span className="flex flex-col gap-0.5 text-left">
-                        <span className="text-[11px] font-medium tracking-[.02em]">Download on the</span>
-                        <span className="font-grotesk text-[21px] font-bold tracking-[-.01em]">App Store</span>
-                    </span>
-                </a>
-            )}
-            {PLAY_STORE_URL && (
-                <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className={badge}>
-                    <Image src="/landing/google-play-icon.png" alt="" width={28} height={29} className="h-[29px] w-7 flex-none" />
-                    <span className="flex flex-col gap-0.5 text-left">
-                        <span className="text-[11px] font-medium uppercase tracking-[.04em]">Get it on</span>
-                        <span className="font-grotesk text-[21px] font-bold tracking-[-.01em]">Google Play</span>
-                    </span>
-                </a>
-            )}
-        </div>
     );
 }
 

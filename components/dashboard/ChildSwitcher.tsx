@@ -75,8 +75,6 @@ export function ChildSwitcher() {
     const activeId = activeChild?.id || activeChild?._id;
     const activeClassNameStr = activeChild?.currentClassId ? classNames[activeChild.currentClassId] : null;
 
-    console.log(activeChild)
-
     return (
         <div className="relative" ref={containerRef}>
             <button
