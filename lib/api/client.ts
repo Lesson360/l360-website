@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import Cookies from 'js-cookie';
+import { loginUrlWithRedirect } from '@/lib/redirect';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://l360-server.onrender.com/api/v1';
 
@@ -43,7 +44,8 @@ export class ApiClient {
           if (!isAuthEndpoint) {
             Cookies.remove('token');
             if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-              window.location.href = '/login';
+              const { pathname, search } = window.location;
+              window.location.href = loginUrlWithRedirect(pathname + search);
             }
           }
         }
