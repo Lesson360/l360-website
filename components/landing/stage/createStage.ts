@@ -22,7 +22,7 @@ const N = PHONE_COLORS.length;
 const DEVICES: { k: number; type: 'tablet' | 'laptop'; kind?: 'video' | 'exam' }[] = [
     { k: 1, type: 'tablet' },
     { k: 4, type: 'laptop', kind: 'video' },
-    { k: 6, type: 'laptop', kind: 'exam' },
+    { k: 7, type: 'laptop', kind: 'exam' },
 ];
 
 interface Options {
@@ -426,7 +426,7 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
         // Neighbours part to make room for the hovered phone.
         const spread = (i: number) => {
             if (hovered < 0) return 0;
-            const H = t.phones[hovered].h; let d = ((i - hovered) % N + N) % N; if (d > 4) d -= 8; if (d === 0) return 0;
+            const H = t.phones[hovered].h; let d = ((i - hovered) % N + N) % N; if (d > N / 2) d -= N; if (d === 0) return 0;
             return Math.sign(d) * Math.max(0, 0.2 - (Math.abs(d) - 1) * 0.07) * H;
         };
 

@@ -108,6 +108,29 @@ export function VideosSection() {
     );
 }
 
+export function LibrarySection() {
+    const shelves = [
+        ['📚', 'E-books', 'Class texts and storybooks for every level'],
+        ['📝', 'Lesson notes', 'Clear, topic-by-topic summaries to revise from'],
+        ['🖨️', 'Worksheets', 'Download, print and practise at home'],
+    ];
+    return (
+        <FeatureSection id="library" index={5} bg="#ECF6DC" slot="left">
+            <Eyebrow color="oklch(0.48 0.13 130)">DIGITAL LIBRARY</Eyebrow>
+            <Heading>A whole library in their pocket.</Heading>
+            <Lede className="text-ink-soft">Books, lesson notes and worksheets for every subject — ready to read on any device or download for later.</Lede>
+            <div className="flex flex-col">
+                {shelves.map(([icon, title, sub], i) => (
+                    <ListRow key={title} lead={<span aria-hidden="true">{icon}</span>} title={title} sub={sub} delay={180 + i * 60} last={i === shelves.length - 1} />
+                ))}
+            </div>
+            <div data-reveal="" data-delay="260">
+                <Button href="/signup">Explore the library →</Button>
+            </div>
+        </FeatureSection>
+    );
+}
+
 export function QuizzesSection() {
     const quizzes = [
         ['🧮', 'Mathematics quiz', '10 questions'],
@@ -115,7 +138,7 @@ export function QuizzesSection() {
         ['🏛️', 'Government quiz', 'Civic knowledge'],
     ];
     return (
-        <FeatureSection id="quizzes" index={5} bg="#DDF2F1" slot="left">
+        <FeatureSection id="quizzes" index={6} bg="#DDF2F1" slot="right">
             <Eyebrow color="oklch(0.45 0.09 195)">QUIZZES</Eyebrow>
             <Heading>Test your knowledge.</Heading>
             <Lede className="text-ink-soft">Monitor your progress and turn knowledge into rewards.</Lede>
@@ -135,7 +158,7 @@ export function ExamsSection() {
         ['⚗', 'Chemistry', 'Atoms, bonding, reactions, acids and more · 24 practice questions'],
     ];
     return (
-        <FeatureSection id="exams" index={6} bg="#FCE4EE" slot="right">
+        <FeatureSection id="exams" index={7} bg="#FCE4EE" slot="left">
             <Eyebrow color="oklch(0.5 0.17 355)">EXAMS</Eyebrow>
             <Heading>Explore a variety of subjects.</Heading>
             <Lede className="text-ink-soft">Exam practice that tests your knowledge, one subject at a time.</Lede>
@@ -156,7 +179,7 @@ export function LevelsSection() {
         { n: '04', name: 'Secondary', sub: 'Exam practice & past questions', cls: 'bg-cream', tilt: 'hover:rotate-1' },
     ];
     return (
-        <FeatureSection id="levels" index={7} bg="#FFE4D3" slot="left">
+        <FeatureSection id="levels" index={8} bg="#FFE4D3" slot="right">
             <Eyebrow color="oklch(0.52 0.17 45)">LEARNING LEVELS</Eyebrow>
             <Heading>Support for every learning level.</Heading>
             <Lede className="text-ink-soft">Lesson360 is structured for early years, nursery, primary, and secondary learners.</Lede>
