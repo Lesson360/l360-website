@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { subscriptionsApi, SubscriptionPlan, PlanDescriptionObject } from '@/lib/api/subscriptions';
+import { subscriptionsApi, SubscriptionPlan } from '@/lib/api/subscriptions';
+import { featuresOf, periodOf, priceOf, subtitleOf } from '@/lib/subscription-plans';
 
 // Shown only if the plans endpoint is unreachable or empty.
 const FALLBACK_PLANS: SubscriptionPlan[] = [
@@ -10,57 +11,6 @@ const FALLBACK_PLANS: SubscriptionPlan[] = [
     { id: 'standard-plan', name: 'Standard', billingPeriod: 'termly', priceAmount: 45000, currency: 'NGN', description: 'Complete termly academic package with full video library & worksheets.' },
     { id: 'premium-plan', name: 'Premium', billingPeriod: 'school_year', priceAmount: 70000, currency: 'NGN', description: 'Full school year access with Test Driller CBT prep & 1-on-1 tutoring.', includesTestDriller: true },
 ];
-
-interface Feature { name: string; included: boolean; detail?: string }
-
-const PERIOD_LABEL: Record<string, string> = { monthly: 'month', termly: 'term', school_year: 'school year', yearly: 'year' };
-
-function priceOf(plan: SubscriptionPlan) {
-    const amount = plan.priceAmount ?? plan.price ?? plan.monthlyPrice ?? 0;
-    return `${plan.currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()}`;
-}
-
-function periodOf(plan: SubscriptionPlan) {
-    const p = (plan.billingPeriod || 'monthly').toLowerCase();
-    return PERIOD_LABEL[p] || p.replace(/_/g, ' ');
-}
-
-function descriptionObject(plan: SubscriptionPlan): PlanDescriptionObject | null {
-    if (typeof plan.description === 'object' && plan.description !== null) return plan.description;
-    if (typeof plan.description === 'string') {
-        try { return JSON.parse(plan.description); } catch { return null; }
-    }
-    return null;
-}
-
-function subtitleOf(plan: SubscriptionPlan) {
-    const obj = descriptionObject(plan);
-    if (obj?.textDescription) return obj.textDescription;
-    if (typeof plan.description === 'string' && !obj && plan.description.trim()) return plan.description;
-    return 'Access customised lessons, practice quizzes, and learning resources.';
-}
-
-function featuresOf(plan: SubscriptionPlan): Feature[] {
-    if (Array.isArray(plan.features) && plan.features.length > 0) {
-        return plan.features.map((f: any) => {
-            if (typeof f === 'string') return { name: f, included: true };
-            const value = f.value ?? 'check';
-            return {
-                name: f.name || f.title || 'Feature',
-                included: value !== 'cross',
-                detail: value !== 'check' && value !== 'cross' ? String(value) : undefined,
-            };
-        });
-    }
-    const d = descriptionObject(plan);
-    return [
-        { name: 'Video lessons', included: d?.videos !== false },
-        { name: 'Worksheets & homework help', included: d?.worksheets !== false },
-        { name: 'Learning resources & notes', included: d?.resources !== false },
-        { name: 'Quizzes & progress tracking', included: d?.quizzes !== false },
-        { name: 'Test Driller exam prep', included: !!plan.includesTestDriller },
-    ];
-}
 
 export function PlanCards() {
     const [plans, setPlans] = useState<SubscriptionPlan[] | null>(null);

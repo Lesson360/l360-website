@@ -157,11 +157,11 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = c; ctx.fillRect(0, 0, W, 430);
     status(INK);
     tx('DIGITAL LIBRARY', 48, 168, `700 22px ${FM}`, INK);
-    wrap('Read, learn and download', 48, 240, 500, 64, `800 56px ${FD}`, INK);
+    wrap('Your digital bookshelf', 48, 240, 500, 64, `800 56px ${FD}`, INK);
     rr(36, 330, 528, 76, 38, CREAM);
     circ(84, 368, 14, null, GREY, 4);
     ctx.beginPath(); ctx.moveTo(94, 378); ctx.lineTo(106, 390); ctx.strokeStyle = GREY; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.stroke();
-    tx('Search books, notes, worksheets', 124, 378, `500 25px ${FS}`, GREY);
+    tx('Search books by title or subject', 124, 378, `500 25px ${FS}`, GREY);
     // book shelf
     const books: [string, string, string][] = [['Basic Science', 'PRIMARY 4', '#5B7BEA'], ['English Grammar', 'JSS 1', '#EC6FA0'], ['Fun with Maths', 'PRIMARY 2', '#F5B935']];
     books.forEach(([t, lvl, col], k) => {
@@ -172,7 +172,7 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
       wrap(t, x + 36, 596, 118, 30, `800 25px ${FD}`, INK);
     });
     tx('Continue reading', 48, 748, `800 34px ${FD}`, INK);
-    const reading: [string, string, number, string][] = [['Basic Science · Ch. 3', 'Living things', 0.62, '#5B7BEA'], ['English · Notes', 'Parts of speech', 0.35, '#EC6FA0']];
+    const reading: [string, string, number, string][] = [['Basic Science · Ch. 3', 'Living things', 0.62, '#5B7BEA'], ['English Grammar · Ch. 2', 'Parts of speech', 0.35, '#EC6FA0']];
     reading.forEach(([t, s, p, col], k) => {
       const y = 780 + k * 170;
       rr(36, y, 528, 150, 30, '#FFFFFF');
