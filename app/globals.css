@@ -99,6 +99,23 @@ html {
   }
 }
 
+/* Pre-launch pages: slow floating visuals */
+@keyframes launch-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--tilt, 0deg)); }
+  50% { transform: translate3d(0, -12px, 0) rotate(var(--tilt, 0deg)); }
+}
+
+.launch-float {
+  animation: launch-float 6s ease-in-out infinite;
+  transform: rotate(var(--tilt, 0deg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-float {
+    animation: none;
+  }
+}
+
 .site-shell {
   width: min(90%, 1600px);
   margin-left: auto;
