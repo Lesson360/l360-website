@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { CONTACT } from './links';
 import { PlanCards } from './PlanCards';
 import { StoreBadges } from './StoreBadges';
+import { CurrencySelect } from '@/components/currency/CurrencySelect';
 
 export function SubscriptionSection() {
     return (
@@ -19,6 +20,7 @@ export function SubscriptionSection() {
                 <p data-reveal="" data-delay="120" className="m-0 max-w-[520px] text-pretty text-[clamp(17px,1.4vw,19px)] leading-normal text-[#2D2A52]">
                     Flexible learning packages designed for every learner’s academic journey.
                 </p>
+                <CurrencySelect tone="dark" className="justify-center [&_select]:bg-ink/20" />
             </div>
 
             {/* App screenshots flank the slot where the phone ring returns. */}

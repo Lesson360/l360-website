@@ -5,7 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { AlertCircle, Check, CreditCard, Loader2, X } from 'lucide-react';
 import { useChildProfile } from '@/lib/context/ChildProfileContext';
 import { subscriptionsApi, SubscriptionPlan, TestDrillerProduct } from '@/lib/api/subscriptions';
-import { featuresOf, fetchActivePlans, periodOf, priceOf, subtitleOf } from '@/lib/subscription-plans';
+import { featuresOf, fetchActivePlans, periodOf, planAmount, subtitleOf } from '@/lib/subscription-plans';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
+import { CurrencySelect } from '@/components/currency/CurrencySelect';
 import { getSafeRedirect } from '@/lib/redirect';
 import { rememberPaymentReturn } from '@/lib/payment-return';
 
@@ -27,6 +29,8 @@ function SubscriptionContent() {
     const searchParams = useSearchParams();
     const returnTo = getSafeRedirect(searchParams.get('return')) || '/dashboard';
     const { activeChild } = useChildProfile();
+    const { price, chargeCurrency } = useCurrency();
+    const priceFor = (plan: SubscriptionPlan) => { const { amount, currency } = planAmount(plan); return price(amount, currency); };
     const childId = activeChild?.id || activeChild?._id || '';
     const childName = activeChild?.name || activeChild?.childName;
 
@@ -60,6 +64,7 @@ function SubscriptionContent() {
                 classId: activeChild?.currentClassId,
                 selectedTestDrillerProductId: testDrillerProductId,
                 provider: 'paystack',
+                currency: chargeCurrency,
                 callbackUrl: `${window.location.origin}/payments/subscription/callback`,
                 metadata: { source: 'web_dashboard' },
             });
@@ -96,6 +101,7 @@ function SubscriptionContent() {
                 <p className="text-sm text-gray-500 font-medium">
                     Choose a plan{childName ? ` for ${childName}` : ''} to unlock lessons, quizzes, exams and subscriber books in the Digital Library.
                 </p>
+                <CurrencySelect className="pt-1" />
             </div>
 
             {(error || loadError) && (
@@ -125,9 +131,12 @@ function SubscriptionContent() {
                                     <h2 className="text-xl font-extrabold">{plan.name || plan.title || `Plan ${i + 1}`}</h2>
                                     {featured && <span className="rounded-full bg-[#FF8A3D] px-2.5 py-1 text-[10px] font-black uppercase text-[#17153A]">Most popular</span>}
                                 </div>
-                                <div className="flex flex-wrap items-baseline gap-1.5">
-                                    <span className="text-3xl font-black tracking-tight">{priceOf(plan)}</span>
-                                    <span className={`text-sm font-semibold ${featured ? 'text-white/70' : 'text-gray-500'}`}>/ {periodOf(plan)}</span>
+                                <div className="space-y-1">
+                                    <div className="flex flex-wrap items-baseline gap-1.5">
+                                        <span className="text-3xl font-black tracking-tight">{priceFor(plan).main}</span>
+                                        <span className={`text-sm font-semibold ${featured ? 'text-white/70' : 'text-gray-500'}`}>/ {periodOf(plan)}</span>
+                                    </div>
+                                    {priceFor(plan).note && <p className={`text-xs font-medium ${featured ? 'text-white/70' : 'text-gray-500'}`}>{priceFor(plan).note}</p>}
                                 </div>
                                 <p className={`text-sm ${featured ? 'text-white/80' : 'text-gray-500'}`}>{subtitleOf(plan)}</p>
                                 <ul className="space-y-2">
@@ -188,7 +197,7 @@ function SubscriptionContent() {
                             disabled={!tdProducts || (tdProducts.length > 0 && !tdChoice) || !!busyPlan}
                             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF4801] px-5 py-3.5 text-sm font-black text-white hover:bg-[#E03F00] disabled:opacity-50 cursor-pointer disabled:cursor-default">
                             {busyPlan ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                            {busyPlan ? 'Redirecting to payment…' : `Continue to payment · ${priceOf(tdPlan)}`}
+                            {busyPlan ? 'Redirecting to payment…' : `Continue to payment · ${priceFor(tdPlan).main}`}
                         </button>
                     </div>
                 </div>

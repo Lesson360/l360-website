@@ -49,6 +49,8 @@ export interface SupportCheckoutPayload {
     diagnosticAttemptId?: string;
     provider?: string;
     callbackUrl?: string;
+    /** Charge currency, e.g. 'USD' for international customers. Omitted = naira. */
+    currency?: string;
     reference?: string;
     metadata?: Record<string, any>;
     rawPayload?: Record<string, any>;

@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
+import { PriceNote, PriceText } from '@/components/currency/PriceTag';
 import {
     GraduationCap,
     BookOpen,
@@ -46,6 +48,7 @@ export default function EnrichmentCoursesPage() {
     // 2. Child Profile State — sourced from the global, dashboard-wide child switcher
     // so every page reacts to the same currently-selected child.
     const { children: contextChildren, activeChild, selectChild } = useChildProfile();
+    const { chargeCurrency } = useCurrency();
     const childProfiles = contextChildren as unknown as ChildProfile[];
     const selectedChild = activeChild as unknown as ChildProfile | null;
 
@@ -259,7 +262,8 @@ export default function EnrichmentCoursesPage() {
             const res = await enrichmentCoursesApi.startCheckout({
                 childProfileId: childId,
                 courseId: courseId,
-                callbackUrl: `${window.location.origin}/dashboard/enrichment-courses/callback`
+                callbackUrl: `${window.location.origin}/dashboard/enrichment-courses/callback`,
+                currency: chargeCurrency,
             });
 
             if (res?.data.checkout?.authorizationUrl) {
@@ -478,9 +482,8 @@ export default function EnrichmentCoursesPage() {
                                         <div className="p-5 pt-4 border-t border-gray-100 flex items-center justify-between mt-4">
                                             <div>
                                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Price</span>
-                                                <span className="text-xl font-black text-gray-900">
-                                                    {course.currency || 'NGN'} {course.priceAmount?.toLocaleString() || '0'}
-                                                </span>
+                                                <PriceText amount={course.priceAmount || 0} currency={course.currency || 'NGN'} className="block text-xl font-black text-gray-900" />
+                                                <PriceNote amount={course.priceAmount || 0} currency={course.currency || 'NGN'} />
                                             </div>
 
                                             {isOwned ? (
@@ -850,7 +853,7 @@ export default function EnrichmentCoursesPage() {
                                         </div>
                                         <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-700 flex items-center gap-1.5">
                                             <Tag className="w-3.5 h-3.5" />
-                                            <span>{previewCourse.currency || 'NGN'} {previewCourse.priceAmount?.toLocaleString()}</span>
+                                            <PriceText amount={previewCourse.priceAmount || 0} currency={previewCourse.currency || 'NGN'} />
                                         </div>
                                         {previewCourse.status === 'published' && (
                                             <div className="px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-100 text-xs font-bold text-blue-700 flex items-center gap-1.5">
@@ -938,10 +941,9 @@ export default function EnrichmentCoursesPage() {
                             </div>
                             <div className="flex justify-between items-center text-sm pt-1">
                                 <span className="font-extrabold text-gray-900">Total Price:</span>
-                                <span className="font-black text-[#FF4801]">
-                                    {checkoutCourse.currency || 'NGN'} {checkoutCourse.priceAmount?.toLocaleString()}
-                                </span>
+                                <PriceText amount={checkoutCourse.priceAmount || 0} currency={checkoutCourse.currency || 'NGN'} className="font-black text-[#FF4801]" />
                             </div>
+                            <PriceNote amount={checkoutCourse.priceAmount || 0} currency={checkoutCourse.currency || 'NGN'} className="block text-right text-[11px] font-semibold text-gray-500" />
                         </div>
 
                         <div className="space-y-3">
@@ -957,7 +959,7 @@ export default function EnrichmentCoursesPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <span>Pay ₦{checkoutCourse.priceAmount.toLocaleString()}</span>
+                                        <span>Pay <PriceText amount={checkoutCourse.priceAmount || 0} currency={checkoutCourse.currency || 'NGN'} /></span>
                                     </>
                                 )}
                             </button>

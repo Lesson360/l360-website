@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
+import { PriceNote, PriceText } from '@/components/currency/PriceTag';
 import {
     Sparkles,
     CheckCircle2,
@@ -140,6 +142,7 @@ export default function SupportServiceRecommendations({
     onComplete,
 }: SupportServiceRecommendationsProps) {
     const [offerings, setOfferings] = useState<SupportServiceOffering[]>([]);
+    const { chargeCurrency } = useCurrency();
     const [isLoading, setIsLoading] = useState(true);
     const [selectedOffering, setSelectedOffering] = useState<SupportServiceOffering | null>(null);
 
@@ -205,6 +208,7 @@ export default function SupportServiceRecommendations({
                 diagnosticAttemptId: attemptId,
                 provider: 'paystack',
                 callbackUrl,
+                currency: chargeCurrency,
             });
 
             const resObj: any = res;
@@ -468,9 +472,10 @@ export default function SupportServiceRecommendations({
                                 <div>
                                     <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Fee</p>
                                     <p className="text-2xl font-black text-gray-900">
-                                        ₦{offering.priceAmount.toLocaleString()}
+                                        <PriceText amount={offering.priceAmount} currency={offering.currency || 'NGN'} />
                                         <span className="text-xs font-semibold text-gray-500"> / package</span>
                                     </p>
+                                    <PriceNote amount={offering.priceAmount} currency={offering.currency || 'NGN'} />
                                 </div>
 
                                 <button

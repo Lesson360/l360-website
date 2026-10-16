@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { subscriptionsApi, SubscriptionPlan } from '@/lib/api/subscriptions';
-import { featuresOf, periodOf, priceOf, subtitleOf } from '@/lib/subscription-plans';
+import { featuresOf, periodOf, planAmount, subtitleOf } from '@/lib/subscription-plans';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
 
 // Shown only if the plans endpoint is unreachable or empty.
 const FALLBACK_PLANS: SubscriptionPlan[] = [
@@ -14,6 +15,7 @@ const FALLBACK_PLANS: SubscriptionPlan[] = [
 
 export function PlanCards() {
     const [plans, setPlans] = useState<SubscriptionPlan[] | null>(null);
+    const { price } = useCurrency();
 
     useEffect(() => {
         let active = true;
@@ -46,6 +48,8 @@ export function PlanCards() {
                 const dark = i === featured;
                 const id = plan.id || plan._id || '';
                 const name = plan.name || plan.title || `Plan ${i + 1}`;
+                const { amount, currency } = planAmount(plan);
+                const display = price(amount, currency);
                 return (
                     <div
                         key={id || name}
@@ -55,9 +59,12 @@ export function PlanCards() {
                             ? <span className="self-start rounded-full bg-[#FF8A3D] px-3 py-1.5 font-jetbrains text-[11px] font-bold tracking-[.1em] text-ink">MOST POPULAR</span>
                             : <span aria-hidden="true" className="hidden h-[27px] md:block" />)}
                         <div className="font-grotesk text-[26px] font-extrabold tracking-[-.02em]">{name}</div>
-                        <div className="flex flex-wrap items-baseline gap-1.5">
-                            <span className="font-grotesk text-[clamp(38px,4vw,48px)] font-extrabold leading-none tracking-[-.04em]">{priceOf(plan)}</span>
-                            <span className={`text-[15px] ${dark ? 'text-[#CFCBE8]' : 'text-[#4A4770]'}`}>/ {periodOf(plan)}</span>
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-wrap items-baseline gap-1.5">
+                                <span className="font-grotesk text-[clamp(34px,4vw,48px)] font-extrabold leading-none tracking-[-.04em]">{display.main}</span>
+                                <span className={`text-[15px] ${dark ? 'text-[#CFCBE8]' : 'text-[#4A4770]'}`}>/ {periodOf(plan)}</span>
+                            </div>
+                            {display.note && <span className={`text-xs font-medium ${dark ? 'text-[#CFCBE8]' : 'text-[#4A4770]'}`}>{display.note}</span>}
                         </div>
                         <p className={`m-0 text-[15px] leading-snug ${dark ? 'text-[#CFCBE8]' : 'text-[#4A4770]'}`}>{subtitleOf(plan)}</p>
                         <ul className="m-0 flex list-none flex-col gap-2.5 p-0">

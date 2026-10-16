@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ReactNode, Suspense } from 'react'
 import { TopLoader } from '@/components/shared/TopLoader';
+import { CurrencyProvider } from '@/lib/currency/CurrencyProvider';
 import localFont from 'next/font/local';
 import './globals.css';
 
@@ -78,7 +79,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <TopLoader />
         </Suspense>
-        {children}
+        <CurrencyProvider>{children}</CurrencyProvider>
       </body>
     </html>
   );

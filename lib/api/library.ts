@@ -83,18 +83,12 @@ export const libraryApi = {
     read: async (childProfileId: string, bookId: string) =>
         unwrap<LibraryReadResponse>(await apiClient.post(`/library/child-profiles/${childProfileId}/books/${bookId}/read`, {})),
 
-    checkout: async (data: { childProfileId: string; bookId: string; callbackUrl?: string }) =>
+    checkout: async (data: { childProfileId: string; bookId: string; callbackUrl?: string; currency?: string }) =>
         unwrap<LibraryCheckoutResponse>(await apiClient.post('/library/checkout', data)),
 
     verifyPayment: async (reference: string) =>
         unwrap<LibraryVerifyResponse>(await apiClient.post(`/library/payments/${encodeURIComponent(reference)}/verify`, {})),
 };
-
-export function formatBookPrice(book: Pick<LibraryBook, 'priceAmount' | 'currency'>) {
-    const amount = book.priceAmount ?? 0;
-    const symbol = !book.currency || book.currency === 'NGN' ? '₦' : `${book.currency} `;
-    return `${symbol}${amount.toLocaleString()}`;
-}
 
 /** Human-readable label for an API error, falling back to a generic message. */
 export function libraryErrorMessage(err: any, fallback: string) {

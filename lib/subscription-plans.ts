@@ -7,9 +7,9 @@ export interface PlanFeature { name: string; included: boolean; detail?: string 
 
 const PERIOD_LABEL: Record<string, string> = { monthly: 'month', termly: 'term', school_year: 'school year', yearly: 'year' };
 
-export function priceOf(plan: SubscriptionPlan) {
-    const amount = plan.priceAmount ?? plan.price ?? plan.monthlyPrice ?? 0;
-    return `${plan.currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()}`;
+/** The plan's stored price and its currency (naira unless the API says otherwise). */
+export function planAmount(plan: SubscriptionPlan): { amount: number; currency: string } {
+    return { amount: plan.priceAmount ?? plan.price ?? plan.monthlyPrice ?? 0, currency: plan.currency || 'NGN' };
 }
 
 export function periodOf(plan: SubscriptionPlan) {

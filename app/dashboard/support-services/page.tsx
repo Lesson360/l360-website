@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
+import { PriceNote, PriceText } from '@/components/currency/PriceTag';
 import Link from 'next/link';
 import {
     AlertCircle,
@@ -26,10 +28,6 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
     completed: { label: 'Completed', className: 'bg-gray-100 text-gray-600' }
 };
 
-function formatPrice(amount: number, currency: string) {
-    const symbol = currency === 'USD' ? '$' : currency === 'GBP' ? '£' : '₦';
-    return `${symbol}${(amount || 0).toLocaleString()}`;
-}
 
 function typeLabel(type?: string) {
     return type === 'one_on_one' ? 'One-to-one' : type === 'group_live' ? 'Group live' : 'Support';
@@ -42,6 +40,7 @@ function isEnrollmentActive(e: SupportEnrollment) {
 
 export default function SupportServicesPage() {
     const { activeChild } = useChildProfile();
+    const { chargeCurrency } = useCurrency();
     const childId = activeChild?.id || activeChild?._id || '';
 
     const [enrollments, setEnrollments] = useState<SupportEnrollment[]>([]);
@@ -114,7 +113,8 @@ export default function SupportServicesPage() {
                 childProfileId: childId,
                 offeringId,
                 provider: 'paystack',
-                callbackUrl: `${window.location.origin}/dashboard/support-services/callback`
+                callbackUrl: `${window.location.origin}/dashboard/support-services/callback`,
+                currency: chargeCurrency,
             });
             const body = res?.data ?? res;
             const url = body?.checkout?.authorizationUrl || body?.payment?.checkout?.authorizationUrl;
@@ -315,7 +315,10 @@ export default function SupportServicesPage() {
                                             <p className="text-xs font-bold text-gray-600">{o.sessionsIncluded} classes included</p>
                                         </div>
                                         <div className="space-y-2">
-                                            <p className="text-xl font-black text-gray-900">{formatPrice(o.priceAmount, o.currency)}</p>
+                                            <div>
+                                                <PriceText amount={o.priceAmount || 0} currency={o.currency || 'NGN'} className="block text-xl font-black text-gray-900" />
+                                                <PriceNote amount={o.priceAmount || 0} currency={o.currency || 'NGN'} />
+                                            </div>
                                             {owned ? (
                                                 <div className="py-2.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-black flex items-center justify-center gap-1.5">
                                                     <CheckCircle2 className="w-4 h-4" /> Already active

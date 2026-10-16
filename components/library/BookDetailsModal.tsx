@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AlertCircle, BookOpen, CreditCard, Loader2, Lock, X } from 'lucide-react';
-import { LibraryBook, formatBookPrice, libraryApi, libraryErrorMessage } from '@/lib/api/library';
+import { LibraryBook, libraryApi, libraryErrorMessage } from '@/lib/api/library';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
 import { rememberPaymentReturn } from '@/lib/payment-return';
 import { BookCover } from './BookCover';
 
@@ -20,12 +21,13 @@ export function bookState(book: LibraryBook): BookState {
 }
 
 export function BookBadge({ book }: { book: LibraryBook }) {
+    const { price } = useCurrency();
     const state = bookState(book);
     const [label, cls] =
         book.accessType === 'paid' && state === 'readable' ? ['Owned', 'bg-emerald-100 text-emerald-700']
             : book.accessType === 'free' ? ['Free', 'bg-emerald-100 text-emerald-700']
                 : book.accessType === 'subscriber' ? ['Included with subscription', 'bg-blue-100 text-blue-700']
-                    : [formatBookPrice(book), 'bg-orange-100 text-[#C23A00]'];
+                    : [price(book.priceAmount ?? 0, book.currency || 'NGN').main, 'bg-orange-100 text-[#C23A00]'];
     return <span className={`inline-block rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${cls}`}>{label}</span>;
 }
 
@@ -40,6 +42,8 @@ interface Props {
 
 export function BookDetailsModal({ book, childId, childName, onClose, onStale }: Props) {
     const [buying, setBuying] = useState(false);
+    const { price, chargeCurrency } = useCurrency();
+    const bookPrice = price(book.priceAmount ?? 0, book.currency || 'NGN');
     const [error, setError] = useState('');
     const closeRef = useRef<HTMLButtonElement>(null);
     const state = bookState(book);
@@ -61,6 +65,7 @@ export function BookDetailsModal({ book, childId, childName, onClose, onStale }:
                 childProfileId: childId,
                 bookId: book.id,
                 callbackUrl: `${window.location.origin}/payments/library/callback`,
+                currency: chargeCurrency,
             });
             const url = res?.payment?.checkout?.authorizationUrl;
             if (!url) throw new Error('missing authorizationUrl');
@@ -129,10 +134,11 @@ export function BookDetailsModal({ book, childId, childName, onClose, onStale }:
                                     <button type="button" onClick={buy} disabled={buying}
                                         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF4801] px-5 py-3.5 text-sm font-black text-white hover:bg-[#E03F00] disabled:opacity-70 sm:w-auto cursor-pointer">
                                         {buying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                                        {buying ? 'Redirecting to payment…' : `Buy book · ${formatBookPrice(book)}`}
+                                        {buying ? 'Redirecting to payment…' : `Buy book · ${bookPrice.main}`}
                                     </button>
                                     <p className="text-xs font-medium text-gray-500">
                                         One-off purchase{childName ? ` for ${childName}` : ''}. Secure payment with Paystack.
+                                        {bookPrice.note && <span className="block">{bookPrice.note}</span>}
                                     </p>
                                 </div>
                             )}
