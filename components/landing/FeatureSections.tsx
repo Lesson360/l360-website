@@ -110,22 +110,22 @@ export function VideosSection() {
 
 export function LibrarySection() {
     const shelves = [
-        ['📚', 'E-books', 'Class texts and storybooks for every level'],
-        ['📝', 'Lesson notes', 'Clear, topic-by-topic summaries to revise from'],
-        ['🖨️', 'Worksheets', 'Download, print and practise at home'],
+        ['📚', 'Storybooks & readers', 'Build a love of reading, from early years up'],
+        ['📘', 'Textbooks & revision guides', 'Books matched to your child’s class, plus exam prep'],
+        ['🔓', 'Free, included or yours to keep', 'Free books, books included with a subscription, and books you can buy one at a time'],
     ];
     return (
         <FeatureSection id="library" index={5} bg="#ECF6DC" slot="left">
             <Eyebrow color="oklch(0.48 0.13 130)">DIGITAL LIBRARY</Eyebrow>
             <Heading>A whole library in their pocket.</Heading>
-            <Lede className="text-ink-soft">Books, lesson notes and worksheets for every subject — ready to read on any device or download for later.</Lede>
+            <Lede className="text-ink-soft">Storybooks, textbooks and revision guides for every class — read them right in Lesson360, on any device.</Lede>
             <div className="flex flex-col">
                 {shelves.map(([icon, title, sub], i) => (
                     <ListRow key={title} lead={<span aria-hidden="true">{icon}</span>} title={title} sub={sub} delay={180 + i * 60} last={i === shelves.length - 1} />
                 ))}
             </div>
             <div data-reveal="" data-delay="260">
-                <Button href="/signup">Explore the library →</Button>
+                <Button href="/dashboard/library">Explore the library →</Button>
             </div>
         </FeatureSection>
     );

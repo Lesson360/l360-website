@@ -16,6 +16,7 @@ import {
     X,
     Loader2,
     CalendarClock,
+    BookOpen,
 } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 
@@ -29,6 +30,11 @@ const NAV_ITEMS = [
         name: 'Video Library',
         href: '/dashboard/video-library',
         icon: Video,
+    },
+    {
+        name: 'Digital Library',
+        href: '/dashboard/library',
+        icon: BookOpen,
     },
     {
         name: 'Test Driller',
@@ -49,6 +55,11 @@ const NAV_ITEMS = [
         name: 'Support Services',
         href: '/dashboard/support-services',
         icon: HeartHandshake,
+    },
+    {
+        name: 'Subscription',
+        href: '/dashboard/subscription',
+        icon: CreditCard,
     },
     {
         name: 'Settings',
@@ -130,6 +141,7 @@ export function DashboardSidebar({ isOpen = false, onClose }: SidebarProps) {
                             const Icon = item.icon;
                             const isActive =
                                 pathname === item.href ||
+                                pathname.startsWith(`${item.href}/`) ||
                                 (item.href === '/dashboard/video-library' && pathname === '/dashboard');
 
                             return (
