@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
+import { CurrencySelect } from '@/components/currency/CurrencySelect';
 import { Loader2, AlertCircle, ShieldCheck, Check, Sparkles, X, Gift, CheckCircle } from 'lucide-react';
 import { subscriptionsApi, SubscriptionPlan, TestDrillerProduct, PlanDescriptionObject } from '@/lib/api/subscriptions';
 import { schoolStructureApi } from '@/lib/api/school-structure';
@@ -113,6 +115,7 @@ export default function SubscriptionPlans() {
 
     // Plans State
     const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+    const { price, chargeCurrency } = useCurrency();
 
     // Modal State for TestDriller Package Selection — products are fetched fresh per plan
     // click, scoped to that plan + the child's level/class (never a global, unscoped list).
@@ -327,6 +330,8 @@ export default function SubscriptionPlans() {
             const payload: any = {
                 planId,
                 provider: 'paystack',
+                // 'USD' for international visitors once USD checkout is enabled; omitted = naira.
+                currency: chargeCurrency,
                 callbackUrl,
                 metadata: {
                     source: 'web_onboarding',
@@ -376,15 +381,6 @@ export default function SubscriptionPlans() {
             setErrorMessage(msg);
             setIsInitializing(false);
         }
-    };
-
-    const formatCurrency = (amount?: number, currency: string = 'NGN') => {
-        if (typeof amount !== 'number') return '₦0';
-        return new Intl.NumberFormat('en-NG', {
-            style: 'currency',
-            currency: currency === 'NGN' ? 'NGN' : 'USD',
-            maximumFractionDigits: 0,
-        }).format(amount);
     };
 
     const parseDescription = (desc?: string | PlanDescriptionObject): { text: string; details: PlanDescriptionObject } => {
@@ -462,6 +458,7 @@ export default function SubscriptionPlans() {
                     </div>
                 </div>
 
+                <CurrencySelect className="justify-center pt-1" />
             </div>
 
             {errorMessage && (
@@ -521,10 +518,15 @@ export default function SubscriptionPlans() {
                                     </div>
 
                                     {/* Price & Billing Cycle Tag */}
-                                    <div className="flex items-center justify-between gap-2 mb-2">
-                                        <span className={`text-3xl sm:text-4xl font-black font-comic tracking-tight ${theme.priceColor}`}>
-                                            {formatCurrency(priceVal, plan.currency)}
+                                    <div className="mb-2 space-y-1">
+                                        <span className={`block text-3xl sm:text-4xl font-black font-comic tracking-tight ${theme.priceColor}`}>
+                                            {price(priceVal, plan.currency || 'NGN').main}
                                         </span>
+                                        {price(priceVal, plan.currency || 'NGN').note && (
+                                            <span className={`block text-xs font-bold font-comic opacity-80 ${theme.priceColor}`}>
+                                                {price(priceVal, plan.currency || 'NGN').note}
+                                            </span>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-2 mb-3">

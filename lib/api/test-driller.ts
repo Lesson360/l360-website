@@ -172,6 +172,8 @@ export interface TestDrillerProductCheckoutPayload {
     productId: string;
     provider?: string;
     callbackUrl?: string;
+    /** Charge currency, e.g. 'USD' for international customers. Omitted = naira. */
+    currency?: string;
 }
 
 export interface TestDrillerProductPurchase {

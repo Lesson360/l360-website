@@ -50,6 +50,8 @@ export interface CheckoutPayload {
     callbackUrl?: string;
     metadata?: Record<string, any>;
     billingPeriod?: string;
+    /** Charge currency, e.g. 'USD' for international customers. Omitted = naira. */
+    currency?: string;
 }
 
 export interface CheckoutResponse {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { PriceNote, PriceText } from '@/components/currency/PriceTag';
 import { BookOpen, CheckCircle2, Loader2, Sparkles, ClipboardList } from 'lucide-react';
 import { TestDrillerProductCatalogItem } from '@/lib/api/test-driller';
 
@@ -39,12 +40,6 @@ interface TestDrillerCatalogProps {
     isCheckingOutProductId: string | null;
     onSubscribe: (product: TestDrillerProductCatalogItem) => void;
     onPractice: (product: TestDrillerProductCatalogItem) => void;
-}
-
-function formatPrice(product: TestDrillerProductCatalogItem): string {
-    if (typeof product.priceAmount !== 'number') return 'Contact Us';
-    const currencySymbol = product.currency === 'USD' ? '$' : product.currency === 'GBP' ? '£' : '₦';
-    return `${currencySymbol}${product.priceAmount.toLocaleString()}`;
 }
 
 function formatDuration(product: TestDrillerProductCatalogItem): string {
@@ -178,9 +173,14 @@ export function TestDrillerCatalog({
                                 </div>
 
                                 {!isOwned && (
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-xl font-black text-gray-900">{formatPrice(product)}</span>
-                                        <span className="text-[11px] font-semibold text-gray-400">/ {formatDuration(product)}</span>
+                                    <div>
+                                        <div className="flex items-baseline gap-1">
+                                            {typeof product.priceAmount === 'number'
+                                                ? <PriceText amount={product.priceAmount} currency={product.currency || 'NGN'} className="text-xl font-black text-gray-900" />
+                                                : <span className="text-xl font-black text-gray-900">Contact Us</span>}
+                                            <span className="text-[11px] font-semibold text-gray-400">/ {formatDuration(product)}</span>
+                                        </div>
+                                        {typeof product.priceAmount === 'number' && <PriceNote amount={product.priceAmount} currency={product.currency || 'NGN'} />}
                                     </div>
                                 )}
 

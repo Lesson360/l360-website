@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useCurrency } from '@/lib/currency/CurrencyProvider';
 import {
     testDrillerApi,
     ChildAccessResponse,
@@ -88,6 +89,7 @@ export default function PracticeExamPage() {
     // Globally-selected child (from the dashboard-wide child switcher) — every page reacts to
     // this so switching a child on one page updates practice exam access/data as well.
     const { activeChild: contextActiveChild } = useChildProfile();
+    const { chargeCurrency } = useCurrency();
 
     // 1. Child Profile & Access Context
     const [childProfileId, setChildProfileId] = useState<string>('');
@@ -312,7 +314,8 @@ export default function PracticeExamPage() {
             const res = await testDrillerApi.startProductCheckout({
                 childProfileId,
                 productId,
-                callbackUrl: `${window.location.origin}/payments/test-driller/callback`
+                callbackUrl: `${window.location.origin}/payments/test-driller/callback`,
+                currency: chargeCurrency,
             });
 
             const checkout = res?.data?.checkout;

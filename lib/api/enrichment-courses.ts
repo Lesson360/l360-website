@@ -173,7 +173,7 @@ export const enrichmentCoursesApi = {
         apiClient.get<{ item: StandaloneCourseItem }>(`/standalone-courses/${courseId}/public`),
 
     // 2. Checkout & Payment Verification
-    startCheckout: (data: { childProfileId: string; courseId: string; provider?: string; callbackUrl?: string }) =>
+    startCheckout: (data: { childProfileId: string; courseId: string; provider?: string; callbackUrl?: string; currency?: string }) =>
         apiClient.post<CheckoutResponseData>('/standalone-course-checkout', {
             provider: 'paystack',
             ...data
