@@ -14,8 +14,14 @@ const RATES_URL = 'https://open.er-api.com/v6/latest/NGN';
  * on the server for an hour and every visitor shares it.
  */
 export async function GET(request: NextRequest) {
-    // Vercel sets x-vercel-ip-country; Cloudflare sets cf-ipcountry.
-    let country = request.headers.get('x-vercel-ip-country') || request.headers.get('cf-ipcountry') || null;
+    // Geo header depends on the host: Vercel, AWS Amplify/CloudFront, or Cloudflare.
+    // No header → no guess (null shows naira); browser language is a poor signal here,
+    // since many Nigerian visitors browse with en-US.
+    let country =
+        request.headers.get('x-vercel-ip-country') ||
+        request.headers.get('cloudfront-viewer-country') ||
+        request.headers.get('cf-ipcountry') ||
+        null;
     // Local testing aid: /api/fx?country=GB (ignored in production).
     if (process.env.NODE_ENV !== 'production') {
         country = request.nextUrl.searchParams.get('country') || country;
