@@ -5,7 +5,7 @@ import { landingFontVars } from '@/components/landing/fonts';
 import { CONTACT } from '@/components/landing/links';
 
 /**
- * Frame for the pre-launch pages (/coming-soon, /waitlist): the landing
+ * Frame for the pre-launch and legal pages (/coming-soon, /waitlist, /privacy, /terms): the landing
  * page's fonts, colours and floating nav, without the 3D stage.
  */
 export function LaunchShell({ children, action }: { children: ReactNode; action: { href: string; label: string } }) {
@@ -41,6 +41,8 @@ export function LaunchShell({ children, action }: { children: ReactNode; action:
                     <a href={`mailto:${CONTACT.email}`} className="text-[#2D2A52] hover:text-ink hover:underline">{CONTACT.email}</a>
                     <a href={CONTACT.phoneHref} className="text-[#2D2A52] hover:text-ink hover:underline">{CONTACT.phone}</a>
                     <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="text-[#2D2A52] hover:text-ink hover:underline">Instagram</a>
+                    <Link href="/privacy" className="text-[#2D2A52] hover:text-ink hover:underline">Privacy</Link>
+                    <Link href="/terms" className="text-[#2D2A52] hover:text-ink hover:underline">Terms</Link>
                 </div>
             </footer>
         </div>
