@@ -29,6 +29,9 @@ export interface LibraryBook {
     classId?: string | null;
     allowDownload?: boolean;
     coverUrl?: string;
+    /** Signed, temporary cover URL; the bucket is private so `coverUrl` alone is not readable. */
+    coverAccessUrl?: string;
+    cover?: { url?: string; accessUrl?: string } | null;
     publishedAt?: string | null;
     access?: LibraryBookAccess;
 }
