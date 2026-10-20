@@ -207,6 +207,13 @@ export default function SignupPage() {
             <span>Sign Up</span>
           )}
         </button>
+
+        <p className="text-center text-xs text-gray-500">
+          By signing up, you agree to our{' '}
+          <Link href="/terms" target="_blank" className="font-semibold text-brand-orange hover:underline">Terms and Conditions</Link>
+          {' '}and{' '}
+          <Link href="/privacy" target="_blank" className="font-semibold text-brand-orange hover:underline">Privacy Policy</Link>.
+        </p>
       </form>
 
       {/* Log In Prompt Link */}

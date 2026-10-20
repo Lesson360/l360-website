@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { CONTACT } from './links';
 import { PlanCards } from './PlanCards';
 import { StoreBadges } from './StoreBadges';
@@ -67,6 +68,11 @@ export function SubscriptionSection() {
                 <div className="flex flex-col gap-1.5">
                     <b className="text-ink">Socials</b>
                     <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="text-[#2D2A52] hover:text-ink hover:underline">Instagram</a>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <b className="text-ink">Legal</b>
+                    <Link href="/privacy" className="text-[#2D2A52] hover:text-ink hover:underline">Privacy Policy</Link>
+                    <Link href="/terms" className="text-[#2D2A52] hover:text-ink hover:underline">Terms and Conditions</Link>
                 </div>
             </footer>
         </section>
