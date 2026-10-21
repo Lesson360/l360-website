@@ -1,5 +1,6 @@
 import { Button } from './primitives';
 import { StoreBadges } from './StoreBadges';
+import { HeroPhotoColumns } from './HeroPhotoColumns';
 
 const CHIPS = [
     { label: '3,000+ VIDEO LESSONS', href: '#explore' },
@@ -17,6 +18,8 @@ export function Hero() {
     return (
         <section
             data-section=""
+            data-hero=""
+            data-nodevice=""
             data-bg="#FFFFFF"
             className="relative mx-auto grid min-h-[100svh] max-w-[1360px] items-center gap-8 px-[clamp(20px,5vw,72px)] pb-[60px] pt-[clamp(96px,12vw,120px)] [grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))]"
         >
@@ -65,11 +68,7 @@ export function Hero() {
                 <StoreBadges delay={300} />
             </div>
 
-            <div data-slot="hero" className="relative flex min-h-[min(72vh,660px)] items-end justify-center">
-                <div className="hidden font-jetbrains text-[11px] font-bold tracking-[.12em] text-ink-muted min-[900px]:block [@media(hover:none)]:hidden">
-                    HOVER A PHONE · CLICK TO JUMP
-                </div>
-            </div>
+            <HeroPhotoColumns />
         </section>
     );
 }

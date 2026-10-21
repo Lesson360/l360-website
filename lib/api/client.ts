@@ -39,7 +39,8 @@ export class ApiClient {
             requestUrl.includes('/auth/login') ||
             requestUrl.includes('/auth/register') ||
             requestUrl.includes('/auth/verify-otp') ||
-            requestUrl.includes('/auth/resend-otp');
+            requestUrl.includes('/auth/resend-otp') ||
+            requestUrl.includes('/auth/delete-by-email');
 
           if (!isAuthEndpoint) {
             Cookies.remove('token');
