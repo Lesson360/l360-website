@@ -22,54 +22,39 @@ export function ChildSwitcher() {
     const [isOpen, setIsOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [classNames, setClassNames] = useState<Record<string, string>>({});
-    const classMapCache = useRef<Record<string, string>>({});
+    // Levels already fetched (or in flight). Each level is requested at most once, even
+    // when a child's class isn't in its level's list (e.g. the class was deleted).
+    const fetchedLevels = useRef<Set<string>>(new Set());
     const containerRef = useRef<HTMLDivElement>(null);
 
     useOnClickOutside(containerRef, () => setIsOpen(false));
 
     useEffect(() => {
-        const fetchClasses = async () => {
-            const newNames: Record<string, string> = { ...classNames };
-            let hasChanges = false;
+        const levelIds = Array.from(new Set(
+            children
+                .filter((c) => c.currentClassId && c.currentLevelId)
+                .map((c) => c.currentLevelId as string),
+        )).filter((id) => !fetchedLevels.current.has(id));
 
-            for (const child of children) {
-                const classId = child.currentClassId;
-                const levelId = child.currentLevelId;
-
-                if (!classId || !levelId || newNames[classId] || classMapCache.current[classId]) {
-                    if (classId && classMapCache.current[classId] && !newNames[classId]) {
-                        newNames[classId] = classMapCache.current[classId];
-                        hasChanges = true;
-                    }
-                    continue;
-                }
-
-                try {
-                    const res = await schoolStructureApi.getClassesByLevel(levelId);
+        levelIds.forEach((levelId) => {
+            fetchedLevels.current.add(levelId);
+            schoolStructureApi.getClassesByLevel(levelId)
+                .then((res) => {
                     const raw = res.data;
                     const items: any[] = Array.isArray(raw) ? raw : (raw as any)?.items || [];
+                    const names: Record<string, string> = {};
                     for (const cls of items) {
                         const id = cls.id || cls._id || '';
-                        if (id) {
-                            classMapCache.current[id] = cls.name;
-                            newNames[id] = cls.name;
-                            hasChanges = true;
-                        }
+                        if (id) names[id] = cls.name;
                     }
-                } catch {
-                    // silently fail and try again later if needed
-                }
-            }
-
-            if (hasChanges) {
-                setClassNames(newNames);
-            }
-        };
-
-        if (children.length > 0) {
-            fetchClasses();
-        }
-    }, [children, classNames]);
+                    setClassNames((prev) => ({ ...prev, ...names }));
+                })
+                .catch(() => {
+                    // Allow a retry the next time the child list changes.
+                    fetchedLevels.current.delete(levelId);
+                });
+        });
+    }, [children]);
 
     const activeName = activeChild?.name || activeChild?.childName || (isLoading ? 'Loading...' : 'Add a Child');
     const activeId = activeChild?.id || activeChild?._id;

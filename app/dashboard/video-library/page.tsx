@@ -924,9 +924,18 @@ export default function VideoLibraryPage() {
 
                     {/* Subjects Grid */}
                     {loadingData ? (
-                        <div className="py-12 flex flex-col items-center justify-center space-y-3">
-                            <Loader2 className="w-8 h-8 text-[#FF4801] animate-spin" />
-                            <p className="text-sm font-bold text-gray-500">Loading Courses...</p>
+                        // Skeletons in the shape of the subject cards, so the grid fills in place.
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" role="status" aria-label="Loading courses">
+                            {[0, 1, 2, 3].map(i => (
+                                <div key={i} className="p-6 rounded-3xl bg-gray-100 border border-gray-200/60 flex flex-col items-center text-center space-y-4 animate-pulse">
+                                    <div className="w-14 h-14 rounded-2xl bg-gray-200" />
+                                    <div className="w-full flex flex-col items-center space-y-2">
+                                        <div className="h-4 w-2/3 rounded-full bg-gray-200" />
+                                        <div className="h-3 w-5/6 rounded-full bg-gray-200/80" />
+                                    </div>
+                                    <div className="h-3 w-24 rounded-full bg-gray-200/80" />
+                                </div>
+                            ))}
                         </div>
                     ) : filteredSubjects.length === 0 ? (
                         <div className="py-12 flex items-center justify-center">
