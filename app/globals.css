@@ -116,6 +116,22 @@ html {
   }
 }
 
+/* 404 page: the unplugged phone's sparks flicker */
+@keyframes nf-spark {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.nf-spark {
+  animation: nf-spark 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-spark {
+    animation: none;
+  }
+}
+
 .site-shell {
   width: min(90%, 1600px);
   margin-left: auto;
