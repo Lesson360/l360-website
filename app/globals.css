@@ -99,6 +99,33 @@ html {
   }
 }
 
+/* Hero: photo columns drifting upward on an endless loop. */
+.hero-columns {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+}
+
+@keyframes hero-column-up {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -50%, 0); }
+}
+
+.hero-column {
+  animation: hero-column-up 48s linear infinite;
+  will-change: transform;
+}
+
+/* Start the second column half a loop ahead so the cards sit staggered. */
+.hero-column.is-offset {
+  animation-delay: -24s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-column {
+    animation: none;
+  }
+}
+
 /* Pre-launch pages: slow floating visuals */
 @keyframes launch-float {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--tilt, 0deg)); }

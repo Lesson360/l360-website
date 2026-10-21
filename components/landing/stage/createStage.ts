@@ -8,7 +8,8 @@ type Three = typeof THREE_NS;
  *
  * The page markup describes the choreography through data attributes:
  *   [data-section][data-bg]   sections whose colours blend into the fixed background
- *   [data-slot="hero"|"cta"]  where the phones spin as a ring
+ *   [data-hero]               the hero; devices only appear from the first feature on
+ *   [data-slot="cta"]         where the phones spin as a ring
  *   [data-feature=N] [data-slot]  where the phones stack (or a tablet/laptop takes over)
  *   [data-nodevice]           sections that hide the devices entirely
  *   [data-speed]              parallax factor for decorative elements
@@ -49,9 +50,8 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
     const q = <T extends HTMLElement = HTMLElement>(s: string) => Array.from(root.querySelectorAll<T>(s));
     const hex = (h?: string) => { const n = parseInt((h || '#FFFFFF').slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
 
-    const heroSlot = root.querySelector<HTMLElement>('[data-slot="hero"]')!;
     const ctaSlot = root.querySelector<HTMLElement>('[data-slot="cta"]')!;
-    const heroSec = heroSlot.closest('section')!;
+    const heroSec = root.querySelector<HTMLElement>('[data-hero]');
     const feats = q('[data-feature]')
         .sort((a, b) => Number(a.dataset.feature) - Number(b.dataset.feature))
         .map(sec => ({ sec, slot: sec.querySelector<HTMLElement>('[data-slot]')! }));
@@ -78,11 +78,11 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
 
     // On one-column layouts the device slot moves above the copy and gets a shorter height.
     const orderSlots = () => {
-        [heroSlot, ...feats.map(f => f.slot)].forEach(sl => {
+        feats.forEach(({ slot: sl }) => {
             const cols = getComputedStyle(sl.parentElement!).gridTemplateColumns.trim().split(/\s+/).length;
             const one = cols <= 1;
-            sl.style.order = one && sl !== heroSlot ? '-1' : '';
-            sl.style.minHeight = one ? (sl === heroSlot ? '46vh' : '58vh') : (sl === heroSlot ? 'min(72vh, 660px)' : 'min(80vh, 760px)');
+            sl.style.order = one ? '-1' : '';
+            sl.style.minHeight = one ? '58vh' : 'min(80vh, 760px)';
         });
     };
     orderSlots();
@@ -345,13 +345,13 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
         const cs = feats.map(f => centerOf(f.sec));
         const F = feats.length;
 
-        // Where are we in the choreography? hero ring → feature stacks → CTA ring.
+        // Where are we in the choreography? first stack → feature stacks → CTA ring.
         let f: number, ring: number, A: Box, B: Box, e: number, sA: number, sB: number, rsT: number | null = null, ssT: number | null = null;
-        if (vc <= cs[0]) {
-            const hc = centerOf(heroSec);
-            e = sm(0.15, 0.85, cl((vc - hc) / (cs[0] - hc)));
-            A = box(heroSlot); B = box(feats[0].slot); sA = ringS(A); sB = stackS(B); rsT = sA; ssT = sB;
-            ring = 1 - e; f = 0;
+        // Above the first feature the stack rides in with its slot (the hero hides it via [data-nodevice]).
+        const entering = vc <= cs[0];
+        if (entering) {
+            A = B = box(feats[0].slot); sA = sB = stackS(A);
+            e = 0; ring = 0; f = 0;
         } else if (vc >= cs[F - 1]) {
             const cc = centerOf(ctaSlot);
             e = sm(0.2, 0.8, cl((vc - cs[F - 1]) / (cc - cs[F - 1])));
@@ -366,7 +366,7 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
         const narrow = !wide;
         const tx = lerp(A.x, B.x, e);
         const slotY = lerp(A.y, B.y, e);
-        const ty = narrow ? slotY : lerp(vc, slotY, ring);
+        const ty = narrow ? slotY : entering ? Math.max(vc, slotY) : lerp(vc, slotY, ring);
 
         // On narrow screens only show devices while their slot is on screen.
         let v = 1;
