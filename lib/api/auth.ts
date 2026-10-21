@@ -65,7 +65,20 @@ export const authApi = {
       data
     ),
 
-  affiliateVerifyEmail: (data: { email: string; otp: string }) =>
+  // Account deletion: emails a code, then deletes the account once the code is confirmed.
+  requestAccountDeletion: (data: { email: string }) =>
+    apiClient.post<{ message: string }>(
+      '/auth/delete-by-email',
+      data
+    ),
+
+  confirmAccountDeletion: (data: { email: string; otp: string }) =>
+    apiClient.post<{ message: string }>(
+      '/auth/delete-by-email/confirm',
+      data
+    ),
+
+  affiliateVerifyEmail:(data: { email: string; otp: string }) =>
     apiClient.post<{ message: string }>(
       '/affiliate-auth/verify-email',
       data
