@@ -13,10 +13,8 @@ import {
     AlertCircle,
     Eye,
     EyeOff,
-    Trash2,
 } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
-import Link from 'next/link';
 
 export default function SettingsPage() {
     // Form & Profile Data State
@@ -432,31 +430,6 @@ export default function SettingsPage() {
                         )}
                     </button>
                 </form>
-            </div>
-
-            {/* SECTION 3: DELETE ACCOUNT CARD */}
-            <div className="bg-white rounded-3xl border border-red-200 p-6 sm:p-10 shadow-xs space-y-6">
-                <div className="flex items-center gap-3 border-b border-gray-100 pb-6">
-                    <span className="w-8 h-8 rounded-full bg-red-100 text-red-700 font-bold text-sm flex items-center justify-center shrink-0">
-                        3
-                    </span>
-                    <div>
-                        <h2 className="text-xl font-black text-gray-900 tracking-tight">
-                            Delete Account
-                        </h2>
-                        <p className="text-xs text-gray-500 font-medium">
-                            Permanently remove your Lesson360 account. We will email you a code to confirm.
-                        </p>
-                    </div>
-                </div>
-
-                <Link
-                    href="/dashboard/settings/delete-account"
-                    className="inline-flex px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow-md transition-all items-center justify-center gap-2"
-                >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete my account</span>
-                </Link>
             </div>
         </div>
     );
