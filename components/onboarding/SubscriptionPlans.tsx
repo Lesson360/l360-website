@@ -44,13 +44,6 @@ const CARD_THEMES = [
     },
 ];
 
-// Fallback TestDriller Products if API endpoint returns empty array
-const DEFAULT_TEST_DRILLER_PRODUCTS: TestDrillerProduct[] = [
-    { id: '6a8ebd63bac2be1a209407f0', name: 'BECE / Junior Secondary Exam Prep', description: 'Past questions, solutions & mock tests for JSS 1 - JSS 3.' },
-    { id: '6a8c3bf39117ec00347ce914', name: 'SSCE / Senior Secondary Exam Prep', description: 'WAEC & NECO CBT practice questions and detailed solutions.' },
-    { id: 'utme-jamb-prep', name: 'UTME / JAMB Exam Prep', description: 'Full CBT UTME exam simulation & speed drills.' },
-];
-
 // Fallback plans if API returns empty array
 const FALLBACK_PLANS: SubscriptionPlan[] = [
     {
@@ -123,6 +116,14 @@ export default function SubscriptionPlans() {
     const [modalSelectedTdId, setModalSelectedTdId] = useState<string>('');
     const [modalTdProducts, setModalTdProducts] = useState<TestDrillerProduct[]>([]);
     const [isLoadingModalTd, setIsLoadingModalTd] = useState(false);
+    const [modalTdError, setModalTdError] = useState('');
+
+    // Paystack needs the parent's email. Phone sign-ups who resume here without one are
+    // asked for it before checkout, then checkout continues with the same plan/package.
+    const [pendingCheckout, setPendingCheckout] = useState<{ plan: SubscriptionPlan; tdId?: string } | null>(null);
+    const [emailInput, setEmailInput] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [isSavingEmail, setIsSavingEmail] = useState(false);
 
     const [selectedCycle, setSelectedCycle] = useState<string>('all');
     const [selectedPlanId, setSelectedPlanId] = useState<string>('');
@@ -225,6 +226,8 @@ export default function SubscriptionPlans() {
             childName: resolvedChildName,
             levelId: resolvedLevelId,
             classId: resolvedClassId,
+            // null when the profile couldn't be loaded, so we only block checkout on a known-missing email
+            parentEmail: profileRes ? ((userObj?.email as string) || '') : null,
         };
     };
 
@@ -276,16 +279,17 @@ export default function SubscriptionPlans() {
             setActiveModalPlan(plan);
             setModalSelectedTdId('');
             setModalTdProducts([]);
+            setModalTdError('');
             setIsLoadingModalTd(true);
 
             try {
                 const academicInfo = await resolveChildAndAcademicInfo();
                 const planId = plan.id || plan._id || '';
-                // Scope to the plan + the child's level only (not class) — a class-level filter
-                // was excluding Test Driller products meant for the whole level.
+                // The API requires both levelId and classId (it returns 400 without classId).
                 const res = await subscriptionsApi.getPlanTestDrillerProducts(
                     planId,
-                    academicInfo.levelId
+                    academicInfo.levelId,
+                    academicInfo.classId
                 );
 
                 let items: TestDrillerProduct[] = [];
@@ -295,10 +299,13 @@ export default function SubscriptionPlans() {
                     items = (res.data as any).items;
                 }
 
-                setModalTdProducts(items.length > 0 ? items : DEFAULT_TEST_DRILLER_PRODUCTS);
-            } catch (err) {
+                // Only real products from the API: a made-up fallback id makes checkout fail
+                // with "Test Driller product not found".
+                setModalTdProducts(items);
+                if (items.length === 1) setModalSelectedTdId(items[0].id || items[0]._id || '');
+            } catch (err: any) {
                 console.warn('Could not fetch level/class-scoped Test Driller products:', err);
-                setModalTdProducts(DEFAULT_TEST_DRILLER_PRODUCTS);
+                setModalTdError(err?.response?.data?.message || 'We couldn’t load the Test Driller packages. Please try again.');
             } finally {
                 setIsLoadingModalTd(false);
             }
@@ -322,6 +329,14 @@ export default function SubscriptionPlans() {
             const activeChildName = academicInfo.childName;
             const activeLevelId = academicInfo.levelId;
             const activeClassId = academicInfo.classId;
+
+            if (academicInfo.parentEmail === '') {
+                setActiveModalPlan(null);
+                setPendingCheckout({ plan, tdId: selectedTdId });
+                setEmailError('');
+                setIsInitializing(false);
+                return;
+            }
 
             const callbackUrl = typeof window !== 'undefined'
                 ? `${window.location.origin}/onboarding/checkout`
@@ -380,6 +395,28 @@ export default function SubscriptionPlans() {
                 'Failed to start payment checkout. Please try again.';
             setErrorMessage(msg);
             setIsInitializing(false);
+        }
+    };
+
+    const handleSaveEmailAndContinue = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!pendingCheckout) return;
+        const value = emailInput.trim();
+        if (!/^\S+@\S+\.\S+$/.test(value)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+        setIsSavingEmail(true);
+        setEmailError('');
+        try {
+            await authApi.updateProfile({ email: value });
+            const { plan, tdId } = pendingCheckout;
+            setPendingCheckout(null);
+            executeCheckout(plan, tdId);
+        } catch (err: any) {
+            setEmailError(err?.response?.data?.message || 'We couldn’t save your email. Please try again.');
+        } finally {
+            setIsSavingEmail(false);
         }
     };
 
@@ -682,6 +719,17 @@ export default function SubscriptionPlans() {
                                         <Loader2 className="w-6 h-6 text-brand-orange animate-spin" />
                                         <p className="text-xs font-comic text-gray-500">Finding packages for this class...</p>
                                     </div>
+                                ) : modalTdError ? (
+                                    <div className="py-6 flex flex-col items-center gap-3 text-center">
+                                        <p className="text-xs font-comic text-red-600">{modalTdError}</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => handlePlanClick(activeModalPlan)}
+                                            className="px-4 py-2 rounded-full border border-gray-300 text-xs font-comic font-bold text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                        >
+                                            Try again
+                                        </button>
+                                    </div>
                                 ) : modalTdList.length === 0 ? (
                                     <p className="text-xs font-comic text-gray-500 text-center py-8">
                                         No TestDriller packages are available for this class yet.
@@ -746,6 +794,51 @@ export default function SubscriptionPlans() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Email needed before payment */}
+            {pendingCheckout && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6">
+                    <div className="fixed inset-0" onClick={() => !isSavingEmail && setPendingCheckout(null)} />
+                    <form
+                        onSubmit={handleSaveEmailAndContinue}
+                        className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-100 z-10 space-y-5 font-comic"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setPendingCheckout(null)}
+                            disabled={isSavingEmail}
+                            aria-label="Close"
+                            className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-bold text-gray-900 leading-tight">Add your email to continue</h3>
+                            <p className="text-sm text-gray-500">
+                                Our payment partner needs an email address to process your payment and send your receipt.
+                            </p>
+                        </div>
+                        <input
+                            type="email"
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            placeholder="parent@example.com"
+                            autoComplete="email"
+                            autoFocus
+                            className="w-full px-4 py-3.5 rounded-2xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 text-sm font-medium"
+                        />
+                        {emailError && <p className="text-xs text-red-600">{emailError}</p>}
+                        <button
+                            type="submit"
+                            disabled={isSavingEmail}
+                            className="w-full py-4 px-6 rounded-2xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                        >
+                            {isSavingEmail ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                            <span>{isSavingEmail ? 'Saving...' : 'Save and continue to payment'}</span>
+                        </button>
+                    </form>
+                </div>
+            )}
 
         </div>
     );
