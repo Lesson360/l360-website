@@ -48,6 +48,8 @@ export default function ChildSetupForm() {
     // Form Fields - Step 1
     const [childName, setChildName] = useState('');
     const [parentEmail, setParentEmail] = useState('');
+    // Email already saved on the account (empty for phone sign-ups).
+    const [accountEmail, setAccountEmail] = useState('');
     const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[0]); // Default Nigeria (+234)
     const [parentPhone, setParentPhone] = useState('');
     const [createdChildId, setCreatedChildId] = useState<string>('');
@@ -76,7 +78,10 @@ export default function ChildSetupForm() {
                 const profileRes = await authApi.getProfile().catch(() => null);
                 if (profileRes?.data) {
                     const userObj = profileRes.data.user || profileRes.data;
-                    if (userObj.email) setParentEmail(userObj.email);
+                    if (userObj.email) {
+                        setParentEmail(userObj.email);
+                        setAccountEmail(userObj.email);
+                    }
 
                     const userPhoneVal = userObj.phone || userObj.phoneNumber || userObj.phone_number || '';
                     if (userPhoneVal) {
@@ -202,22 +207,38 @@ export default function ChildSetupForm() {
             return;
         }
 
+        // Paystack needs the parent's email, so a phone sign-up must add one here
+        // or checkout fails later in the flow.
+        if (!parentEmail.trim()) {
+            setErrorMessage('Please enter your email address. We need it to process your payment.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
             // Update parent profile with signup method provided (email or phone)
             const fullPhone = parentPhone.trim() ? `${selectedCountry.dialCode}${parentPhone.trim()}` : '';
             const updatePayload: Record<string, string> = {};
-            if (parentEmail.trim()) updatePayload.email = parentEmail.trim();
+            const newEmail = parentEmail.trim() !== accountEmail ? parentEmail.trim() : '';
+            if (newEmail) updatePayload.email = newEmail;
             if (fullPhone) {
                 updatePayload.phone = fullPhone;
                 updatePayload.phoneNumber = fullPhone;
             }
 
             if (Object.keys(updatePayload).length > 0) {
-                await authApi.updateProfile(updatePayload).catch((err) => {
+                try {
+                    await authApi.updateProfile(updatePayload);
+                    if (newEmail) setAccountEmail(newEmail);
+                } catch (err: any) {
+                    // A missing email blocks payment, so don't continue silently without it.
+                    if (newEmail) {
+                        setErrorMessage(err?.response?.data?.message || 'We couldn’t save your email. Please check it and try again.');
+                        return;
+                    }
                     console.warn('Parent profile update response:', err);
-                });
+                }
             }
 
             // Advance to Step 2 screen (Select Level & Class)
@@ -422,7 +443,7 @@ export default function ChildSetupForm() {
                         {/* Input 2: Parent Email */}
                         <div className="space-y-2">
                             <label className="block text-sm font-bold text-gray-800">
-                                Parent Email Address
+                                Parent Email Address <span className="text-brand-orange">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -437,7 +458,7 @@ export default function ChildSetupForm() {
                                 />
                             </div>
                             <p className="text-[11px] text-gray-400">
-                                Prefilled with your signup email. You can update it if needed.
+                                {accountEmail ? 'Prefilled with your signup email. You can update it if needed.' : 'Needed to pay for your plan and send your receipts.'}
                             </p>
                         </div>
 

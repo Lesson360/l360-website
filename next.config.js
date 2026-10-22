@@ -1,5 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      // Account deletion moved out of the dashboard so it works without signing in
+      // (App Store review). Redirects run before middleware, so old app links skip the login check.
+      {
+        source: '/dashboard/settings/delete-account',
+        destination: '/delete-account',
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

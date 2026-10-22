@@ -12,7 +12,7 @@ const errorMessage = (err: any, fallback: string) => err?.response?.data?.messag
 
 /**
  * Two-step account deletion: request a code by email, then confirm it.
- * Rendered at /dashboard/settings/delete-account, which the mobile app links to.
+ * Rendered on the public /delete-account page (no sign-in needed), which the mobile app links to.
  * Without `lockedEmail` the user types the email themselves.
  */
 export function DeleteAccountFlow({ lockedEmail }: { lockedEmail?: string }) {

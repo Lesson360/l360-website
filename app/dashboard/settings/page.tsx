@@ -13,10 +13,8 @@ import {
     AlertCircle,
     Eye,
     EyeOff,
-    Trash2,
 } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
-import Link from 'next/link';
 
 export default function SettingsPage() {
     // Form & Profile Data State
@@ -25,11 +23,14 @@ export default function SettingsPage() {
     const [savingProfile, setSavingProfile] = useState(false);
     const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    // Profile Details with initial defaults
-    const [firstName, setFirstName] = useState('Samuel');
-    const [surname, setSurname] = useState('Adams');
-    const [phoneNumber, setPhoneNumber] = useState('+234811614592');
-    const [email, setEmail] = useState('samueladams@gmail.com');
+    // Profile Details
+    const [firstName, setFirstName] = useState('');
+    const [surname, setSurname] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
+    // Phone sign-ups may have no email yet. They can add one here (payments need it);
+    // an email already on the account stays locked.
+    const [hasSavedEmail, setHasSavedEmail] = useState(false);
 
     // Security & Password Change State
     const [currentPassword, setCurrentPassword] = useState('');
@@ -57,6 +58,7 @@ export default function SettingsPage() {
                 if (uLast) setSurname(uLast);
                 if (uPhone) setPhoneNumber(uPhone);
                 if (uEmail) setEmail(uEmail);
+                setHasSavedEmail(!!uEmail);
             }
         } catch (err) {
             console.error('Failed to load profile settings:', err);
@@ -69,12 +71,7 @@ export default function SettingsPage() {
         loadProfileData();
     }, [loadProfileData]);
 
-    // Handle Edit Click - ensure state has fallback values
     const handleStartEdit = () => {
-        if (!firstName) setFirstName('Samuel');
-        if (!surname) setSurname('Adams');
-        if (!phoneNumber) setPhoneNumber('+234811614592');
-        if (!email) setEmail('samueladams@gmail.com');
         setIsEditing(true);
     };
 
@@ -86,11 +83,15 @@ export default function SettingsPage() {
 
         try {
             // Update Auth Profile
-            await authApi.updateProfile({
+            const payload: Record<string, string> = {
                 firstName,
                 lastName: surname,
                 phoneNumber,
-            });
+            };
+            if (!hasSavedEmail && email.trim()) payload.email = email.trim();
+
+            await authApi.updateProfile(payload);
+            if (payload.email) setHasSavedEmail(true);
 
             setToastMessage({ type: 'success', text: 'Personal details updated successfully.' });
             setIsEditing(false);
@@ -255,7 +256,7 @@ export default function SettingsPage() {
                                     />
                                 ) : (
                                     <div className="w-full px-4 py-3.5 rounded-xl bg-[#F4F4F6] text-sm font-semibold text-gray-900 border border-gray-100">
-                                        {firstName || 'Samuel'}
+                                        {firstName || <span className="text-gray-400">Not set</span>}
                                     </div>
                                 )}
                             </div>
@@ -275,7 +276,7 @@ export default function SettingsPage() {
                                     />
                                 ) : (
                                     <div className="w-full px-4 py-3.5 rounded-xl bg-[#F4F4F6] text-sm font-semibold text-gray-900 border border-gray-100">
-                                        {surname || 'Adams'}
+                                        {surname || <span className="text-gray-400">Not set</span>}
                                     </div>
                                 )}
                             </div>
@@ -294,17 +295,29 @@ export default function SettingsPage() {
                                     />
                                 ) : (
                                     <div className="w-full px-4 py-3.5 rounded-xl bg-[#F4F4F6] text-sm font-semibold text-gray-900 border border-gray-100">
-                                        {phoneNumber || '+234811614592'}
+                                        {phoneNumber || <span className="text-gray-400">Not set</span>}
                                     </div>
                                 )}
                             </div>
 
-                            {/* Email Address (Non-editable) */}
+                            {/* Email Address: locked once set, addable when missing */}
                             <div className="space-y-1.5">
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Email Address
                                 </label>
-                                {isEditing ? (
+                                {isEditing && !hasSavedEmail ? (
+                                    <>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="parent@example.com"
+                                            autoComplete="email"
+                                            className="w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-300 text-sm font-semibold text-gray-900 focus:outline-none focus:border-brand-orange focus:bg-white transition-all"
+                                        />
+                                        <p className="text-[11px] text-gray-500">Needed for payment receipts and to pay for a plan.</p>
+                                    </>
+                                ) : isEditing ? (
                                     <div className="relative">
                                         <input
                                             type="email"
@@ -317,7 +330,7 @@ export default function SettingsPage() {
                                     </div>
                                 ) : (
                                     <div className="w-full px-4 py-3.5 rounded-xl bg-[#F4F4F6] text-sm font-semibold text-gray-900 border border-gray-100">
-                                        {email || 'samueladams@gmail.com'}
+                                        {email || <span className="text-gray-400">Not added yet. Click Edit Information to add one.</span>}
                                     </div>
                                 )}
                             </div>
@@ -432,31 +445,6 @@ export default function SettingsPage() {
                         )}
                     </button>
                 </form>
-            </div>
-
-            {/* SECTION 3: DELETE ACCOUNT CARD */}
-            <div className="bg-white rounded-3xl border border-red-200 p-6 sm:p-10 shadow-xs space-y-6">
-                <div className="flex items-center gap-3 border-b border-gray-100 pb-6">
-                    <span className="w-8 h-8 rounded-full bg-red-100 text-red-700 font-bold text-sm flex items-center justify-center shrink-0">
-                        3
-                    </span>
-                    <div>
-                        <h2 className="text-xl font-black text-gray-900 tracking-tight">
-                            Delete Account
-                        </h2>
-                        <p className="text-xs text-gray-500 font-medium">
-                            Permanently remove your Lesson360 account. We will email you a code to confirm.
-                        </p>
-                    </div>
-                </div>
-
-                <Link
-                    href="/dashboard/settings/delete-account"
-                    className="inline-flex px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow-md transition-all items-center justify-center gap-2"
-                >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete my account</span>
-                </Link>
             </div>
         </div>
     );
