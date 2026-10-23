@@ -10,7 +10,7 @@ export function AppSection() {
     const steps = [
         ['Take a quiz', 'Test what you have learned with 10 fun questions.'],
         ['Performance assessment', 'Monitor your progress.'],
-        ['Enrichment courses', 'Master new subjects.'],
+        ['Executive Development Program', 'Master new skills.'],
         ['Live videos', 'Real-time learning experiences.'],
     ];
     return (
@@ -171,6 +171,35 @@ export function ExamsSection() {
     );
 }
 
+// Called "enrichment courses" in the API (/standalone-courses); users see "Executive Development Program".
+export function ExecutiveProgramSection() {
+    const tracks = [
+        ['💻', 'Coding & technology', 'Build real projects, step by step'],
+        ['✍️', 'Creative writing', 'Find their voice and tell great stories'],
+        ['🚀', 'Advanced learning tracks', 'Stretch beyond the school curriculum'],
+    ];
+    return (
+        <FeatureSection id="executive-program" index={8} bg="#E9E4FB" slot="right">
+            <Eyebrow color="oklch(0.48 0.17 290)">EXECUTIVE DEVELOPMENT PROGRAM</Eyebrow>
+            <Heading>Skills that go beyond the classroom.</Heading>
+            <Lede className="text-ink-soft">Specialised courses that grow your child’s talents, with guided video lessons, notes and worksheets in every section.</Lede>
+            <div className="flex flex-col">
+                {tracks.map(([icon, title, sub], i) => (
+                    <ListRow key={title} lead={<span aria-hidden="true">{icon}</span>} title={title} sub={sub} delay={180 + i * 60} last={i === tracks.length - 1} />
+                ))}
+            </div>
+            <div data-reveal="" data-delay="200" className="flex flex-wrap gap-2">
+                <Chip className="bg-[#8A63E0] text-cream">Video lessons</Chip>
+                <Chip className="bg-cream">Notes &amp; worksheets</Chip>
+                <Chip className="bg-cream">Enrol per child</Chip>
+            </div>
+            <div data-reveal="" data-delay="260">
+                <Button href="/dashboard/enrichment-courses">Browse the programs →</Button>
+            </div>
+        </FeatureSection>
+    );
+}
+
 export function LevelsSection() {
     const levels = [
         { n: '01', name: 'Early Years', sub: 'Play-based foundations', cls: 'bg-cream', tilt: 'hover:-rotate-1' },
@@ -179,7 +208,7 @@ export function LevelsSection() {
         { n: '04', name: 'Secondary', sub: 'Exam practice & past questions', cls: 'bg-cream', tilt: 'hover:rotate-1' },
     ];
     return (
-        <FeatureSection id="levels" index={8} bg="#FFE4D3" slot="right">
+        <FeatureSection id="levels" index={9} bg="#FFE4D3" slot="left">
             <Eyebrow color="oklch(0.52 0.17 45)">LEARNING LEVELS</Eyebrow>
             <Heading>Support for every learning level.</Heading>
             <Lede className="text-ink-soft">Lesson360 is structured for early years, nursery, primary, and secondary learners.</Lede>

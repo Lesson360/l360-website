@@ -68,15 +68,15 @@ export default function ComingSoonPage() {
                             <Image src="/landing/teens-studying-laptop.webp" alt="Teenagers studying together on a laptop" fill sizes="(max-width: 760px) 52vw, 290px" className="object-cover" />
                         </div>
                     </div>
-                    <div className="absolute left-1/2 top-1/2 z-10 w-[34%] -translate-x-1/2 -translate-y-1/2">
-                        <div className="launch-float [animation-delay:-1.5s]">
+                    <div className="absolute left-1/2 top-1/2 z-10 w-[28%] -translate-x-1/2 -translate-y-1/2">
+                        <div className="launch-float rounded-[clamp(16px,3vw,30px)] bg-ink p-[clamp(4px,.7vw,7px)] shadow-[0_30px_40px_-10px_rgba(23,21,58,.45)] [--tilt:2deg] [animation-delay:-1.5s]">
                             <Image
-                                src="/landing/app-welcome.png"
-                                alt="The Lesson360 app welcome screen"
-                                width={616}
-                                height={891}
-                                sizes="(max-width: 760px) 34vw, 190px"
-                                className="h-auto w-full drop-shadow-[0_30px_40px_rgba(23,21,58,.4)]"
+                                src="/landing/app/home.jpg"
+                                alt="The Lesson360 app home screen"
+                                width={736}
+                                height={1600}
+                                sizes="(max-width: 760px) 28vw, 160px"
+                                className="block h-auto w-full rounded-[clamp(12px,2.4vw,24px)]"
                             />
                         </div>
                     </div>

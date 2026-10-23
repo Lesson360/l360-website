@@ -48,7 +48,7 @@ const SECTIONS: LegalSection[] = [
             <>
                 <p>
                     Lesson360 offers video lessons, quizzes, diagnostic tests, the Test Driller and practice exams, a Digital
-                    Library, enrichment courses, live classes and support services. What you can use depends on your plan and
+                    Library, the Executive Development Program, live classes and support services. What you can use depends on your plan and
                     purchases, and on your child’s class and level.
                 </p>
                 <p>
@@ -66,7 +66,7 @@ const SECTIONS: LegalSection[] = [
             <ul>
                 <li>Prices are shown before you pay. Prices may be displayed in your local currency for convenience, but you are charged in the currency shown at checkout.</li>
                 <li>Payments are processed securely by Paystack. Paystack’s own terms also apply to your payment.</li>
-                <li>A subscription gives access to the content in your plan for the period shown at checkout. Some items, such as Test Driller packages, paid library books, enrichment courses and support services, are sold separately.</li>
+                <li>A subscription gives access to the content in your plan for the period shown at checkout. Some items, such as Test Driller packages, paid library books, Executive Development Program courses and support services, are sold separately.</li>
                 <li>Access starts once your payment has been confirmed.</li>
                 <li>We may change our prices. Changes won’t affect a period you have already paid for, and we’ll tell you before a new price applies to you.</li>
             </ul>

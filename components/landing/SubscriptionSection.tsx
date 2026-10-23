@@ -5,6 +5,24 @@ import { PlanCards } from './PlanCards';
 import { StoreBadges } from './StoreBadges';
 import { CurrencySelect } from '@/components/currency/CurrencySelect';
 
+/** A real app screenshot in a simple phone frame. The outer div carries the parallax offset, the inner one the tilt. */
+function PhoneShot({ src, alt, speed, tilt }: { src: string; alt: string; speed: string; tilt: string }) {
+    return (
+        <div data-speed={speed} className="hidden w-[clamp(96px,15vw,230px)] flex-none sm:block">
+            <div className={`${tilt} rounded-[clamp(18px,2.6vw,38px)] bg-ink p-[clamp(4px,.55vw,8px)] shadow-[0_30px_40px_-10px_rgba(23,21,58,.45)]`}>
+                <Image
+                    src={src}
+                    alt={alt}
+                    width={736}
+                    height={1600}
+                    sizes="(max-width: 760px) 22vw, 230px"
+                    className="block h-auto w-full rounded-[clamp(14px,2.1vw,31px)]"
+                />
+            </div>
+        </div>
+    );
+}
+
 export function SubscriptionSection() {
     return (
         <section
@@ -26,32 +44,16 @@ export function SubscriptionSection() {
 
             {/* App screenshots flank the slot where the phone ring returns. */}
             <div className="flex w-full max-w-[1360px] items-center justify-center">
-                <Image
-                    data-speed="0.14"
-                    src="/landing/app-dashboard.png"
-                    alt="Lesson360 app dashboard"
-                    width={351}
-                    height={891}
-                    sizes="(max-width: 760px) 22vw, 230px"
-                    className="hidden h-auto w-[clamp(84px,15vw,230px)] sm:block drop-shadow-[0_30px_40px_rgba(23,21,58,.35)]"
-                />
+                <PhoneShot speed="0.14" tilt="-rotate-6" src="/landing/app/home.jpg" alt="Lesson360 app home screen with subjects, quizzes and Test Driller" />
                 <div data-slot="cta" className="min-h-[min(52vh,480px)] max-w-[720px] flex-1" />
-                <Image
-                    data-speed="-0.14"
-                    src="/landing/app-welcome.png"
-                    alt="Lesson360 app welcome screen"
-                    width={616}
-                    height={891}
-                    sizes="(max-width: 760px) 26vw, 260px"
-                    className="hidden h-auto w-[clamp(96px,17vw,260px)] sm:block drop-shadow-[0_30px_40px_rgba(23,21,58,.35)]"
-                />
+                <PhoneShot speed="-0.14" tilt="rotate-6" src="/landing/app/progress.jpg" alt="Lesson360 app progress screen with scores and performance by subject" />
             </div>
 
             <PlanCards />
 
             <StoreBadges align="center" delay={120} />
 
-            <footer className="pointer-events-auto mt-auto grid w-full max-w-[1360px] gap-6 border-t border-ink/15 pt-12 text-left text-sm leading-normal text-[#2D2A52] [grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))]">
+            <footer id="contact" className="pointer-events-auto mt-auto scroll-mt-28 grid w-full max-w-[1360px] gap-6 border-t border-ink/15 pt-12 text-left text-sm leading-normal text-[#2D2A52] [grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))]">
                 <div className="flex flex-col gap-3">
                     <Image src="/landing/logo.png" alt="Lesson360" width={2576} height={509} className="block h-[22px] w-auto self-start [filter:brightness(0)_saturate(100%)_invert(8%)_sepia(30%)_hue-rotate(210deg)]" />
                     <span>© {new Date().getFullYear()} Lesson360</span>

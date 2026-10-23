@@ -2,7 +2,7 @@ import { LandingStage } from '@/components/landing/stage/LandingStage';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { Hero } from '@/components/landing/Hero';
 import {
-    AppSection, PreschoolSection, ReviewsSection, AffiliateSection, VideosSection, LibrarySection, QuizzesSection, ExamsSection, LevelsSection,
+    AppSection, PreschoolSection, ReviewsSection, AffiliateSection, VideosSection, LibrarySection, QuizzesSection, ExamsSection, ExecutiveProgramSection, LevelsSection,
 } from '@/components/landing/FeatureSections';
 import { FamiliesSection, CommunitySection } from '@/components/landing/PhotoSections';
 import { SubscriptionSection } from '@/components/landing/SubscriptionSection';
@@ -23,6 +23,7 @@ export default function Home() {
                 <LibrarySection />
                 <QuizzesSection />
                 <ExamsSection />
+                <ExecutiveProgramSection />
                 <LevelsSection />
                 <CommunitySection />
                 <SubscriptionSection />

@@ -5,6 +5,29 @@ export const PHONE_COLORS = ['#FF4A00', '#5B7BEA', '#3FB57A', '#8A63E0', '#F5B93
 export const SW = 600;
 export const SH = 1316;
 
+// Real app screenshots, one per phone. Phone k faces the reader in feature section k,
+// so each picks the screen closest to that section. The drawn screens below are the
+// fallback while an image loads (or if it fails).
+const APP = '/landing/app';
+export const PHONE_SHOTS = [
+  `${APP}/home.jpg`,                // the app
+  `${APP}/courses.jpg`,             // pre-school (tablet takes over)
+  `${APP}/progress.jpg`,            // guardian reviews
+  `${APP}/seer-assistant.jpg`,      // affiliate
+  `${APP}/episode-fractions.jpg`,   // videos (laptop takes over)
+  `${APP}/subject-mathematics.jpg`, // digital library
+  `${APP}/take-test.jpg`,           // quizzes
+  `${APP}/subject-mathematics.jpg`, // exams (laptop takes over)
+  `${APP}/courses.jpg`,             // executive development program
+];
+
+/** Paints a screenshot to fill the screen texture, cropping evenly from the sides. */
+export function drawShot(ctx: CanvasRenderingContext2D, img: HTMLImageElement) {
+  const s = Math.max(SW / img.naturalWidth, SH / img.naturalHeight);
+  const w = img.naturalWidth * s, h = img.naturalHeight * s;
+  ctx.drawImage(img, (SW - w) / 2, 0, w, h);
+}
+
 const INK = '#17153A', CREAM = '#FFF8EC', GREY = '#5A5778';
 // Canvas `font` strings can't read CSS variables, so the page passes in the
 // concrete family names next/font generated (see setScreenFonts).
@@ -56,12 +79,16 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
     tx('TAKE QUIZ', 76, 440, `700 22px ${FM}`, c);
     wrap('Test what you have learned with 10 fun questions!', 76, 486, 440, 38, `700 30px ${FD}`, CREAM);
     pill('Start Quiz', 76, 590, 220, 60, c, INK, 26);
-    const tiles = [['Performance Assessment', 'Monitor your progress', '#3FB57A'], ['Enrichment Courses', 'Master new subjects', '#5B7BEA'], ['Live Videos', 'Real-time learning', '#8A63E0']];
+    const tiles = [['Performance Assessment', 'Monitor your progress', '#3FB57A'], ['Executive Development Program', 'Master new skills', '#5B7BEA'], ['Live Videos', 'Real-time learning', '#8A63E0']];
     tiles.forEach(([t, s, col], k) => {
       const y = 712 + k * 140;
       rr(36, y, 528, 120, 30, '#FFFFFF');
       circ(100, y + 60, 32, col);
-      tx(t, 152, y + 54, `700 29px ${FD}`, INK);
+      // Shrink long titles to fit the tile instead of running off its edge.
+      let size = 29;
+      ctx.font = `700 ${size}px ${FD}`;
+      while (size > 18 && ctx.measureText(t).width > 392) ctx.font = `700 ${--size}px ${FD}`;
+      tx(t, 152, y + 54, `700 ${size}px ${FD}`, INK);
       tx(s, 152, y + 92, `500 24px ${FS}`, GREY);
     });
     button('View All', 1150, INK, CREAM);
