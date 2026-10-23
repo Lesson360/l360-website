@@ -213,6 +213,15 @@ export default function ChildSetupForm() {
             setErrorMessage('Please enter your email address. We need it to process your payment.');
             return;
         }
+        if (!/^\S+@\S+\.\S+$/.test(parentEmail.trim())) {
+            setErrorMessage('Please enter a valid email address.');
+            return;
+        }
+
+        if (!parentPhone.trim()) {
+            setErrorMessage('Please enter your phone number.');
+            return;
+        }
 
         setIsSubmitting(true);
 
@@ -451,6 +460,7 @@ export default function ChildSetupForm() {
                                 </div>
                                 <input
                                     type="email"
+                                    required
                                     value={parentEmail}
                                     onChange={(e) => setParentEmail(e.target.value)}
                                     placeholder="e.g. parent@example.com"
@@ -465,7 +475,7 @@ export default function ChildSetupForm() {
                         {/* Input 3: Parent Phone */}
                         <div className="space-y-2">
                             <label className="block text-sm font-bold text-gray-800">
-                                Phone Number
+                                Phone Number <span className="text-brand-orange">*</span>
                             </label>
                             <div className="flex items-center rounded-2xl border border-gray-300 bg-white shadow-xs focus-within:border-brand-orange focus-within:ring-2 focus-within:ring-brand-orange/20 overflow-hidden">
                                 <CountryCodeSelect
@@ -475,6 +485,7 @@ export default function ChildSetupForm() {
                                 />
                                 <input
                                     type="tel"
+                                    required
                                     disabled={isSubmitting}
                                     value={parentPhone}
                                     onChange={(e) => setParentPhone(e.target.value.replace(/\D/g, ''))}
