@@ -42,7 +42,7 @@ const NAV_ITEMS = [
         icon: FileText,
     },
     {
-        name: 'Enrichment Courses',
+        name: 'Executive Development Program',
         href: '/dashboard/enrichment-courses',
         icon: GraduationCap,
     },
@@ -155,7 +155,7 @@ export function DashboardSidebar({ isOpen = false, onClose }: SidebarProps) {
                                         }`}
                                 >
                                     <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-brand-orange' : 'text-white/80'}`} />
-                                    <span>{item.name}</span>
+                                    <span className="leading-tight">{item.name}</span>
                                 </Link>
                             );
                         })}

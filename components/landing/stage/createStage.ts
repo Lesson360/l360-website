@@ -1,5 +1,5 @@
 import type * as THREE_NS from 'three';
-import { PHONE_COLORS, SW, SH, drawScreen, drawTablet, drawKeys, drawLaptop, screenFontSamples } from './screens';
+import { PHONE_COLORS, PHONE_SHOTS, SW, SH, drawScreen, drawShot, drawTablet, drawKeys, drawLaptop, screenFontSamples } from './screens';
 
 type Three = typeof THREE_NS;
 
@@ -252,8 +252,19 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
             const b2 = new THREE.Mesh(btnGeo, bodyMat); b2.position.set(-0.765, 0.75, 0); b2.scale.y = 0.6; inner.add(b2);
             const b3 = new THREE.Mesh(btnGeo, bodyMat); b3.position.set(-0.765, 0.42, 0); b3.scale.y = 0.6; inner.add(b3);
             const glass = new THREE.Mesh(glassGeo, glassMat); front.add(glass);
-            const screen = new THREE.Mesh(screenGeo, screenMat(mkTex(SW, SH, ctx => drawScreen(i, ctx)))); screen.position.z = 0.002; front.add(screen);
+            // Real screenshot once it loads; the drawn screen until then (or if it fails).
+            const shot = PHONE_SHOTS[i] ? new Image() : null;
+            const shotReady = () => !!shot && shot.complete && shot.naturalWidth > 0;
+            const screen = new THREE.Mesh(screenGeo, screenMat(mkTex(SW, SH, ctx => (shotReady() ? drawShot(ctx, shot!) : drawScreen(i, ctx))))); screen.position.z = 0.002; front.add(screen);
+            // Screenshots carry their own status bar and Dynamic Island, so the model's island
+            // only shows over the drawn fallback.
             const island = new THREE.Mesh(islandGeo, islandMat); island.position.set(0, 1.33, 0.004); front.add(island);
+            if (shot) {
+                const repaint = repaints[repaints.length - 1];
+                shot.decoding = 'async';
+                shot.onload = () => { if (!alive) return; island.visible = false; repaint(); };
+                shot.src = PHONE_SHOTS[i];
+            }
             front.position.z = 0.0905; inner.add(front);
             [body, screen, glass].forEach(m => { m.userData.idx = i; pickables.push(m); });
             scene.add(root);

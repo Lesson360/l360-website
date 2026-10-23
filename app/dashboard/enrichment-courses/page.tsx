@@ -315,7 +315,7 @@ export default function EnrichmentCoursesPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
                 <Loader2 className="w-10 h-10 text-[#FF4801] animate-spin" />
-                <p className="text-sm font-bold text-gray-500">Loading Enrichment Dashboard...</p>
+                <p className="text-sm font-bold text-gray-500">Loading Executive Development Program...</p>
             </div>
         );
     }
@@ -328,7 +328,7 @@ export default function EnrichmentCoursesPage() {
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-2 max-w-xl">
                         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-                            Enrichment Courses
+                            Executive Development Program
                         </h1>
                         <p className="text-sm text-slate-300 leading-relaxed">
                             Discover specialized extracurricular skills, creative writing, coding, and advanced learning tracks tailored for your child.
@@ -473,7 +473,7 @@ export default function EnrichmentCoursesPage() {
                                                     {course.title}
                                                 </h3>
                                                 <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                                                    {course.shortDescription || course.description || 'Guided enrichment skill module for learners.'}
+                                                    {course.shortDescription || course.description || 'Guided Executive Development Program course for learners.'}
                                                 </p>
                                             </div>
                                         </div>
@@ -529,7 +529,7 @@ export default function EnrichmentCoursesPage() {
                             <div className="space-y-1">
                                 <h3 className="text-lg font-extrabold text-gray-900">No Purchased Courses Yet</h3>
                                 <p className="text-xs text-gray-500 leading-relaxed">
-                                    {selectedChild?.name || 'This child'} does not have any active enrichment courses. Explore the catalogue to enroll in a course.
+                                    {selectedChild?.name || 'This child'} is not enrolled in any Executive Development Program courses yet. Explore the catalogue to enroll in a course.
                                 </p>
                             </div>
                             <button
@@ -571,7 +571,7 @@ export default function EnrichmentCoursesPage() {
                                                 {course.title}
                                             </h3>
                                             <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                                                {course.shortDescription || course.description || 'Enrichment course module.'}
+                                                {course.shortDescription || course.description || 'Executive Development Program course.'}
                                             </p>
                                         </div>
                                     </div>
@@ -601,7 +601,7 @@ export default function EnrichmentCoursesPage() {
                     <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 space-y-8 shadow-sm">
                         <div className="space-y-2 border-b border-gray-100 pb-6">
                             <span className="text-xs font-bold text-[#FF4801] uppercase tracking-wider">
-                                {selectedCourse.category || 'Enrichment Module'}
+                                {selectedCourse.category || 'Executive Development Program'}
                             </span>
                             <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
                                 {selectedCourse.title}
@@ -762,7 +762,7 @@ export default function EnrichmentCoursesPage() {
                         <div className="flex items-center justify-between text-white border-b border-slate-800 pb-3">
                             <div>
                                 <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wider block">
-                                    Enrichment Video Lesson
+                                    Executive Development Program Lesson
                                 </span>
                                 <h3 className="text-lg font-bold text-white">{activeVideo.title}</h3>
                             </div>
@@ -912,7 +912,7 @@ export default function EnrichmentCoursesPage() {
                             </div>
                             <h3 className="text-xl font-extrabold text-gray-900">Confirm Purchase</h3>
                             <p className="text-xs text-gray-500">
-                                You are purchasing an enrichment course for your selected child profile.
+                                You are purchasing an Executive Development Program course for your selected child profile.
                             </p>
                         </div>
 

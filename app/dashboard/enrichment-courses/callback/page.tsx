@@ -11,7 +11,7 @@ function CallbackContent() {
     const reference = searchParams.get('reference') || searchParams.get('trxref');
 
     const [status, setStatus] = useState<'verifying' | 'success' | 'failed'>('verifying');
-    const [message, setMessage] = useState('Verifying your enrichment course payment...');
+    const [message, setMessage] = useState('Verifying your Executive Development Program payment...');
 
     useEffect(() => {
         if (!reference) {
@@ -41,7 +41,7 @@ function CallbackContent() {
             const res = await enrichmentCoursesApi.verifyPayment(ref);
             if (res?.item?.status === 'paid' || res?.data?.item?.status === 'paid') {
                 setStatus('success');
-                setMessage('Payment verified successfully! Your child now has access to the enrichment course.');
+                setMessage('Payment verified successfully! Your child now has access to the Executive Development Program course.');
                 localStorage.removeItem('pending_enrichment_checkout');
             } else {
                 setStatus('failed');
@@ -78,7 +78,7 @@ function CallbackContent() {
                             onClick={() => router.push('/dashboard/enrichment-courses')}
                             className="w-full py-3.5 px-6 rounded-xl bg-[#FF4801] hover:bg-[#e03d00] text-white font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                         >
-                            <span>Go to Enrichment Courses</span>
+                            <span>Go to Executive Development Program</span>
                         </button>
                     </div>
                 )}

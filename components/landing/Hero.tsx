@@ -5,7 +5,7 @@ import { HeroPhotoColumns } from './HeroPhotoColumns';
 const CHIPS = [
     { label: '3,000+ VIDEO LESSONS', href: '#explore' },
     { label: '200+ QUIZZES', href: '#quizzes' },
-    { label: 'ENRICHMENT COURSES', href: '#app' },
+    { label: 'EXECUTIVE DEVELOPMENT PROGRAM', href: '#executive-program' },
 ];
 
 const STATS = [
@@ -49,7 +49,7 @@ export function Hero() {
                 </h1>
 
                 <p data-reveal="" data-delay="160" className="m-0 max-w-[500px] text-pretty text-[clamp(17px,1.4vw,20px)] leading-normal text-ink-soft">
-                    Video lessons, fun quizzes, exams and enrichment courses — for early years, nursery, primary and secondary learners.
+                    Video lessons, fun quizzes, exams and the Executive Development Program — for early years, nursery, primary and secondary learners.
                 </p>
 
                 <div data-reveal="" data-delay="220" className="flex flex-wrap gap-x-[clamp(20px,3vw,44px)] gap-y-4">
