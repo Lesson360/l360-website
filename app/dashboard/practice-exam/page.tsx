@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCurrency } from '@/lib/currency/CurrencyProvider';
 import {
     testDrillerApi,
@@ -12,33 +12,40 @@ import {
     StartAttemptResponse,
     SubmitAttemptResponse,
     AttemptItem,
-    SessionQuestion,
     TestDrillerProductCatalogItem
 } from '@/lib/api/test-driller';
 
 import { authApi } from '@/lib/api/auth';
 import { schoolStructureApi } from '@/lib/api/school-structure';
 import { useChildProfile } from '@/lib/context/ChildProfileContext';
-import { SubjectExam, PRACTICE_EXAMS, UserAnswerMap, ExamResultSummary } from '@/lib/data/practiceExamsData';
+import { SubjectExam } from '@/lib/data/practiceExamsData';
+import {
+    CbtAnswerMap,
+    CbtQuestion,
+    CbtResult,
+    answersFromAttempt,
+    fromPracticeSubject,
+    fromSessionQuestions,
+    resultFromApi,
+    resultFromPracticeSubject,
+    toAnswerPayload
+} from '@/lib/practice-exam/cbt';
 
 import { TestDrillerCatalog } from '@/components/practice-exam/TestDrillerCatalog';
 import { PaperInstructions } from '@/components/practice-exam/PaperInstructions';
 import { ExamSelectionGrid } from '@/components/practice-exam/ExamSelectionGrid';
-import { ExamQuestionView } from '@/components/practice-exam/ExamQuestionView';
-import { ExamResultView } from '@/components/practice-exam/ExamResultView';
-import { ExamReviewView } from '@/components/practice-exam/ExamReviewView';
+import { CbtExamScreen } from '@/components/practice-exam/CbtExamScreen';
+import { CbtResultSlip } from '@/components/practice-exam/CbtResultSlip';
 import {
     Loader2,
-    AlertCircle,
     BookOpen,
     Calendar,
-    Play,
-    RefreshCw,
-    CheckCircle2,
     ArrowLeft,
     ChevronRight
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
+// While an attempt is open, autosave at least this often (handoff: every 20-30 seconds).
+const PERIODIC_SAVE_MS = 25000;
 
 // Fallback only: if an entitlement has no examTypeIdsSnapshot (see below), match a product
 // to the exam type(s) it covers by name/slug (e.g. "Jamb Combo" -> the "JAMB" exam type).
@@ -52,25 +59,6 @@ function matchExamTypesForProduct(product: TestDrillerProductCatalogItem, examTy
     });
 }
 
-// Build one answer-payload entry for autosave/submit. short_text questions must send
-// `textAnswer`, not `selectedOptionKeys` (the value typed into the textarea is stored in the
-// same `liveAnswers` map as a single-element array, e.g. liveAnswers[qId] = [typedText]).
-function buildAnswerPayloadEntry(questionId: string, values: string[], questions: SessionQuestion[]) {
-    const question = questions.find((q) => q.id === questionId);
-    if (question?.type === 'short_text') {
-        return { questionId, textAnswer: values[0] || '' };
-    }
-    return { questionId, selectedOptionKeys: values };
-}
-
-// The real Test Driller submit response's `review.questions[].options` can come back as raw
-// Mongoose subdocuments (internal fields like `_doc`, `__parentArray`, `$__`) instead of a
-// clean { key, text, isCorrect } shape. Unwrap defensively so the UI never depends on that.
-function cleanReviewOption(raw: any): { key?: string; text?: string; isCorrect?: boolean } {
-    const doc = raw?._doc || raw;
-    return { key: doc?.key, text: doc?.text, isCorrect: doc?.isCorrect };
-}
-
 // Restrict the year list to an entitlement's purchased year range, when it has one.
 function filterYearsByEntitlement(years: number[], entitlement: ChildEntitlement | null): number[] {
     if (!entitlement || (entitlement.yearStartSnapshot == null && entitlement.yearEndSnapshot == null)) {
@@ -81,11 +69,17 @@ function filterYearsByEntitlement(years: number[], entitlement: ChildEntitlement
     return years.filter((y) => y >= start && y <= end);
 }
 
-type Stage = 'catalog' | 'filters' | 'papers' | 'instructions' | 'taking' | 'result' | 'review';
+// Local-clock deadline from the server's remainingTimeSeconds (the device clock may be off,
+// so expiresAt is only a fallback). null means the paper is untimed.
+function deadlineFromAttempt(item: AttemptItem): number | null {
+    if (item.remainingTimeSeconds != null) return Date.now() + item.remainingTimeSeconds * 1000;
+    if (item.expiresAt) return Date.parse(item.expiresAt);
+    return null;
+}
+
+type Stage = 'catalog' | 'filters' | 'papers' | 'instructions' | 'taking' | 'result';
 
 export default function PracticeExamPage() {
-    const router = useRouter();
-
     // Globally-selected child (from the dashboard-wide child switcher) — every page reacts to
     // this so switching a child on one page updates practice exam access/data as well.
     const { activeChild: contextActiveChild } = useChildProfile();
@@ -132,30 +126,32 @@ export default function PracticeExamPage() {
     const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
     // 4. Attempt State (Live API)
-    const [currentAttempt, setCurrentAttempt] = useState<AttemptItem | null>(null);
-    const [sessionQuestions, setSessionQuestions] = useState<SessionQuestion[]>([]);
     const [activeAttemptId, setActiveAttemptId] = useState<string>('');
+    const [cbtQuestions, setCbtQuestions] = useState<CbtQuestion[]>([]);
     const [isStartingAttempt, setIsStartingAttempt] = useState<boolean>(false);
     const [isSubmittingAttempt, setIsSubmittingAttempt] = useState<boolean>(false);
     const [autosaveStatus, setAutosaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
 
-    // Live API answers map: questionId -> array of selected keys e.g. ['a'] or ['b']
-    const [liveAnswers, setLiveAnswers] = useState<Record<string, string[]>>({});
+    // Answers map: questionId -> selected option keys, e.g. ['b']; short_text is [typedText]
+    const [liveAnswers, setLiveAnswers] = useState<CbtAnswerMap>({});
 
-    // Live API Submit Response & Review
-    const [apiSubmitResponse, setApiSubmitResponse] = useState<SubmitAttemptResponse | null>(null);
+    // Timer: deadline on the local clock (null = untimed) and when this screen opened
+    const [deadlineMs, setDeadlineMs] = useState<number | null>(null);
+    const [startedAtMs, setStartedAtMs] = useState<number>(0);
+
+    // Result slip, built from the submit response (or locally for the fallback)
+    const [cbtResult, setCbtResult] = useState<CbtResult | null>(null);
 
     // 5. Fallback Mock Simulation States (used only if the backend has no exam types/papers at all)
     const [useMockFallback, setUseMockFallback] = useState<boolean>(false);
     const [selectedSubjectMock, setSelectedSubjectMock] = useState<SubjectExam | null>(null);
-    const [userAnswersMock, setUserAnswersMock] = useState<UserAnswerMap>({});
-    const [resultSummaryMock, setResultSummaryMock] = useState<ExamResultSummary | null>(null);
 
-    // Timer tracking
-    const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
-    const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
-
-    // Debounce timer ref for autosave
+    // Refs so timers and event listeners always see the latest attempt values
+    const answersRef = useRef<CbtAnswerMap>({});
+    const questionsRef = useRef<CbtQuestion[]>([]);
+    const attemptIdRef = useRef<string>('');
+    const dirtyRef = useRef<boolean>(false);
+    const submittingRef = useRef<boolean>(false);
     const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // ==========================================
@@ -180,6 +176,8 @@ export default function PracticeExamPage() {
             setSelectedProduct(null);
             setSelectedEntitlement(null);
             setUseMockFallback(false);
+            setSelectedSubjectMock(null);
+            resetAttemptState();
             setStage('catalog');
             setCatalogTab('explore');
 
@@ -424,35 +422,50 @@ export default function PracticeExamPage() {
         setStage('instructions');
     };
 
+    const resetAttemptState = () => {
+        if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+        autosaveTimerRef.current = null;
+        attemptIdRef.current = '';
+        answersRef.current = {};
+        questionsRef.current = [];
+        dirtyRef.current = false;
+        submittingRef.current = false;
+        setActiveAttemptId('');
+        setCbtQuestions([]);
+        setLiveAnswers({});
+        setDeadlineMs(null);
+        setCbtResult(null);
+        setAutosaveStatus('saved');
+        setIsSubmittingAttempt(false);
+    };
+
     const handleStartApiPaper = async () => {
         const paper = selectedPaper;
         if (!childProfileId || !paper) return;
         setIsStartingAttempt(true);
 
         try {
+            // The start endpoint resumes an in-progress attempt for the same paper instead of
+            // creating a duplicate, so this also handles "Resume".
             const res: StartAttemptResponse = await testDrillerApi.startPaperAttempt(
                 childProfileId,
                 paper.id
             );
 
             if (res?.session && res?.item) {
-                setCurrentAttempt(res.item);
+                resetAttemptState();
+                const questions = fromSessionQuestions(res.session.questions || []);
+                const answers = answersFromAttempt(res.item.answers);
+                questionsRef.current = questions;
+                answersRef.current = answers;
+                attemptIdRef.current = res.item.id;
+
+                const serverStart = Date.parse(res.item.startedAt);
                 setActiveAttemptId(res.item.id);
-                setSessionQuestions(res.session.questions || []);
-
-                // Initialize answers map from existing attempt if resuming
-                const initialAnswers: Record<string, string[]> = {};
-                if (res.item.answers && Array.isArray(res.item.answers)) {
-                    res.item.answers.forEach((ans) => {
-                        if (ans.questionId && ans.selectedOptionKeys) {
-                            initialAnswers[ans.questionId] = ans.selectedOptionKeys;
-                        }
-                    });
-                }
-                setLiveAnswers(initialAnswers);
-
-                setElapsedSeconds(0);
-                setIsTimerRunning(true);
+                setCbtQuestions(questions);
+                setLiveAnswers(answers);
+                setDeadlineMs(deadlineFromAttempt(res.item));
+                setStartedAtMs(!isNaN(serverStart) && serverStart <= Date.now() ? serverStart : Date.now());
                 setStage('taking');
             } else {
                 alert('Failed to start paper attempt: No session data returned from server.');
@@ -466,148 +479,184 @@ export default function PracticeExamPage() {
         }
     };
 
-    // Handle selecting answer in API mode
-    const handleApiAnswerSelect = (questionId: string, optionKey: string) => {
-        setLiveAnswers((prev) => {
-            const updated = {
-                ...prev,
-                [questionId]: [optionKey]
-            };
-            triggerAutosave(updated);
-            return updated;
-        });
+    const showApiResult = (res: SubmitAttemptResponse) => {
+        if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+        setCbtResult(resultFromApi(
+            res,
+            questionsRef.current,
+            answersRef.current,
+            selectedPaper?.title || 'Test Driller',
+            selectedPaper?.durationMinutes ?? null
+        ));
+        attemptIdRef.current = '';
+        setActiveAttemptId('');
+        setStage('result');
     };
 
-    // Trigger debounced autosave according to Section 4 of handoff
-    const triggerAutosave = useCallback((currentAnswersMap: Record<string, string[]>) => {
-        if (!childProfileId || !activeAttemptId) return;
+    // The backend may already have finalised the attempt (e.g. auto-submitted when time ran
+    // out). If so, show its result instead of treating the failure as an error.
+    const recoverFinishedAttempt = async (): Promise<boolean> => {
+        const attemptId = attemptIdRef.current;
+        if (!attemptId || !childProfileId) return false;
+        try {
+            const detail: any = await testDrillerApi.getAttemptDetail(childProfileId, attemptId);
+            if (detail?.item && detail.item.status !== 'in_progress') {
+                showApiResult({ item: detail.item, review: detail.review });
+                return true;
+            }
+        } catch {
+            // Fall through: the caller reports the original error.
+        }
+        return false;
+    };
+
+    const saveProgress = async () => {
+        const attemptId = attemptIdRef.current;
+        if (!attemptId || !childProfileId || submittingRef.current || !dirtyRef.current) return;
+        dirtyRef.current = false;
         setAutosaveStatus('saving');
 
-        if (autosaveTimerRef.current) {
-            clearTimeout(autosaveTimerRef.current);
+        try {
+            const res = await testDrillerApi.saveAttemptProgress(
+                childProfileId,
+                attemptId,
+                toAnswerPayload(answersRef.current, questionsRef.current)
+            );
+            if (attemptIdRef.current !== attemptId) return;
+            setAutosaveStatus('saved');
+
+            const item = res?.item;
+            if (item?.status && item.status !== 'in_progress') {
+                await recoverFinishedAttempt();
+                return;
+            }
+            // Re-sync the countdown with the server's clock on every save.
+            if (item?.remainingTimeSeconds != null) {
+                setDeadlineMs(Date.now() + item.remainingTimeSeconds * 1000);
+            }
+        } catch (err) {
+            console.warn('Autosave failed:', err);
+            // Keep local answers and retry on the next debounce or periodic save.
+            dirtyRef.current = true;
+            setAutosaveStatus('error');
+        }
+    };
+
+    // Timers and listeners call through this ref so they always run the latest closure.
+    const saveProgressRef = useRef(saveProgress);
+    saveProgressRef.current = saveProgress;
+
+    const handleAnswer = (questionId: string, values: string[]) => {
+        const updated = { ...answersRef.current, [questionId]: values };
+        answersRef.current = updated;
+        setLiveAnswers(updated);
+
+        if (!attemptIdRef.current) return; // local fallback: nothing to save
+        dirtyRef.current = true;
+        setAutosaveStatus('saving');
+        if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+        autosaveTimerRef.current = setTimeout(() => saveProgressRef.current(), 1500);
+    };
+
+    // Periodic save while the attempt is open, plus a save when the tab is hidden.
+    useEffect(() => {
+        if (stage !== 'taking' || !activeAttemptId) return;
+        const interval = setInterval(() => saveProgressRef.current(), PERIODIC_SAVE_MS);
+        const onHidden = () => {
+            if (document.visibilityState === 'hidden') saveProgressRef.current();
+        };
+        document.addEventListener('visibilitychange', onHidden);
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', onHidden);
+        };
+    }, [stage, activeAttemptId]);
+
+    const handleSubmit = async (reason: 'manual' | 'time_expired' = 'manual') => {
+        if (submittingRef.current) return;
+
+        // Local fallback: grade on the device.
+        if (!attemptIdRef.current) {
+            if (!selectedSubjectMock) return;
+            setCbtResult(resultFromPracticeSubject(
+                selectedSubjectMock,
+                answersRef.current,
+                Math.round((Date.now() - startedAtMs) / 1000),
+                reason
+            ));
+            setStage('result');
+            return;
         }
 
-        autosaveTimerRef.current = setTimeout(async () => {
-            const answerPayload = Object.entries(currentAnswersMap).map(([qId, keys]) =>
-                buildAnswerPayloadEntry(qId, keys, sessionQuestions)
-            );
-
-            try {
-                await testDrillerApi.saveAttemptProgress(
-                    childProfileId,
-                    activeAttemptId,
-                    answerPayload
-                );
-                setAutosaveStatus('saved');
-            } catch (err) {
-                console.warn('Autosave failed:', err);
-                setAutosaveStatus('error');
-            }
-        }, 1500);
-    }, [childProfileId, activeAttemptId]);
-
-    // Handle Submitting API Attempt
-    const handleApiSubmit = async () => {
-        if (!childProfileId || !activeAttemptId) return;
-        setIsTimerRunning(false);
+        const attemptId = attemptIdRef.current;
+        if (!childProfileId) return;
+        submittingRef.current = true;
         setIsSubmittingAttempt(true);
-
-        const answerPayload = Object.entries(liveAnswers).map(([qId, keys]) =>
-            buildAnswerPayloadEntry(qId, keys, sessionQuestions)
-        );
+        if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
 
         try {
             const res = await testDrillerApi.submitAttempt(
                 childProfileId,
-                activeAttemptId,
-                answerPayload
+                attemptId,
+                toAnswerPayload(answersRef.current, questionsRef.current)
             );
-
-            setApiSubmitResponse(res);
-            setStage('result');
+            showApiResult(res);
         } catch (err: any) {
             console.error('API submission failed:', err);
-            alert(err?.response?.data?.message || 'Submission error. Please check network.');
+            if (!(await recoverFinishedAttempt())) {
+                alert(err?.response?.data?.message || 'Submission error. Please check your network and try again.');
+            }
         } finally {
+            submittingRef.current = false;
             setIsSubmittingAttempt(false);
         }
+    };
+
+    // Leaving keeps a live attempt open on the server; opening the paper again resumes it.
+    const handleExitExam = async () => {
+        if (!attemptIdRef.current) {
+            handleBackToCatalog();
+            return;
+        }
+        if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+        await saveProgressRef.current();
+        resetAttemptState();
+        setStage('papers');
     };
 
     // ==========================================
     // MOCK SIMULATION HANDLERS (Fallback mode — only reached if the backend has zero exam
     // types/papers configured for this child, so the page is never a dead end)
     // ==========================================
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (isTimerRunning) {
-            interval = setInterval(() => {
-                setElapsedSeconds((prev) => prev + 1);
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [isTimerRunning]);
-
     const handleSelectSubjectMock = (subject: SubjectExam) => {
+        resetAttemptState();
+        const questions = fromPracticeSubject(subject);
+        questionsRef.current = questions;
         setSelectedSubjectMock(subject);
-        setUserAnswersMock({});
-        setElapsedSeconds(0);
-        setIsTimerRunning(true);
+        setCbtQuestions(questions);
+        setDeadlineMs(subject.durationMinutes ? Date.now() + subject.durationMinutes * 60000 : null);
+        setStartedAtMs(Date.now());
         setStage('taking');
     };
 
-    const handleAnswerSelectMock = (questionId: string, optionId: string) => {
-        setUserAnswersMock((prev) => ({
-            ...prev,
-            [questionId]: optionId
-        }));
-    };
-
-    const handleSubmitExamMock = () => {
-        setIsTimerRunning(false);
-        if (!selectedSubjectMock) return;
-
-        const allQuestions = selectedSubjectMock.topics.flatMap((t) => t.questions);
-        const totalQuestions = allQuestions.length;
-        const attemptedCount = Object.keys(userAnswersMock).length;
-
-        let correctCount = 0;
-        allQuestions.forEach((q) => {
-            if (userAnswersMock[q.id] === q.correctOptionId) {
-                correctCount += 1;
-            }
-        });
-
-        const scorePercentage = totalQuestions > 0
-            ? Math.round((correctCount / totalQuestions) * 100)
-            : 0;
-
-        setResultSummaryMock({
-            scorePercentage,
-            correctCount,
-            totalQuestions,
-            passed: scorePercentage >= 50,
-            timeTakenSeconds: elapsedSeconds,
-            totalTimeMinutes: selectedSubjectMock.durationMinutes,
-            attemptedCount
-        });
-
-        setStage('result');
+    const handleNewTest = () => {
+        resetAttemptState();
+        if (useMockFallback || !selectedPaper) {
+            setSelectedSubjectMock(null);
+            setStage('taking');
+        } else {
+            setStage('papers');
+        }
     };
 
     const handleBackToCatalog = () => {
-        setIsTimerRunning(false);
+        resetAttemptState();
         setStage('catalog');
         setSelectedProduct(null);
         setSelectedEntitlement(null);
         setSelectedSubjectMock(null);
         setSelectedPaper(null);
-        setUserAnswersMock({});
-        setLiveAnswers({});
         setUseMockFallback(false);
-    };
-
-    const handleBackToDashboard = () => {
-        router.push('/dashboard/video-library');
     };
 
     // Loading access state
@@ -824,222 +873,44 @@ export default function PracticeExamPage() {
                 />
             )}
 
-            {/* STAGE 5: TAKING EXAM */}
+            {/* STAGE 5: TAKING EXAM (CBT terminal) */}
             {stage === 'taking' && (
-                <>
-                    {useMockFallback || !selectedPaper ? (
-                        !selectedSubjectMock ? (
-                            <ExamSelectionGrid onSelectSubject={handleSelectSubjectMock} />
-                        ) : (
-                            <ExamQuestionView
-                                subject={selectedSubjectMock}
-                                userAnswers={userAnswersMock}
-                                onAnswerSelect={handleAnswerSelectMock}
-                                onSubmitExam={handleSubmitExamMock}
-                                onBackToSelection={handleBackToCatalog}
-                                elapsedSeconds={elapsedSeconds}
-                            />
-                        )
-                    ) : (
-                        /* API Live Attempt Workspace */
-                        <div className="space-y-6">
-                            {/* Autosave Banner */}
-                            <div className="flex items-center justify-between text-xs font-semibold text-gray-500 bg-white px-4 py-2 rounded-xl border border-gray-200">
-                                <span>{selectedPaper.title}</span>
-                                <span className="flex items-center gap-1.5">
-                                    {autosaveStatus === 'saving' && (
-                                        <>
-                                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-orange-500" />
-                                            <span className="text-orange-600 font-bold">Autosaving Progress...</span>
-                                        </>
-                                    )}
-                                    {autosaveStatus === 'saved' && (
-                                        <>
-                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                                            <span className="text-emerald-600 font-bold">Progress Saved</span>
-                                        </>
-                                    )}
-                                    {autosaveStatus === 'error' && (
-                                        <span className="text-red-500 font-bold">Autosave retry pending</span>
-                                    )}
-                                </span>
-                            </div>
-
-                            {/* Render Questions View mapped from session.questions */}
-                            <ExamQuestionView
-                                subject={{
-                                    id: selectedPaper.id,
-                                    title: selectedPaper.title,
-                                    subtitle: selectedPaper.instructions || '',
-                                    iconType: 'math',
-                                    iconBgColor: 'bg-purple-900',
-                                    iconTextColor: 'text-white',
-                                    totalQuestions: sessionQuestions.length,
-                                    durationMinutes: selectedPaper.durationMinutes,
-                                    totalMarks: selectedPaper.totalMarks || 100,
-                                    topics: [
-                                        {
-                                            id: 'api-main-topic',
-                                            name: selectedPaper.title,
-                                            headerTitle: selectedPaper.title,
-                                            questionCount: sessionQuestions.length,
-                                            totalMarks: selectedPaper.totalMarks || 100,
-                                            durationMinutes: selectedPaper.durationMinutes,
-                                            questions: sessionQuestions.map((q, idx) => ({
-                                                id: q.id,
-                                                number: idx + 1,
-                                                text: q.prompt,
-                                                marks: q.marks || 1,
-                                                type: q.type,
-                                                options: (q.options || []).map((opt, optIdx) => {
-                                                    const defaultLabel = String.fromCharCode(65 + optIdx);
-                                                    const keyVal = String(opt.key || opt.id || opt._id || defaultLabel);
-                                                    const labelVal = opt.label || (opt.key ? String(opt.key).toUpperCase() : defaultLabel);
-                                                    return {
-                                                        id: keyVal,
-                                                        label: labelVal,
-                                                        text: opt.text
-                                                    };
-                                                }),
-                                                correctOptionId: '',
-                                                topicId: 'api-main-topic'
-                                            }))
-                                        }
-                                    ]
-                                }}
-                                userAnswers={Object.fromEntries(
-                                    Object.entries(liveAnswers).map(([k, v]) => [k, v[0] || ''])
-                                )}
-                                onAnswerSelect={(qId, optId) => handleApiAnswerSelect(qId, optId)}
-                                onSubmitExam={handleApiSubmit}
-                                onBackToSelection={handleBackToCatalog}
-                                elapsedSeconds={elapsedSeconds}
-                                isSubmitting={isSubmittingAttempt}
-                            />
-                        </div>
-                    )}
-                </>
+                (useMockFallback || !selectedPaper) && !selectedSubjectMock ? (
+                    <ExamSelectionGrid onSelectSubject={handleSelectSubjectMock} />
+                ) : (
+                    <CbtExamScreen
+                        key={activeAttemptId || selectedSubjectMock?.id || 'exam'}
+                        candidateName={childName || 'Candidate'}
+                        paperTitle={selectedPaper && !useMockFallback ? selectedPaper.title : selectedSubjectMock?.title || 'Practice exam'}
+                        paperMeta={selectedPaper && !useMockFallback
+                            ? `${selectedPaper.attemptMode === 'practice' ? 'Practice' : 'Exam'} mode`
+                            : 'Practice mode'}
+                        questions={cbtQuestions}
+                        answers={liveAnswers}
+                        onAnswer={handleAnswer}
+                        deadlineMs={deadlineMs}
+                        startedAtMs={startedAtMs}
+                        onTimeUp={() => handleSubmit('time_expired')}
+                        onSubmit={() => handleSubmit('manual')}
+                        onExit={handleExitExam}
+                        exitMessage={activeAttemptId
+                            ? 'Your answers are saved. The clock keeps running while you are away, and opening this paper again resumes where you stopped.'
+                            : 'This practice run is not saved. Leaving now discards your answers.'}
+                        isSubmitting={isSubmittingAttempt}
+                        saveStatus={activeAttemptId ? autosaveStatus : undefined}
+                        flagStorageKey={activeAttemptId ? `l360.cbt.flags.${activeAttemptId}` : undefined}
+                    />
+                )
             )}
 
-            {/* STAGE 6: RESULT */}
-            {stage === 'result' && (
-                <>
-                    {apiSubmitResponse?.item ? (
-                        <ExamResultView
-                            subject={{
-                                id: selectedPaper?.id || 'res',
-                                title: apiSubmitResponse.review?.paper?.title || selectedPaper?.title || 'Practice Exam',
-                                subtitle: '',
-                                iconType: 'math',
-                                iconBgColor: 'bg-purple-900',
-                                iconTextColor: 'text-white',
-                                totalQuestions: apiSubmitResponse.item.totalQuestions,
-                                durationMinutes: selectedPaper?.durationMinutes || 60,
-                                totalMarks: apiSubmitResponse.item.totalAvailableScore || 100,
-                                topics: []
-                            }}
-                            result={{
-                                scorePercentage: apiSubmitResponse.item.percentage || 0,
-                                correctCount: apiSubmitResponse.item.totalCorrect || 0,
-                                totalQuestions: apiSubmitResponse.item.totalQuestions || 0,
-                                passed: (apiSubmitResponse.item.percentage || 0) >= 50,
-                                timeTakenSeconds: elapsedSeconds,
-                                totalTimeMinutes: selectedPaper?.durationMinutes || 60,
-                                attemptedCount: apiSubmitResponse.item.answers?.length || 0
-                            }}
-                            onReviewAnswers={() => setStage('review')}
-                            onBackToDashboard={handleBackToDashboard}
-                        />
-                    ) : (
-                        selectedSubjectMock && resultSummaryMock && (
-                            <ExamResultView
-                                subject={selectedSubjectMock}
-                                result={resultSummaryMock}
-                                onReviewAnswers={() => setStage('review')}
-                                onBackToDashboard={handleBackToDashboard}
-                            />
-                        )
-                    )}
-                </>
-            )}
-
-            {/* STAGE 7: ANSWER REVIEW */}
-            {stage === 'review' && (
-                <>
-                    {apiSubmitResponse?.review?.questions ? (
-                        <ExamReviewView
-                            subject={{
-                                id: selectedPaper?.id || 'rev',
-                                title: apiSubmitResponse.review.paper.title || 'Review',
-                                subtitle: '',
-                                iconType: 'math',
-                                iconBgColor: 'bg-purple-900',
-                                iconTextColor: 'text-white',
-                                totalQuestions: apiSubmitResponse.review.questions.length,
-                                durationMinutes: 60,
-                                totalMarks: 100,
-                                topics: [
-                                    {
-                                        id: 'rev-topic',
-                                        name: 'Answer Key Review',
-                                        questionCount: apiSubmitResponse.review.questions.length,
-                                        totalMarks: 100,
-                                        durationMinutes: 60,
-                                        questions: apiSubmitResponse.review.questions.map((q, idx) => {
-                                            // The real backend can return options as raw Mongoose subdocuments
-                                            // (extra `_doc`/`__parentArray`/`$__` bookkeeping fields) — unwrap first.
-                                            const cleanedOptions = (q.options || []).map(cleanReviewOption);
-                                            const gradedAnswer = apiSubmitResponse.item.answers?.find((a) => a.questionId === q.id);
-
-                                            return {
-                                                id: q.id,
-                                                number: idx + 1,
-                                                text: q.prompt,
-                                                marks: 1,
-                                                type: q.type,
-                                                options: cleanedOptions.map((opt, optIdx) => {
-                                                    const defaultLabel = String.fromCharCode(65 + optIdx);
-                                                    const keyVal = String(opt.key || defaultLabel);
-                                                    const labelVal = opt.key ? String(opt.key).toUpperCase() : defaultLabel;
-                                                    return {
-                                                        id: keyVal,
-                                                        label: labelVal,
-                                                        text: opt.text || ''
-                                                    };
-                                                }),
-                                                correctOptionId: cleanedOptions.find((opt) => opt.isCorrect)?.key || '',
-                                                correctTextAnswers: q.correctTextAnswers,
-                                                explanation: q.explanation,
-                                                topicId: 'rev-topic',
-                                                backendGraded: gradedAnswer
-                                                    ? {
-                                                        isCorrect: !!gradedAnswer.isCorrect,
-                                                        scoreAwarded: gradedAnswer.scoreAwarded,
-                                                        userTextAnswer: gradedAnswer.textAnswer
-                                                    }
-                                                    : undefined
-                                            };
-                                        })
-                                    }
-                                ]
-                            }}
-                            userAnswers={Object.fromEntries(
-                                Object.entries(liveAnswers).map(([k, v]) => [k, v[0] || ''])
-                            )}
-                            onBackToResult={() => setStage('result')}
-                            onBackToDashboard={handleBackToDashboard}
-                        />
-                    ) : (
-                        selectedSubjectMock && (
-                            <ExamReviewView
-                                subject={selectedSubjectMock}
-                                userAnswers={userAnswersMock}
-                                onBackToResult={() => setStage('result')}
-                                onBackToDashboard={handleBackToDashboard}
-                            />
-                        )
-                    )}
-                </>
+            {/* STAGE 6: RESULT SLIP (score + corrections) */}
+            {stage === 'result' && cbtResult && (
+                <CbtResultSlip
+                    result={cbtResult}
+                    candidateName={childName || 'Candidate'}
+                    onNewTest={handleNewTest}
+                    onBackToCatalog={handleBackToCatalog}
+                />
             )}
 
         </div>
