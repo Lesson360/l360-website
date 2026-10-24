@@ -11,21 +11,26 @@ export const SH = 1316;
 const APP = '/landing/app';
 export const PHONE_SHOTS = [
   `${APP}/home.jpg`,                // the app
-  `${APP}/courses.jpg`,             // pre-school (tablet takes over)
+  `${APP}/courses.jpg`,             // pre-school: the child-facing course list
   `${APP}/progress.jpg`,            // guardian reviews
-  `${APP}/seer-assistant.jpg`,      // affiliate
+  `${APP}/affiliate-dashboard.jpg`, // affiliate
   `${APP}/episode-fractions.jpg`,   // videos (laptop takes over)
-  `${APP}/subject-mathematics.jpg`, // digital library
+  `${APP}/digital-library.jpg`,     // digital library
   `${APP}/take-test.jpg`,           // quizzes
   `${APP}/subject-mathematics.jpg`, // exams (laptop takes over)
-  `${APP}/courses.jpg`,             // executive development program
+  `${APP}/executive-course.jpg`,    // executive development program
 ];
 
-/** Paints a screenshot to fill the screen texture, cropping evenly from the sides. */
-export function drawShot(ctx: CanvasRenderingContext2D, img: HTMLImageElement) {
-  const s = Math.max(SW / img.naturalWidth, SH / img.naturalHeight);
+// Real screenshots for the laptops, by kind; kinds without one keep their drawn screen.
+export const LAPTOP_SHOTS: Partial<Record<'video' | 'exam', string>> = {
+  exam: `${APP}/subjects-desktop.jpg`, // exams: the dashboard's subject list
+};
+
+/** Paints a screenshot to fill a w×h screen texture, cropping evenly from the sides. */
+export function drawShot(ctx: CanvasRenderingContext2D, img: HTMLImageElement, cw = SW, ch = SH) {
+  const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
   const w = img.naturalWidth * s, h = img.naturalHeight * s;
-  ctx.drawImage(img, (SW - w) / 2, 0, w, h);
+  ctx.drawImage(img, (cw - w) / 2, 0, w, h);
 }
 
 const INK = '#17153A', CREAM = '#FFF8EC', GREY = '#5A5778';
@@ -265,36 +270,6 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
     });
     button('Continue', 1150, INK, CREAM);
   }
-}
-
-export function drawTablet(ctx: CanvasRenderingContext2D, W: number, H: number) {
-  const { rr, tx, circ, check } = kit(ctx);
-  const c = '#5B7BEA';
-  ctx.fillStyle = '#EEF2FF'; ctx.fillRect(0, 0, W, H);
-  tx('9:41', 60, 64, `700 30px ${FS}`, INK);
-  rr(800, 40, 100, 32, 10, null, INK, 3); rr(806, 46, 74, 20, 5, INK);
-  rr(48, 110, 864, 232, 40, c);
-  tx('PRE-SCHOOL · WORKSHEET 3', 92, 172, `700 26px ${FM}`, CREAM);
-  tx('How many apples', 92, 244, `800 58px ${FD}`, CREAM);
-  tx('can you count?', 92, 308, `800 58px ${FD}`, 'rgba(255,248,236,.75)');
-  rr(48, 370, 864, 470, 44, '#FFFFFF');
-  const ap = [[190, 510], [350, 490], [520, 510], [690, 495], [270, 700], [440, 720], [610, 700], [770, 740]].slice(0, 7);
-  ap.forEach(([x, y]) => {
-    circ(x, y, 66, '#F2765A');
-    circ(x - 20, y - 20, 17, 'rgba(255,255,255,.45)');
-    rr(x - 6, y - 92, 12, 32, 6, '#6B4A2B');
-    ctx.beginPath(); ctx.ellipse(x + 26, y - 80, 26, 13, -0.5, 0, Math.PI * 2); ctx.fillStyle = '#3FB57A'; ctx.fill();
-  });
-  ['5', '6', '7', '8'].forEach((n, k) => {
-    const x = 48 + k * 222, sel = k === 2;
-    rr(x, 878, 198, 198, 40, sel ? c : '#FFFFFF', sel ? null : '#D9DFF5', 4);
-    tx(n, x + 99, 1013, `800 110px ${FD}`, sel ? CREAM : INK, 'center');
-    if (sel) { circ(x + 166, 910, 30, CREAM); check(x + 166, 910, 28, INK); }
-  });
-  tx('Great job! That’s 7 apples.', 48, 1136, `700 34px ${FS}`, INK);
-  tx('Activity 3 of 8', 48, 1182, `500 28px ${FS}`, GREY);
-  rr(48, 1206, 864, 18, 9, '#D9DFF5'); rr(48, 1206, 864 * 3 / 8, 18, 9, c);
-  rr(380, 1250, 200, 10, 5, 'rgba(23,21,58,.25)');
 }
 
 export function drawKeys(ctx: CanvasRenderingContext2D, W: number, H: number) {

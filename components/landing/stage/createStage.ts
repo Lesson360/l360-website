@@ -1,5 +1,5 @@
 import type * as THREE_NS from 'three';
-import { PHONE_COLORS, PHONE_SHOTS, SW, SH, drawScreen, drawShot, drawTablet, drawKeys, drawLaptop, screenFontSamples } from './screens';
+import { PHONE_COLORS, PHONE_SHOTS, LAPTOP_SHOTS, SW, SH, drawScreen, drawShot, drawKeys, drawLaptop, screenFontSamples } from './screens';
 
 type Three = typeof THREE_NS;
 
@@ -10,7 +10,7 @@ type Three = typeof THREE_NS;
  *   [data-section][data-bg]   sections whose colours blend into the fixed background
  *   [data-hero]               the hero; devices only appear from the first feature on
  *   [data-slot="cta"]         where the phones spin as a ring
- *   [data-feature=N] [data-slot]  where the phones stack (or a tablet/laptop takes over)
+ *   [data-feature=N] [data-slot]  where the phones stack (or a laptop takes over)
  *   [data-nodevice]           sections that hide the devices entirely
  *   [data-speed]              parallax factor for decorative elements
  *   [data-reveal][data-delay] fade-up on first view
@@ -19,11 +19,10 @@ type Three = typeof THREE_NS;
 const SPIN_DEG_PER_SEC = 10;
 const N = PHONE_COLORS.length;
 
-// Feature sections where a tablet or laptop replaces the phone stack.
-const DEVICES: { k: number; type: 'tablet' | 'laptop'; kind?: 'video' | 'exam' }[] = [
-    { k: 1, type: 'tablet' },
-    { k: 4, type: 'laptop', kind: 'video' },
-    { k: 7, type: 'laptop', kind: 'exam' },
+// Feature sections where a laptop replaces the phone stack.
+const DEVICES: { k: number; kind: 'video' | 'exam' }[] = [
+    { k: 4, kind: 'video' },
+    { k: 7, kind: 'exam' },
 ];
 
 interface Options {
@@ -274,33 +273,31 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
         const devs = DEVICES.map(d => {
             const root = new THREE.Group(), inner = new THREE.Group(); root.add(inner);
             const bodyMat = bodyMatFor(PHONE_COLORS[d.k]);
-            let lid: THREE_NS.Group | null = null;
-            if (d.type === 'tablet') {
-                const bg = new THREE.ExtrudeGeometry(rounded(2.3, 3.04, 0.2), { depth: 0.09, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 5, curveSegments: 20 });
-                bg.translate(0, 0, -0.045);
-                inner.add(new THREE.Mesh(bg, bodyMat));
-                const glass = new THREE.Mesh(flat(2.33, 3.07, 0.2), glassMat); glass.position.z = 0.072; inner.add(glass);
-                const scr = new THREE.Mesh(flat(2.13, 2.87, 0.1), screenMat(mkTex(960, 1294, drawTablet))); scr.position.z = 0.075; inner.add(scr);
-                const lens = new THREE.Mesh(lensGeo, lensMat); lens.position.set(-0.8, 1.2, -0.08); inner.add(lens);
-            } else {
-                const base = new THREE.Mesh(new THREE.ExtrudeGeometry(rounded(3.6, 2.4, 0.14), { depth: 0.09, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 4, curveSegments: 16 }), bodyMat);
-                base.rotation.x = -Math.PI / 2; inner.add(base);
-                const kb = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.2), new THREE.MeshStandardMaterial({ map: mkTex(1024, 384, drawKeys), roughness: 0.7 }));
-                kb.rotation.x = -Math.PI / 2; kb.position.set(0, 0.114, -0.36); inner.add(kb);
-                const pad = new THREE.Mesh(flat(1.2, 0.66, 0.06), new THREE.MeshStandardMaterial({ color: '#000000', transparent: true, opacity: 0.14, roughness: 0.4 }));
-                pad.rotation.x = -Math.PI / 2; pad.position.set(0, 0.114, 0.66); inner.add(pad);
-                lid = new THREE.Group(); lid.position.set(0, 0.1, -1.17); inner.add(lid);
-                const lidBody = new THREE.Mesh(new THREE.ExtrudeGeometry(rounded(3.6, 2.36, 0.14), { depth: 0.05, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 4, curveSegments: 16 }), bodyMat);
-                lidBody.position.set(0, 1.18, -0.065); lid.add(lidBody);
-                const lg = new THREE.Mesh(flat(3.6, 2.36, 0.14), glassMat); lg.position.set(0, 1.18, 0.002); lid.add(lg);
-                const kind = d.kind!;
-                const ls = new THREE.Mesh(flat(3.36, 2.1, 0.03), screenMat(mkTex(1280, 800, (cx, w, h) => drawLaptop(kind, cx, w, h)))); ls.position.set(0, 1.21, 0.005); lid.add(ls);
-                inner.position.set(0, -1.15, -0.1);
+            const base = new THREE.Mesh(new THREE.ExtrudeGeometry(rounded(3.6, 2.4, 0.14), { depth: 0.09, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 4, curveSegments: 16 }), bodyMat);
+            base.rotation.x = -Math.PI / 2; inner.add(base);
+            const kb = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.2), new THREE.MeshStandardMaterial({ map: mkTex(1024, 384, drawKeys), roughness: 0.7 }));
+            kb.rotation.x = -Math.PI / 2; kb.position.set(0, 0.114, -0.36); inner.add(kb);
+            const pad = new THREE.Mesh(flat(1.2, 0.66, 0.06), new THREE.MeshStandardMaterial({ color: '#000000', transparent: true, opacity: 0.14, roughness: 0.4 }));
+            pad.rotation.x = -Math.PI / 2; pad.position.set(0, 0.114, 0.66); inner.add(pad);
+            const lid = new THREE.Group(); lid.position.set(0, 0.1, -1.17); inner.add(lid);
+            const lidBody = new THREE.Mesh(new THREE.ExtrudeGeometry(rounded(3.6, 2.36, 0.14), { depth: 0.05, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 4, curveSegments: 16 }), bodyMat);
+            lidBody.position.set(0, 1.18, -0.065); lid.add(lidBody);
+            const lg = new THREE.Mesh(flat(3.6, 2.36, 0.14), glassMat); lg.position.set(0, 1.18, 0.002); lid.add(lg);
+            // Real screenshot once it loads (when the kind has one); the drawn screen until then.
+            const src = LAPTOP_SHOTS[d.kind];
+            const shot = src ? new Image() : null;
+            const shotReady = () => !!shot && shot.complete && shot.naturalWidth > 0;
+            const ls = new THREE.Mesh(flat(3.36, 2.1, 0.03), screenMat(mkTex(1280, 800, (cx, w, h) => (shotReady() ? drawShot(cx, shot!, w, h) : drawLaptop(d.kind, cx, w, h))))); ls.position.set(0, 1.21, 0.005); lid.add(ls);
+            if (shot && src) {
+                const repaint = repaints[repaints.length - 1];
+                shot.decoding = 'async';
+                shot.onload = () => { if (alive) repaint(); };
+                shot.src = src;
             }
+            inner.position.set(0, -1.15, -0.1);
             root.visible = false; scene.add(root);
             return { ...d, root, inner, lid };
         });
-
         const onResize = () => { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); };
         onResize();
         on('resize', onResize);
@@ -400,7 +397,7 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
         const m = mouse, km = 1 - Math.exp(-dt * 3);
         m.x += (m.tx - m.x) * km; m.y += (m.ty - m.y) * km;
 
-        // Tablets/laptops take over their sections.
+        // Laptops take over their sections.
         let devMax = 0;
         t.devs.forEach(d => {
             let w = cl(1 - Math.abs(c.f - d.k) * 1.3) * cl(1 - c.ring * 2.5); w = w * w * (3 - 2 * w);
@@ -408,14 +405,11 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
             if (w < 0.003) { d.root.visible = false; return; }
             d.root.visible = true;
             const b = box(feats[d.k].slot), sd = b.x >= vw / 2 ? 1 : -1, fl = 1 - w;
-            const s = d.type === 'tablet'
-                ? Math.max(0.3, Math.min(b.h / vh * 2 * halfH * 0.86 / 3.1, b.w / vw * 2 * halfW * (wide ? 0.8 : 0.82) / 2.35, 1.9))
-                : Math.max(0.3, Math.min(b.h / vh * 2 * halfH * 0.84 / 3.3, b.w / vw * 2 * halfW * (wide ? 1.0 : 0.95) / 3.7, 1.6));
+            const s = Math.max(0.3, Math.min(b.h / vh * 2 * halfH * 0.84 / 3.3, b.w / vw * 2 * halfW * (wide ? 1.0 : 0.95) / 3.7, 1.6));
             const dx = (b.x / vw * 2 - 1) * halfW, dy = (1 - b.y / vh * 2) * halfH;
             d.root.position.set(dx + sd * fl * 1.2 * s, dy - fl * 0.9 * s + Math.sin(now * 1.2 + d.k) * 0.04 * s, -fl * 2.5);
             d.root.scale.setScalar(Math.max(1e-4, s * (0.5 + 0.5 * w)));
-            if (d.type === 'tablet') d.root.rotation.set(0.05 - m.y * 0.1, -sd * 0.3 + m.x * 0.18 + sd * fl * 1.6, sd * 0.02 - sd * fl * 0.3);
-            else { d.root.rotation.set(0.32 - m.y * 0.08, -sd * 0.3 + m.x * 0.16 + sd * fl * 1.4, 0); d.lid!.rotation.x = lerp(1.45, -0.16, sm(0.25, 1, w)); }
+            d.root.rotation.set(0.32 - m.y * 0.08, -sd * 0.3 + m.x * 0.16 + sd * fl * 1.4, 0); d.lid.rotation.x = lerp(1.45, -0.16, sm(0.25, 1, w));
         });
         const phoneVis = 1 - devMax;
 
