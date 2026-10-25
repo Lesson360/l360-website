@@ -3,17 +3,21 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { AFFILIATE_URL } from './links';
 
-// Sections on this page, plus the footer's contact details.
-const SECTIONS = [
-    { href: '#explore', label: 'Videos' },
-    { href: '#executive-program', label: 'Executive Development Program' },
+// Learning sections, grouped under "Learn" on desktop to keep the bar short.
+const LEARN = [
+    { href: '#explore', label: 'Videos', sub: 'Video lessons for every class' },
+    { href: '#executive-program', label: 'Executive Development Program', sub: 'Skills beyond the classroom' },
+];
+// The other sections on this page, plus the footer's contact details.
+const OTHER = [
     { href: '#library', label: 'Library' },
     { href: '#start', label: 'Subscription' },
     { href: '#contact', label: 'Contact' },
 ];
+const SECTIONS = [...LEARN, ...OTHER];
 
 export function LandingNav() {
     const [open, setOpen] = useState(false);
@@ -50,7 +54,33 @@ export function LandingNav() {
                 </a>
 
                 <ul className="m-0 hidden list-none items-center gap-[clamp(14px,1.8vw,28px)] p-0 text-[15px] font-medium lg:flex">
-                    {SECTIONS.map(s => (
+                    {/* Opens on hover, or on focus for keyboard and touch; Escape closes it. */}
+                    <li
+                        className="group relative"
+                        onKeyDown={e => { if (e.key === 'Escape') (document.activeElement as HTMLElement | null)?.blur(); }}
+                    >
+                        <button
+                            type="button"
+                            aria-haspopup="true"
+                            className="flex items-center gap-1 whitespace-nowrap text-ink hover:text-flame group-focus-within:text-flame"
+                        >
+                            Learn
+                            <ChevronDown aria-hidden="true" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" />
+                        </button>
+                        <div className="invisible absolute left-1/2 top-full -translate-x-1/2 pt-4 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                            <ul className="m-0 w-[300px] list-none rounded-3xl border border-ink/[.08] bg-[rgba(255,248,236,.98)] p-2 shadow-[0_24px_48px_-24px_rgba(23,21,58,.35)] backdrop-blur-[14px]">
+                                {LEARN.map(s => (
+                                    <li key={s.href}>
+                                        <a href={s.href} className="group/item block rounded-2xl px-4 py-3 text-ink hover:bg-ink/[.05] focus-visible:bg-ink/[.05]">
+                                            <span className="block font-bold group-hover/item:text-flame">{s.label}</span>
+                                            <span className="block text-[13px] text-ink-soft">{s.sub}</span>
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </li>
+                    {OTHER.map(s => (
                         <li key={s.href}>
                             <a href={s.href} className="whitespace-nowrap text-ink hover:text-flame">{s.label}</a>
                         </li>
