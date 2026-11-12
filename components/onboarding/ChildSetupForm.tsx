@@ -231,10 +231,7 @@ export default function ChildSetupForm() {
             const updatePayload: Record<string, string> = {};
             const newEmail = parentEmail.trim() !== accountEmail ? parentEmail.trim() : '';
             if (newEmail) updatePayload.email = newEmail;
-            if (fullPhone) {
-                updatePayload.phone = fullPhone;
-                updatePayload.phoneNumber = fullPhone;
-            }
+            if (fullPhone) updatePayload.phoneNumber = fullPhone;
 
             if (Object.keys(updatePayload).length > 0) {
                 try {
