@@ -8,15 +8,16 @@ const card = `flex flex-col rounded-3xl p-6 transition-transform duration-500 ${
 
 export function AppSection() {
     const steps = [
-        ['Take a quiz', 'Test what you have learned with 10 fun questions.'],
-        ['Performance assessment', 'Monitor your progress.'],
-        ['Executive Development Program', 'Master new skills.'],
-        ['Live videos', 'Real-time learning experiences.'],
+        ['Pre-recorded Video Lessons & Learning Resources', 'Learn at your own pace with videos and study materials across subjects.'],
+        ['CBT Examination Practice', 'Prepare for national and international exams with structured CBT practice.'],
+        ['Performance Assessment & Leaderboard', 'Track progress, review results and see your position on the leaderboard.'],
+        ['Real-Time Live Classes', 'Join interactive online classes and learn with expert instructors.'],
+        ['One-on-One Tutorials', 'Get personalised teaching and focused support for your learning needs.'],
     ];
     return (
         <FeatureSection id="app" index={0} bg="#FDE9E0" slot="right">
             <Eyebrow color="oklch(0.52 0.19 35)">THE APP</Eyebrow>
-            <Heading>Everything they need to learn, in one app.</Heading>
+            <Heading>More ways to learn. More room to grow.</Heading>
             <div className="flex flex-col">
                 {steps.map(([title, sub], i) => (
                     <ListRow key={title} lead={i + 1} leadColor="oklch(0.55 0.19 35)" title={title} sub={sub} delay={120 + i * 60} last={i === steps.length - 1} />
@@ -33,14 +34,9 @@ export function AppSection() {
 export function PreschoolSection() {
     return (
         <FeatureSection index={1} bg="#E6ECFB" slot="left">
-            <Eyebrow color="oklch(0.48 0.17 265)">PRE-SCHOOL</Eyebrow>
-            <Heading>Why children love us!</Heading>
-            <Lede className="text-ink-soft">Every pre-school topic in one app, with fun worksheets and activities that adapt to each child’s progress.</Lede>
-            <div data-reveal="" data-delay="200" className="flex flex-wrap gap-2">
-                <Chip className="bg-[#5B7BEA] text-cream">All pre-school topics in 1 app</Chip>
-                <Chip className="bg-cream">Fun &amp; educational worksheets</Chip>
-                <Chip className="bg-cream">Activities based on progress</Chip>
-            </div>
+            <Eyebrow color="oklch(0.48 0.17 265)">EXAM PREPARATION</Eyebrow>
+            <Heading>Why students trust us to prepare them for exams!</Heading>
+            <Lede className="text-ink-soft">Clear lessons, exam-style CBT practice, progress tracking and personalised support to help every student prepare with confidence.</Lede>
         </FeatureSection>
     );
 }
