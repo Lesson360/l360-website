@@ -42,7 +42,7 @@ export function PreschoolSection() {
 }
 
 const REVIEWS = [
-    { quote: 'My daughter asks to do her quizzes now. Screen time finally feels like learning time.', name: 'Micheal Adewale', initials: 'MA', bg: 'bg-cream', avatar: 'bg-[#F5B935]', tilt: 'hover:-rotate-1' },
+    { quote: 'My daughter asks to do her CBT now. Screen time finally feels like learning time.', name: 'Micheal Adewale', initials: 'MA', bg: 'bg-cream', avatar: 'bg-[#F5B935]', tilt: 'hover:-rotate-1' },
     { quote: 'The progress reports show me exactly where my son needs help before his exams.', name: 'Anabelle Joseph', initials: 'AJ', bg: 'bg-[#3FB57A]', avatar: 'bg-cream', tilt: 'hover:rotate-1' },
 ];
 
@@ -91,7 +91,7 @@ export function VideosSection() {
         <FeatureSection id="explore" index={4} bg="#FFF1C9" slot="right">
             <Eyebrow color="oklch(0.5 0.12 70)">EXPLORE OUR VIDEOS</Eyebrow>
             <Heading>Your classroom, one tap away.</Heading>
-            <Lede className="text-ink-soft">Interactive video lessons designed for success — plus a full video library to pause, replay and master every topic.</Lede>
+            <Lede className="text-ink-soft">Interactive video lessons designed for success, plus a full video library to pause, replay and master every topic.</Lede>
             <div data-reveal="" data-delay="200" className="flex flex-wrap gap-2">
                 <Chip href="#explore" className="bg-[#F5B935] text-ink">Videos</Chip>
                 <Chip href="#quizzes" className="bg-cream text-ink hover:text-flame">Quizzes</Chip>
@@ -106,15 +106,15 @@ export function VideosSection() {
 
 export function LibrarySection() {
     const shelves = [
-        ['📚', 'Storybooks & readers', 'Build a love of reading, from early years up'],
-        ['📘', 'Textbooks & revision guides', 'Books matched to your child’s class, plus exam prep'],
-        ['🔓', 'Free, included or yours to keep', 'Free books, books included with a subscription, and books you can buy one at a time'],
+        ['📚', 'Storybooks & Reading Books', 'Enjoy stories and build strong reading skills'],
+        ['📘', 'Textbooks & Revision Guides', 'Resources for school work and exam preparation'],
+        ['🔓', 'Flexible Access', 'Free resources, subscription books and individual purchases.'],
     ];
     return (
         <FeatureSection id="library" index={5} bg="#ECF6DC" slot="left">
             <Eyebrow color="oklch(0.48 0.13 130)">DIGITAL LIBRARY</Eyebrow>
             <Heading>A whole library in their pocket.</Heading>
-            <Lede className="text-ink-soft">Storybooks, textbooks and revision guides for every class — read them right in Lesson360, on any device.</Lede>
+            <Lede className="text-ink-soft">Storybooks, textbooks and revision guides for everyday learning and examination preparation, available on any device.</Lede>
             <div className="flex flex-col">
                 {shelves.map(([icon, title, sub], i) => (
                     <ListRow key={title} lead={<span aria-hidden="true">{icon}</span>} title={title} sub={sub} delay={180 + i * 60} last={i === shelves.length - 1} />
@@ -129,19 +129,22 @@ export function LibrarySection() {
 
 export function QuizzesSection() {
     const quizzes = [
-        ['🧮', 'Mathematics quiz', '10 questions'],
-        ['📖', 'English quiz', '12 questions'],
-        ['🏛️', 'Government quiz', 'Civic knowledge'],
+        ['📊', 'Progress Monitoring', 'Track performance and identify topics needing attention.'],
+        ['🎯', 'Exam Drillers', 'Practise CBT questions and improve exam readiness.'],
+        ['🏆', 'Leaderboard', 'View your ranking and track your improvement.'],
     ];
     return (
         <FeatureSection id="quizzes" index={6} bg="#DDF2F1" slot="right">
-            <Eyebrow color="oklch(0.45 0.09 195)">QUIZZES</Eyebrow>
+            <Eyebrow color="oklch(0.45 0.09 195)">CBT</Eyebrow>
             <Heading>Test your knowledge.</Heading>
-            <Lede className="text-ink-soft">Monitor your progress and turn knowledge into rewards.</Lede>
+            <Lede className="text-ink-soft">Practice with CBT exam questions, track your performance and identify topics that need more attention.</Lede>
             <div className="flex flex-col">
                 {quizzes.map(([icon, title, sub], i) => (
-                    <ListRow key={title} lead={<span aria-hidden="true">{icon}</span>} title={title} sub={sub} delay={180 + i * 60} last={i === quizzes.length - 1} action={<StartButton />} />
+                    <ListRow key={title} lead={<span aria-hidden="true">{icon}</span>} title={title} sub={sub} delay={180 + i * 60} last={i === quizzes.length - 1} />
                 ))}
+            </div>
+            <div data-reveal="" data-delay="360" className="flex">
+                <Button href="/signup">Start →</Button>
             </div>
         </FeatureSection>
     );
@@ -202,12 +205,14 @@ export function LevelsSection() {
         { n: '02', name: 'Nursery', sub: 'Pre-school topics & worksheets', cls: 'bg-[#FF8A3D]', tilt: 'hover:rotate-1' },
         { n: '03', name: 'Primary', sub: 'Core subjects, step by step', cls: 'bg-[#8A63E0] text-cream', tilt: 'hover:-rotate-1' },
         { n: '04', name: 'Secondary', sub: 'Exam practice & past questions', cls: 'bg-cream', tilt: 'hover:rotate-1' },
+        // fifth card spans the row so it doesn't sit alone in a two-column grid
+        { n: '05', name: 'Pre-College', sub: 'Courses that prepare you for university', cls: 'col-span-full bg-[#FF8A3D]', tilt: 'hover:-rotate-1' },
     ];
     return (
         <FeatureSection id="levels" index={9} bg="#FFE4D3" slot="left">
             <Eyebrow color="oklch(0.52 0.17 45)">LEARNING LEVELS</Eyebrow>
             <Heading>Support for every learning level.</Heading>
-            <Lede className="text-ink-soft">Lesson360 is structured for early years, nursery, primary, and secondary learners.</Lede>
+            <Lede className="text-ink-soft">Lesson360 is structured for early years, nursery, primary, secondary and pre-college learners.</Lede>
             <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))]">
                 {levels.map((l, i) => (
                     <div key={l.name} data-reveal="" data-delay={i * 90} className={`${card} gap-2.5 hover:-translate-y-1.5 ${l.tilt} ${l.cls}`}>

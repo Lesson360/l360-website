@@ -20,10 +20,10 @@ export function FamiliesSection() {
             <div className="pointer-events-auto flex flex-wrap items-end justify-between gap-6">
                 <div className="flex max-w-[680px] flex-col gap-5">
                     <Eyebrow color="#FF4A00">LESSON360 FAMILIES</Eyebrow>
-                    <Heading>Real children. <span className="text-flame">Real progress.</span></Heading>
+                    <Heading>Confident Students and <span className="text-flame">Reassured Parents.</span></Heading>
                 </div>
                 <Lede className="max-w-[380px] text-ink-soft">
-                    Children across Nigeria learn with Lesson360 at home, in class and on the go — and their parents see every step.
+                    Helping Year 6, Year 9 and Year 12 students prepare for their examinations through structured lessons, CBT practice and learning support.
                 </Lede>
             </div>
 
@@ -45,19 +45,36 @@ export function FamiliesSection() {
                         />
                     </div>
                 ))}
-                <div data-reveal="" data-delay={320} className="flex flex-col justify-end gap-1 rounded-[20px] bg-flame p-4 text-cream sm:rounded-3xl sm:p-6">
-                    <div className="font-grotesk text-[clamp(36px,4.4vw,64px)] font-extrabold leading-none tracking-[-.04em]">2M+</div>
-                    <div className="text-sm font-medium leading-snug sm:text-base">kids learning with Lesson360</div>
+                <div data-reveal="" data-delay={320} className="flex flex-col justify-center gap-2.5 rounded-[20px] bg-flame p-4 text-cream sm:rounded-3xl lg:gap-4 lg:p-6">
+                    {/* laptop with a graduation cap on its screen */}
+                    <svg viewBox="0 0 64 48" className="h-10 w-auto flex-none self-start lg:h-14" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="9" y="3" width="46" height="32" rx="4" />
+                        <path d="M3 43h58" strokeWidth="4" />
+                        <path d="M32 11 19 17l13 6 13-6-13-6Z" fill="currentColor" strokeWidth="1.5" />
+                        <path d="M25 21.5v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4" strokeWidth="2.5" />
+                        <path d="M45 17v6" strokeWidth="2.5" />
+                    </svg>
+                    <div className="font-grotesk text-[clamp(15px,1.55vw,22px)] font-extrabold leading-[1.15] tracking-[-.02em]">
+                        Structured Learning for{' '}
+                        <span className="relative inline-block">
+                            Better Exam Results.
+                            <svg viewBox="0 0 200 12" preserveAspectRatio="none" className="absolute -bottom-2.5 left-0 h-2.5 w-full text-[#FFD43B]" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" aria-hidden="true">
+                                <path d="M4 7c40-5 110-5 192-1" />
+                            </svg>
+                        </span>
+                    </div>
                 </div>
             </div>
         </section>
     );
 }
 
-const AUDIENCES = [
-    { src: '/landing/portrait-parent.webp', title: 'Parents & guardians', sub: 'Follow progress and get updates' },
-    { src: '/landing/portrait-teacher.webp', title: 'Teachers', sub: 'Bring videos, quizzes and exams into class' },
-    { src: '/landing/portrait-school-admin.webp', title: 'Schools & partners', sub: 'One platform for every learner' },
+const LEARNERS = [
+    { title: 'Early Years', range: '6 months – 5 years', sub: 'A strong start for lifelong learning.' },
+    { title: 'Primary', range: 'Years 1 – 6', sub: 'Build core skills with confidence.' },
+    { title: 'Secondary', range: 'Years 7 – 12', sub: 'Deeper learning and real-world readiness.' },
+    { title: 'Exam Classes', range: 'WAEC, NECO, JAMB, IGCSE, SAT, IELTS', sub: 'Focused preparation and practice to excel.' },
+    { title: 'PreCollege', range: 'Ages 17 – 20', sub: 'Bridge the gap to university, work and life.' },
 ];
 
 export function CommunitySection() {
@@ -73,18 +90,19 @@ export function CommunitySection() {
                 <Eyebrow color="oklch(0.8 0.12 295)">WHO WE SERVE</Eyebrow>
                 <Heading>For every home and every classroom.</Heading>
                 <Lede className="text-[#CFCBE8]">
-                    Parents, guardians, teachers and schools use Lesson360 to keep learning going — on whatever device they have.
+                    Parents, guardians, teachers and schools use Lesson360 to keep learning going — for learners from 6 months to 20 years, including students in exam classes.
                 </Lede>
                 <div className="flex flex-col">
-                    {AUDIENCES.map((a, i) => (
-                        <div key={a.title} data-reveal="" data-delay={160 + i * 60} className="flex items-center gap-4 border-t border-[rgba(247,242,234,.14)] py-3.5">
-                            <div className="relative h-14 w-14 flex-none overflow-hidden rounded-full bg-white/10">
-                                {/* the portraits are circular cut-outs; zoom slightly to hide their white corners */}
-                                <Image src={a.src} alt="" fill sizes="56px" className="scale-[1.12] object-cover" />
+                    {LEARNERS.map((l, i) => (
+                        <div key={l.title} data-reveal="" data-delay={160 + i * 60} className="flex items-center gap-4 border-t border-[rgba(247,242,234,.14)] py-3.5">
+                            <div className="grid h-14 w-14 flex-none place-items-center rounded-full bg-white/10 font-grotesk text-lg font-extrabold">
+                                {String(i + 1).padStart(2, '0')}
                             </div>
                             <div>
-                                <div className="text-lg font-bold">{a.title}</div>
-                                <div className="mt-0.5 text-sm text-[#CFCBE8]">{a.sub}</div>
+                                <div className="text-lg font-bold">
+                                    {l.title} <span className="text-[#FF8A3D]">({l.range})</span>
+                                </div>
+                                <div className="mt-0.5 text-sm text-[#CFCBE8]">{l.sub}</div>
                             </div>
                         </div>
                     ))}
