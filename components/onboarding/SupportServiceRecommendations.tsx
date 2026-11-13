@@ -400,7 +400,7 @@ export default function SupportServiceRecommendations({
             )}
 
             {/* Recommended Offerings Card Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {offerings.map((offering) => {
                     const isPrimary = offering.recommendationFit === 'primary';
                     const isGroup = offering.type === 'group_live';
@@ -509,7 +509,7 @@ export default function SupportServiceRecommendations({
             {/* MODAL 1: SCHEDULE SLOT SELECTION MODAL */}
             {isSlotModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in duration-200">
-                    <div className="relative w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+                    <div className="relative w-full max-w-2xl bg-white rounded-3xl p-5 sm:p-8 shadow-2xl space-y-5 sm:space-y-6 max-h-[90dvh] overflow-y-auto overscroll-contain">
 
                         {/* Header */}
                         <div className="flex items-start justify-between border-b border-gray-100 pb-4">
@@ -630,7 +630,7 @@ export default function SupportServiceRecommendations({
             {/* MODAL 2: SUCCESS ENROLLMENT SUMMARY MODAL */}
             {isSuccessModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in duration-200">
-                    <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
+                    <div className="relative w-full max-w-lg bg-white rounded-3xl p-5 sm:p-8 shadow-2xl space-y-5 sm:space-y-6 text-center max-h-[90dvh] overflow-y-auto overscroll-contain">
 
                         <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md">
                             <CheckCircle2 className="w-10 h-10 stroke-[2.5]" />

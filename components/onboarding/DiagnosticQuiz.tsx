@@ -310,7 +310,7 @@ export default function DiagnosticQuiz() {
 
     if (isLoading) {
         return (
-            <div className="w-full max-w-4xl mx-auto bg-white p-12 rounded-3xl border border-gray-100 shadow-md text-center space-y-4">
+            <div className="w-full max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-gray-100 shadow-md text-center space-y-4">
                 <Loader2 className="w-10 h-10 animate-spin text-brand-orange mx-auto" />
                 <p className="text-gray-600 font-medium text-sm">
                     Preparing your child&apos;s diagnostic assessment...
@@ -320,17 +320,17 @@ export default function DiagnosticQuiz() {
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 lg:p-10 rounded-3xl border border-gray-100 shadow-md space-y-8 relative">
+        <div className="w-full max-w-4xl mx-auto bg-white p-4 sm:p-8 lg:p-10 rounded-3xl border border-gray-100 shadow-md space-y-6 sm:space-y-8 relative">
 
             {/* VIEW 1: INTRO SCREEN */}
             {view === 'intro' && (
-                <div className="space-y-8 text-center sm:text-left">
+                <div className="space-y-6 sm:space-y-8 text-center sm:text-left">
                     <div className="space-y-3">
                         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-peach text-brand-orange text-xs font-bold">
                             <Sparkles className="w-4 h-4" />
                             <span>Learner Placement Diagnostic</span>
                         </div>
-                        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                        <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
                             {template?.title || 'Academic Assessment'}
                         </h1>
                         <p className="text-base text-gray-600 leading-relaxed max-w-2xl">
@@ -339,7 +339,7 @@ export default function DiagnosticQuiz() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 text-left">
                         <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100 flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-brand-orange text-white flex items-center justify-center font-bold shrink-0">
                                 <Clock className="w-5 h-5" />
@@ -427,7 +427,7 @@ export default function DiagnosticQuiz() {
                             </span>
                         )}
 
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-900 leading-snug">
                             {currentQuestion.prompt}
                         </h2>
 
@@ -452,7 +452,8 @@ export default function DiagnosticQuiz() {
                                     {/* Hover Zoom Badge */}
                                     <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-xs text-gray-700 text-xs font-bold shadow-xs flex items-center gap-1.5 group-hover:bg-brand-orange group-hover:text-white transition-all">
                                         <ZoomIn className="w-3.5 h-3.5" />
-                                        <span>Click to expand diagram</span>
+                                        <span className="hidden sm:inline">Click to expand diagram</span>
+                                        <span className="sm:hidden">Tap to zoom</span>
                                     </div>
 
                                     {/* Responsive Image Display */}
@@ -476,7 +477,7 @@ export default function DiagnosticQuiz() {
                                             <ImageIcon className="w-3.5 h-3.5 text-brand-orange" />
                                             <span>Diagnostic Diagram</span>
                                         </span>
-                                        <span className="text-brand-orange group-hover:underline font-bold">
+                                        <span className="hidden sm:inline text-brand-orange group-hover:underline font-bold">
                                             Full Resolution Preview 🔍
                                         </span>
                                     </div>
@@ -486,7 +487,7 @@ export default function DiagnosticQuiz() {
                     </div>
 
                     {/* Options Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5">
                         {currentQuestion.options.map((opt) => {
                             const qId = currentQuestion.id || currentQuestion._id || '';
                             const isSelected = answers[qId] === opt.key;
@@ -509,7 +510,7 @@ export default function DiagnosticQuiz() {
                                     >
                                     </div>
 
-                                    <div className="flex-1 text-sm font-semibold text-gray-800 leading-relaxed">
+                                    <div className="flex-1 text-[15px] sm:text-sm font-semibold text-gray-800 leading-snug sm:leading-relaxed">
                                         {opt.text}
                                     </div>
 
@@ -522,12 +523,12 @@ export default function DiagnosticQuiz() {
                     </div>
 
                     {/* Step Controls */}
-                    <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-4">
+                    <div className="sticky bottom-0 z-10 -mx-4 -mb-4 rounded-b-3xl border-t border-gray-100 bg-white/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:z-auto sm:m-0 sm:rounded-none sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-4 sm:backdrop-blur-none flex items-center justify-between gap-3">
                         <button
                             type="button"
                             onClick={handlePrevQuestion}
                             disabled={currentQuestionIndex === 0}
-                            className="px-5 py-3 rounded-xl border border-gray-300 text-gray-700 font-bold text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                            className="px-4 sm:px-5 py-3.5 sm:py-3 rounded-xl border border-gray-300 text-gray-700 font-bold text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                         >
                             <ArrowLeft className="w-4 h-4" />
                             <span>Previous</span>
@@ -538,7 +539,7 @@ export default function DiagnosticQuiz() {
                                 type="button"
                                 onClick={handleNextQuestion}
                                 disabled={!answers[currentQuestion.id || currentQuestion._id || '']}
-                                className="px-6 py-3 rounded-xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-sm shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                className="flex-1 sm:flex-none justify-center px-6 py-3.5 sm:py-3 rounded-xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base sm:text-sm shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                             >
                                 <span>Next</span>
                                 <ArrowRight className="w-4 h-4" />
@@ -548,7 +549,7 @@ export default function DiagnosticQuiz() {
                                 type="button"
                                 onClick={handleSubmitQuiz}
                                 disabled={isSubmitting || !answers[currentQuestion.id || currentQuestion._id || '']}
-                                className="px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="flex-1 sm:flex-none justify-center px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orange-deep text-white font-bold text-base sm:text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 {isSubmitting ? (
                                     <>
@@ -575,7 +576,7 @@ export default function DiagnosticQuiz() {
                             <Sparkles className="w-4 h-4" />
                             <span>Diagnostic Assessment Complete</span>
                         </div>
-                        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                        <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
                             Congratulations, {childName || 'Learner'}!
                         </h1>
                         <p className="text-base text-gray-600 leading-relaxed">
@@ -585,10 +586,10 @@ export default function DiagnosticQuiz() {
                     </div>
 
                     {/* Result Summary Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
 
                         {/* Score Circle Card */}
-                        <div className="p-6 rounded-3xl bg-gradient-to-br from-orange-50 to-peach-50 border border-brand-orange/20 text-center space-y-2">
+                        <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-br from-orange-50 to-peach-50 border border-brand-orange/20 text-center space-y-2">
                             <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Overall Score</p>
                             <div className="text-4xl sm:text-5xl font-black text-brand-orange">
                                 {result?.percentageScore ?? 80}%
@@ -599,9 +600,9 @@ export default function DiagnosticQuiz() {
                         </div>
 
                         {/* Assigned Band Card */}
-                        <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 text-center space-y-2">
+                        <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 text-center space-y-2">
                             <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Learning Band</p>
-                            <div className="text-2xl sm:text-3xl font-extrabold text-purple-700 capitalize">
+                            <div className="text-xl sm:text-3xl font-extrabold text-purple-700 capitalize">
                                 {result?.band?.replaceAll('_', ' ') || 'Rising Star'}
                             </div>
                             <p className="text-xs text-purple-600 font-semibold">
@@ -610,7 +611,7 @@ export default function DiagnosticQuiz() {
                         </div>
 
                         {/* Status Card */}
-                        <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 text-center space-y-2">
+                        <div className="hidden sm:block p-6 rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 text-center space-y-2">
                             <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Next Step</p>
                             <div className="text-2xl sm:text-3xl font-extrabold text-blue-700">
                                 Ready to Learn
@@ -632,14 +633,14 @@ export default function DiagnosticQuiz() {
                     />
 
                     {/* Finish CTA */}
-                    <div className="pt-6 border-t border-gray-100 flex items-center justify-between gap-4">
+                    <div className="pt-5 sm:pt-6 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                         <span className="text-xs font-semibold text-gray-500">
                             Or skip support services for now and view curriculum:
                         </span>
                         <button
                             type="button"
                             onClick={handleFinishAndNavigate}
-                            className="px-6 py-3.5 rounded-2xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                            className="px-6 py-3.5 rounded-2xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <span>Go to Dashboard</span>
                             <ArrowRight className="w-4 h-4" />
@@ -657,7 +658,7 @@ export default function DiagnosticQuiz() {
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="relative max-w-4xl max-h-[90vh] bg-white rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden flex flex-col space-y-4"
+                        className="relative max-w-4xl max-h-[90dvh] bg-white rounded-3xl p-3 sm:p-6 shadow-2xl overflow-hidden flex flex-col space-y-4"
                     >
                         {/* Lightbox Header */}
                         <div className="flex items-center justify-between border-b border-gray-100 pb-3">

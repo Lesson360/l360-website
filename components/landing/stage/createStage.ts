@@ -30,13 +30,15 @@ interface Options {
     canvas: HTMLCanvasElement;
     bgLayer: HTMLElement;
     reducedMotion: boolean;
+    /** Phone-sized screens: no WebGL at all. Sections show static screenshots, and the loop only runs while scrolling. */
+    lite: boolean;
     /** Called if WebGL or three.js is unavailable, so the page can collapse the device slots. */
     onUnavailable: () => void;
 }
 
 interface Box { x: number; y: number; w: number; h: number }
 
-export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailable }: Options) {
+export function createStage({ root, canvas, bgLayer, reducedMotion, lite, onUnavailable }: Options) {
     let alive = true;
     let raf = 0;
     const cleanups: (() => void)[] = [];
@@ -84,13 +86,17 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
             sl.style.minHeight = one ? '58vh' : 'min(80vh, 760px)';
         });
     };
-    orderSlots();
-    on('resize', orderSlots);
+    if (!lite) {
+        orderSlots();
+        on('resize', orderSlots);
+    }
+    canvas.style.display = lite ? 'none' : '';
 
     // ── Reveal on scroll ────────────────────────────────────────────────────
     let reveals: HTMLElement[] = [];
     const show = (el: HTMLElement) => {
-        const delay = Number(el.dataset.delay || 0);
+        // Stagger less on phones, where items mostly arrive one at a time anyway.
+        const delay = Number(el.dataset.delay || 0) * (lite ? 0.4 : 1);
         el.style.transitionDelay = `${delay}ms`;
         el.style.opacity = '1';
         el.style.transform = 'none';
@@ -100,7 +106,7 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
             el.style.removeProperty('transform');
             el.style.removeProperty('transition');
             el.style.removeProperty('transition-delay');
-        }, delay + 1300);
+        }, delay + (lite ? 700 : 1300));
         cleanups.push(() => clearTimeout(t));
     };
     const io = new IntersectionObserver(entries => {
@@ -119,8 +125,11 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
             if (vh > 200 && el.getBoundingClientRect().top < vh * 0.95) return;
             reveals.push(el);
             el.style.opacity = '0';
-            el.style.transform = 'translate3d(0, 56px, 0)';
-            el.style.transition = 'opacity 1.1s cubic-bezier(.2,.7,.2,1), transform 1.2s cubic-bezier(.2,.7,.2,1)';
+            // Shorter, quicker reveals on phones: long slides feel sluggish under a thumb scroll.
+            el.style.transform = `translate3d(0, ${lite ? 20 : 56}px, 0)`;
+            el.style.transition = lite
+                ? 'opacity .5s cubic-bezier(.2,.7,.2,1), transform .55s cubic-bezier(.2,.7,.2,1)'
+                : 'opacity 1.1s cubic-bezier(.2,.7,.2,1), transform 1.2s cubic-bezier(.2,.7,.2,1)';
             io.observe(el);
         });
     }
@@ -478,10 +487,14 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
     // ── Frame loop ──────────────────────────────────────────────────────────
     let last: number | null = null;
     let warned = false;
+    let seenY = -1, seenH = -1;
     const tick = (ms: number) => {
         if (!alive) return;
         raf = requestAnimationFrame(tick);
         const now = ms / 1000; const dt = Math.min(0.05, now - (last ?? now)); last = now;
+        // Without the 3D scene nothing moves between scrolls, so skip the layout reads.
+        if (!three && scrollY === seenY && innerHeight === seenH) return;
+        seenY = scrollY; seenH = innerHeight;
         tickBg();
         if (!three) return;
         try { tick3d(now, dt); } catch (err) {
@@ -490,7 +503,7 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
     };
     raf = requestAnimationFrame(tick);
 
-    buildScene()
+    if (!lite) buildScene()
         .then(scene => { if (alive) three = scene; else scene.dispose(); })
         .catch(err => { console.warn('[landing] 3D stage unavailable', err); if (alive) onUnavailable(); });
 
@@ -500,5 +513,9 @@ export function createStage({ root, canvas, bgLayer, reducedMotion, onUnavailabl
         cleanups.forEach(fn => fn());
         three?.dispose();
         root.style.cursor = '';
+        canvas.style.display = '';
+        // Leave nothing hidden for whichever stage comes next.
+        q('[data-reveal]').forEach(el => ['opacity', 'transform', 'transition', 'transition-delay'].forEach(p => el.style.removeProperty(p)));
+        feats.forEach(({ slot: sl }) => { sl.style.order = ''; sl.style.minHeight = ''; });
     };
 }

@@ -54,7 +54,7 @@ export function ReviewsSection() {
             <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))]">
                 {REVIEWS.map((r, i) => (
                     <figure key={r.name} data-reveal="" data-delay={i * 90} className={`${card} m-0 gap-[18px] hover:-translate-y-1.5 ${r.tilt} ${r.bg}`}>
-                        <blockquote className="m-0 font-grotesk text-[19px] font-semibold leading-[1.3]">“{r.quote}”</blockquote>
+                        <blockquote className="m-0 font-grotesk text-[17px] font-semibold sm:text-[19px] leading-[1.3]">“{r.quote}”</blockquote>
                         <figcaption className="mt-auto flex items-center gap-2.5 text-sm">
                             <span aria-hidden="true" className={`flex h-11 w-11 flex-none items-center justify-center rounded-full font-jetbrains text-xs font-bold text-ink ${r.avatar}`}>
                                 {r.initials}
@@ -89,7 +89,7 @@ export function AffiliateSection() {
 export function VideosSection() {
     return (
         <FeatureSection id="explore" index={4} bg="#FFF1C9" slot="right">
-            <Eyebrow color="oklch(0.5 0.12 70)">EXPLORE OUR VIDEOS</Eyebrow>
+            <Eyebrow color="oklch(0.5 0.12 70)">EXPLORE OUR LESSONS</Eyebrow>
             <Heading>Your classroom, one tap away.</Heading>
             <Lede className="text-ink-soft">Interactive video lessons designed for success, plus a full video library to pause, replay and master every topic.</Lede>
             <div data-reveal="" data-delay="200" className="flex flex-wrap gap-2">
@@ -213,12 +213,12 @@ export function LevelsSection() {
             <Eyebrow color="oklch(0.52 0.17 45)">LEARNING LEVELS</Eyebrow>
             <Heading>Support for every learning level.</Heading>
             <Lede className="text-ink-soft">Lesson360 is structured for early years, nursery, primary, secondary and pre-college learners.</Lede>
-            <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))]">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 md:[grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))]">
                 {levels.map((l, i) => (
-                    <div key={l.name} data-reveal="" data-delay={i * 90} className={`${card} gap-2.5 hover:-translate-y-1.5 ${l.tilt} ${l.cls}`}>
+                    <div key={l.name} data-reveal="" data-delay={i * 90} className={`${card} gap-2 max-sm:rounded-[20px] max-sm:p-4 sm:gap-2.5 hover:-translate-y-1.5 ${l.tilt} ${l.cls}`}>
                         <div className="font-jetbrains text-[11px] font-bold tracking-[.12em] opacity-75">LEVEL {l.n}</div>
-                        <div className="font-grotesk text-[28px] font-extrabold leading-none tracking-[-.02em]">{l.name}</div>
-                        <div className="text-sm">{l.sub}</div>
+                        <div className="font-grotesk text-[21px] font-extrabold sm:text-[28px] leading-none tracking-[-.02em]">{l.name}</div>
+                        <div className="text-[13px] leading-snug sm:text-sm">{l.sub}</div>
                     </div>
                 ))}
             </div>

@@ -12,7 +12,7 @@ const STORES: Record<Store, { url: string; name: string; icon: string; iconW: nu
     android: { url: PLAY_STORE_URL, name: 'Google Play', icon: '/landing/google-play-icon.png', iconW: 28, iconH: 29, top: 'Get it on', topCls: 'uppercase tracking-[.04em]', bottom: 'Google Play' },
 };
 
-const badgeCls = 'flex min-w-[170px] items-center gap-3 rounded-[14px] bg-ink py-2.5 pl-3.5 pr-5 leading-[1.05] text-cream transition-[transform,background-color] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] hover:-translate-y-0.5 hover:bg-flame hover:text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-flame';
+const badgeCls = 'flex min-w-0 items-center gap-2.5 rounded-[14px] bg-ink py-2.5 pl-3 pr-3.5 leading-[1.05] max-sm:flex-1 sm:min-w-[170px] sm:gap-3 sm:pl-3.5 sm:pr-5 text-cream transition-[transform,background-color] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] hover:-translate-y-0.5 hover:bg-flame hover:text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-flame';
 
 /**
  * App Store / Google Play badges. Until a store listing exists (its env URL is
@@ -39,8 +39,8 @@ export function StoreBadges({ className = '', delay, align = 'start' }: { classN
         <>
             <Image src={STORES[s].icon} alt="" width={STORES[s].iconW} height={STORES[s].iconH} className="flex-none" style={{ width: STORES[s].iconW, height: STORES[s].iconH }} />
             <span className="flex flex-col gap-0.5 text-left">
-                <span className={`text-[11px] font-medium ${STORES[s].topCls}`}>{STORES[s].top}</span>
-                <span className="font-grotesk text-[21px] font-bold tracking-[-.01em]">{STORES[s].bottom}</span>
+                <span className={`whitespace-nowrap text-[10px] font-medium sm:text-[11px] ${STORES[s].topCls}`}>{STORES[s].top}</span>
+                <span className="whitespace-nowrap font-grotesk text-[17px] font-bold tracking-[-.01em] sm:text-[21px]">{STORES[s].bottom}</span>
             </span>
         </>
     );
@@ -50,7 +50,7 @@ export function StoreBadges({ className = '', delay, align = 'start' }: { classN
             ref={groupRef}
             data-reveal=""
             data-delay={delay}
-            className={`pointer-events-auto relative flex flex-wrap gap-2.5 ${align === 'center' ? 'justify-center' : ''} ${className}`}
+            className={`pointer-events-auto relative flex w-full gap-2 sm:w-auto sm:flex-wrap sm:gap-2.5 ${align === 'center' ? 'justify-center' : ''} ${className}`}
         >
             {(Object.keys(STORES) as Store[]).map(s => STORES[s].url ? (
                 <a key={s} href={STORES[s].url} target="_blank" rel="noopener noreferrer" className={badgeCls}>

@@ -62,6 +62,15 @@ html {
   background: var(--brand-orange-deep);
 }
 
+/* Phones: iOS Safari zooms the page on focus when a field's text is under 16px. */
+@media (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Smooth transitions */
 * {
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;

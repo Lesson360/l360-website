@@ -16,7 +16,7 @@ export default function OnboardingHeader({
     stepTitle = 'Child Setup',
 }: OnboardingHeaderProps) {
     return (
-        <header className="w-full bg-white border-b border-gray-100 py-3.5 px-4 sm:px-8 shadow-xs">
+        <header className="w-full bg-white border-b border-gray-100 py-3 px-4 sm:py-3.5 sm:px-8 shadow-xs">
             <div className="max-w-6xl mx-auto flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="inline-block">
@@ -25,7 +25,7 @@ export default function OnboardingHeader({
                         alt="Lesson 360 Logo"
                         width={140}
                         height={35}
-                        className="h-8 w-auto object-contain"
+                        className="h-7 w-auto object-contain sm:h-8"
                         priority
                     />
                 </Link>

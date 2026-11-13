@@ -1,5 +1,7 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { LAPTOP_SHOTS, PHONE_COLORS, PHONE_SHOTS } from './stage/screens';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
@@ -18,7 +20,7 @@ export function Heading({ children, className }: { children: ReactNode; classNam
         <h2
             data-reveal=""
             data-delay="80"
-            className={cx('relative m-0 text-balance font-grotesk text-[clamp(40px,5vw,76px)] font-extrabold leading-[.95] tracking-[-.04em]', className)}
+            className={cx('relative m-0 text-balance font-grotesk text-[34px] font-extrabold md:text-[clamp(40px,5vw,76px)] leading-[.95] tracking-[-.04em]', className)}
         >
             {children}
         </h2>
@@ -98,7 +100,8 @@ export function StartButton({ href = '/signup', label = 'Start' }: { href?: stri
 export function FeatureSection({ id, index, bg, slot, className, children }: {
     id?: string; index: number; bg: string; slot: 'left' | 'right'; className?: string; children: ReactNode;
 }) {
-    const slotEl = <div data-slot="" className="min-h-[min(80vh,760px)]" />;
+    // The 3D stage only runs from the md breakpoint up (see LandingStage); phones get a static screenshot instead.
+    const slotEl = <div data-slot="" className="hidden min-h-[min(80vh,760px)] md:block" />;
     return (
         <section
             id={id}
@@ -106,13 +109,46 @@ export function FeatureSection({ id, index, bg, slot, className, children }: {
             data-feature={index}
             data-bg={bg}
             className={cx(
-                'relative mx-auto grid min-h-[115vh] max-w-[1360px] scroll-mt-4 items-center gap-12 px-[clamp(20px,5vw,72px)] py-[clamp(88px,10vw,120px)] [grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))]',
+                'relative mx-auto grid max-w-[1360px] scroll-mt-4 items-center gap-7 px-[clamp(20px,5vw,72px)] py-14 md:min-h-[115vh] md:gap-12 md:py-[clamp(88px,10vw,120px)] [grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))]',
                 className,
             )}
         >
+            <MobileDevice index={index} tilt={slot === 'left' ? '-rotate-3' : 'rotate-3'} />
             {slot === 'left' && slotEl}
-            <div className="pointer-events-auto relative flex flex-col gap-7">{children}</div>
+            <div className="pointer-events-auto relative flex flex-col gap-6 md:gap-7">{children}</div>
             {slot === 'right' && slotEl}
         </section>
     );
 }
+
+/**
+ * Phone-sized stand-in for the 3D devices: the section's app screenshot in a
+ * plain frame, cropped and faded at the bottom so it stays compact.
+ */
+function MobileDevice({ index, tilt }: { index: number; tilt: string }) {
+    const k = index % PHONE_SHOTS.length;
+    const laptop = DESKTOP_SHOT_FEATURES[index];
+    if (laptop) {
+        return (
+            <div data-reveal="" aria-hidden="true" className="mx-auto w-full max-w-[420px] md:hidden">
+                <div className="rounded-[14px] p-[5px] shadow-[0_24px_40px_-22px_rgba(23,21,58,.5)]" style={{ backgroundColor: PHONE_COLORS[k] }}>
+                    <Image src={laptop} alt="" width={1280} height={800} sizes="(max-width: 767px) 90vw, 1px" className="block h-auto w-full rounded-[10px]" />
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div
+            data-reveal=""
+            aria-hidden="true"
+            className="flex h-[250px] justify-center overflow-hidden pt-3 [mask-image:linear-gradient(to_bottom,#000_72%,transparent)] md:hidden"
+        >
+            <div className={cx('h-max w-[178px] rounded-[30px] p-[5px] shadow-[0_24px_40px_-18px_rgba(23,21,58,.5)]', tilt)} style={{ backgroundColor: PHONE_COLORS[k] }}>
+                <Image src={PHONE_SHOTS[k]} alt="" width={736} height={1600} sizes="(max-width: 767px) 178px, 1px" className="block h-auto w-full rounded-[25px]" />
+            </div>
+        </div>
+    );
+}
+
+// Feature sections whose device is a laptop with a real desktop screenshot.
+const DESKTOP_SHOT_FEATURES: Record<number, string | undefined> = { 7: LAPTOP_SHOTS.exam };

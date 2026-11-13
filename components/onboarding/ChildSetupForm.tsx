@@ -361,7 +361,7 @@ export default function ChildSetupForm() {
 
     if (isInitializing) {
         return (
-            <div className="w-full max-w-4xl mx-auto bg-white p-12 rounded-3xl border border-gray-100 shadow-md text-center space-y-4">
+            <div className="w-full max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-gray-100 shadow-md text-center space-y-4">
                 <Loader2 className="w-8 h-8 animate-spin text-brand-orange mx-auto" />
                 <p className="text-gray-500 font-medium text-sm">
                     Loading your setup details...
@@ -371,20 +371,21 @@ export default function ChildSetupForm() {
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 lg:p-10 rounded-3xl border border-gray-100 shadow-md space-y-8">
+        <div className="w-full max-w-4xl mx-auto bg-white p-4 sm:p-8 lg:p-10 rounded-3xl border border-gray-100 shadow-md space-y-6 sm:space-y-8">
 
             {/* Stepper Header Indicator */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-4">
                 <div className="flex items-center gap-2">
                     <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step === 1 ? 'bg-brand-orange text-white' : 'bg-emerald-500 text-white'}`}>
                         {step === 1 ? '1' : <Check className="w-4 h-4 stroke-[3]" />}
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-gray-900">
-                        Step 1: Parent & Child Info
+                    <span className="text-xs sm:text-sm font-bold text-gray-900 whitespace-nowrap">
+                        <span className="sm:hidden">Your details</span>
+                        <span className="hidden sm:inline">Step 1: Parent & Child Info</span>
                     </span>
                 </div>
 
-                <div className="w-12 sm:w-24 h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div className="flex-1 sm:flex-none sm:w-24 h-1 bg-gray-100 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-brand-orange transition-all duration-300 rounded-full"
                         style={{ width: step === 1 ? '50%' : '100%' }}
@@ -395,8 +396,9 @@ export default function ChildSetupForm() {
                     <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step === 2 ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-400'}`}>
                         2
                     </span>
-                    <span className={`text-xs sm:text-sm font-bold ${step === 2 ? 'text-gray-900' : 'text-gray-400'}`}>
-                        Step 2: Level & Class
+                    <span className={`text-xs sm:text-sm font-bold whitespace-nowrap ${step === 2 ? 'text-gray-900' : 'text-gray-400'}`}>
+                        <span className="sm:hidden">Level & class</span>
+                        <span className="hidden sm:inline">Step 2: Level & Class</span>
                     </span>
                 </div>
             </div>
@@ -441,6 +443,9 @@ export default function ChildSetupForm() {
                                     value={childName}
                                     onChange={(e) => setChildName(e.target.value)}
                                     placeholder="e.g. Chidinma"
+                                    autoComplete="off"
+                                    autoCapitalize="words"
+                                    enterKeyHint="next"
                                     className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 transition-all font-medium text-sm shadow-xs"
                                 />
                             </div>
@@ -461,10 +466,14 @@ export default function ChildSetupForm() {
                                     value={parentEmail}
                                     onChange={(e) => setParentEmail(e.target.value)}
                                     placeholder="e.g. parent@example.com"
+                                    autoComplete="email"
+                                    inputMode="email"
+                                    autoCapitalize="none"
+                                    enterKeyHint="next"
                                     className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 transition-all font-medium text-sm shadow-xs"
                                 />
                             </div>
-                            <p className="text-[11px] text-gray-400">
+                            <p className="text-xs text-gray-500">
                                 {accountEmail ? 'Prefilled with your signup email. You can update it if needed.' : 'Needed to pay for your plan and send your receipts.'}
                             </p>
                         </div>
@@ -487,10 +496,13 @@ export default function ChildSetupForm() {
                                     value={parentPhone}
                                     onChange={(e) => setParentPhone(e.target.value.replace(/\D/g, ''))}
                                     placeholder="801 234 5678"
+                                    autoComplete="tel-national"
+                                    inputMode="numeric"
+                                    enterKeyHint="done"
                                     className="w-full py-3.5 px-3.5 bg-transparent text-gray-900 placeholder-gray-400 focus:outline-none text-sm font-medium"
                                 />
                             </div>
-                            <p className="text-[11px] text-gray-400">
+                            <p className="text-xs text-gray-500">
                                 Used for account security & SMS notifications.
                             </p>
                         </div>
@@ -522,12 +534,12 @@ export default function ChildSetupForm() {
 
             {/* SCREEN 2: STEP 2 - SELECT LEVEL AND CLASS */}
             {step === 2 && (
-                <form onSubmit={handleStep2Submit} className="space-y-8">
+                <form onSubmit={handleStep2Submit} className="space-y-6 sm:space-y-8">
                     <div className="space-y-3">
                         <button
                             type="button"
                             onClick={() => setStep(1)}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-brand-orange transition-colors"
+                            className="inline-flex items-center gap-1 py-2 text-xs font-bold text-gray-500 hover:text-brand-orange transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4" />
                             <span>Edit Child Name & Contact Info</span>
@@ -543,7 +555,7 @@ export default function ChildSetupForm() {
                                 </p>
                             </div>
 
-                            <div className="px-4 py-2 rounded-2xl bg-brand-peach/30 border border-brand-orange/20 shrink-0">
+                            <div className="hidden sm:block px-4 py-2 rounded-2xl bg-brand-peach/30 border border-brand-orange/20 shrink-0">
                                 <span className="text-xs font-bold text-brand-orange">
                                     Learner: {childName}
                                 </span>
@@ -562,7 +574,7 @@ export default function ChildSetupForm() {
                                 Loading academic levels...
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                                 {levels.map((lvl) => {
                                     const lvlId = lvl.id || lvl._id || '';
                                     const isSelected = selectedLevelId === lvlId;
@@ -587,7 +599,7 @@ export default function ChildSetupForm() {
                                             key={lvlId}
                                             type="button"
                                             onClick={() => setSelectedLevelId(lvlId)}
-                                            className={`relative w-full h-56 sm:h-64 rounded-3xl ${theme.bg} ${theme.text} p-3.5 flex flex-col justify-between text-center transition-all duration-200 shadow-md hover:shadow-xl transform hover:-translate-y-1 overflow-hidden cursor-pointer ${isSelected
+                                            className={`relative w-full h-48 sm:h-64 rounded-3xl ${theme.bg} ${theme.text} p-3.5 flex flex-col justify-between text-center transition-all duration-200 shadow-md hover:shadow-xl transform hover:-translate-y-1 overflow-hidden cursor-pointer ${isSelected
                                                 ? 'ring-4 ring-brand-orange ring-offset-2 scale-[1.02] shadow-2xl z-10'
                                                 : 'opacity-95 hover:opacity-100'
                                                 }`}
@@ -601,7 +613,7 @@ export default function ChildSetupForm() {
 
                                             {/* Level Image */}
                                             <div className="relative flex-1 w-full flex items-center justify-center p-1 min-h-0">
-                                                <div className="relative w-full h-full max-h-[130px] sm:max-h-[145px] flex items-center justify-center">
+                                                <div className="relative w-full h-full max-h-[104px] sm:max-h-[145px] flex items-center justify-center">
                                                     <img
                                                         src={imageSrc}
                                                         alt={lvl.name}
@@ -649,7 +661,7 @@ export default function ChildSetupForm() {
                                     <span>Fetching classes...</span>
                                 </div>
                             ) : classes.length > 0 ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-56 overflow-y-auto pr-1">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:max-h-56 sm:overflow-y-auto sm:pr-1">
                                     {classes.map((cls) => {
                                         const clsId = cls.id || cls._id || '';
                                         const isSelected = selectedClassId === clsId;
@@ -658,7 +670,7 @@ export default function ChildSetupForm() {
                                                 key={clsId}
                                                 type="button"
                                                 onClick={() => setSelectedClassId(clsId)}
-                                                className={`p-3 text-center text-xs font-bold rounded-xl border transition-all cursor-pointer ${isSelected
+                                                className={`p-3.5 sm:p-3 text-center text-sm sm:text-xs font-bold rounded-xl border transition-all cursor-pointer ${isSelected
                                                     ? 'border-brand-orange bg-brand-orange text-white shadow-sm'
                                                     : 'border-gray-200 bg-white text-gray-700 hover:border-brand-orange/50 hover:bg-brand-peach/20'
                                                     }`}
@@ -677,7 +689,7 @@ export default function ChildSetupForm() {
                     )}
 
                     {/* Step 2 Submit Button */}
-                    <div className="pt-4 border-t border-gray-100 flex justify-end">
+                    <div className="sticky bottom-0 z-10 -mx-4 -mb-4 rounded-b-3xl border-t border-gray-100 bg-white/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:z-auto sm:m-0 sm:rounded-none sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-4 sm:backdrop-blur-none flex justify-end">
                         <button
                             type="submit"
                             disabled={

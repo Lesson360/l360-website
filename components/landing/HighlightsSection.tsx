@@ -18,22 +18,22 @@ export function HighlightsSection() {
             data-section=""
             data-nodevice=""
             data-bg="#FFFFFF"
-            className="relative mx-auto max-w-[1360px] px-[clamp(20px,5vw,72px)] py-[clamp(48px,7vw,96px)]"
+            className="relative mx-auto max-w-[1360px] px-[clamp(20px,5vw,72px)] py-[clamp(28px,7vw,96px)]"
         >
-            <div className="pointer-events-auto grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+            <div className="pointer-events-auto grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
                 {HIGHLIGHTS.map(({ icon: Icon, title, sub }, i) => (
                     <div
                         key={title}
                         data-reveal=""
                         data-delay={i * 60}
-                        className={`flex items-center gap-4 rounded-3xl bg-cream p-5 transition-transform duration-500 hover:-translate-y-1 sm:gap-5 sm:p-7 ${EASE}`}
+                        className={`flex flex-col gap-3 rounded-[20px] bg-cream p-4 transition-transform duration-500 hover:-translate-y-1 sm:flex-row sm:items-center sm:gap-5 sm:rounded-3xl sm:p-7 ${EASE}`}
                     >
-                        <span className="grid h-14 w-14 flex-none place-items-center rounded-full bg-white text-flame sm:h-16 sm:w-16">
-                            <Icon className="h-7 w-7 sm:h-8 sm:w-8" strokeWidth={2.25} aria-hidden="true" />
+                        <span className="grid h-11 w-11 flex-none place-items-center rounded-full bg-white text-flame sm:h-16 sm:w-16">
+                            <Icon className="h-[22px] w-[22px] sm:h-8 sm:w-8" strokeWidth={2.25} aria-hidden="true" />
                         </span>
                         <div className="min-w-0">
-                            <div className="font-grotesk text-[clamp(19px,1.7vw,24px)] font-extrabold leading-[1.15] tracking-[-.02em]">{title}</div>
-                            <div className="mt-1 text-[15px] text-ink-soft sm:text-base">{sub}</div>
+                            <div className="font-grotesk text-[17px] font-extrabold sm:text-[clamp(19px,1.7vw,24px)] leading-[1.15] tracking-[-.02em]">{title}</div>
+                            <div className="mt-1 text-[13px] leading-snug text-ink-soft sm:text-base">{sub}</div>
                         </div>
                     </div>
                 ))}

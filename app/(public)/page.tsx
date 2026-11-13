@@ -5,7 +5,7 @@ import { HighlightsSection } from '@/components/landing/HighlightsSection';
 import {
     AppSection, PreschoolSection, ReviewsSection, AffiliateSection, VideosSection, LibrarySection, QuizzesSection, ExamsSection, ExecutiveProgramSection, LevelsSection,
 } from '@/components/landing/FeatureSections';
-import { FamiliesSection, CommunitySection } from '@/components/landing/PhotoSections';
+import { FamiliesSection, CommunitySection, AiAcademySection } from '@/components/landing/PhotoSections';
 import { SubscriptionSection } from '@/components/landing/SubscriptionSection';
 
 export default function Home() {
@@ -22,6 +22,7 @@ export default function Home() {
                 <ReviewsSection />
                 <AffiliateSection />
                 <VideosSection />
+                <AiAcademySection />
                 <LibrarySection />
                 <QuizzesSection />
                 <ExamsSection />
