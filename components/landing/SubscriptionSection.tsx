@@ -29,11 +29,11 @@ export function SubscriptionSection() {
             id="start"
             data-section=""
             data-bg="#FF5A14"
-            className="relative flex min-h-screen flex-col items-center gap-7 px-[clamp(20px,5vw,72px)] pb-10 pt-[clamp(88px,10vw,110px)] text-center"
+            className="relative flex min-h-screen flex-col items-center gap-7 px-[clamp(20px,5vw,72px)] pb-10 pt-16 text-center md:pt-[clamp(88px,10vw,110px)]"
         >
             <div className="pointer-events-auto flex max-w-[860px] flex-col items-center gap-5">
                 <div data-reveal="" className="font-jetbrains text-xs font-bold tracking-[.12em] text-ink">SUBSCRIPTION</div>
-                <h2 data-reveal="" data-delay="60" className="m-0 text-balance font-grotesk text-[clamp(44px,7vw,104px)] font-extrabold leading-[.92] tracking-[-.045em]">
+                <h2 data-reveal="" data-delay="60" className="m-0 text-balance font-grotesk text-[clamp(38px,7vw,104px)] font-extrabold leading-[.92] tracking-[-.045em]">
                     Our subscription options.
                 </h2>
                 <p data-reveal="" data-delay="120" className="m-0 max-w-[520px] text-pretty text-[clamp(17px,1.4vw,19px)] leading-normal text-[#2D2A52]">
@@ -43,7 +43,7 @@ export function SubscriptionSection() {
             </div>
 
             {/* App screenshots flank the slot where the phone ring returns. */}
-            <div className="flex w-full max-w-[1360px] items-center justify-center">
+            <div className="hidden w-full max-w-[1360px] items-center justify-center md:flex">
                 <PhoneShot speed="0.14" tilt="-rotate-6" src="/landing/app/home.jpg" alt="Lesson360 app home screen with subjects, quizzes and Test Driller" />
                 <div data-slot="cta" className="min-h-[min(52vh,480px)] max-w-[720px] flex-1" />
                 <PhoneShot speed="-0.14" tilt="rotate-6" src="/landing/app/progress.jpg" alt="Lesson360 app progress screen with scores and performance by subject" />

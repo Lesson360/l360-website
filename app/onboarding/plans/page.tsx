@@ -7,7 +7,7 @@ export default function PlansPage() {
         <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
             <OnboardingHeader currentStep={2} totalSteps={3} stepTitle="Choose Plan" />
 
-            <main className="flex-1 py-8 sm:py-12 px-4 sm:px-6 flex items-center justify-center">
+            <main className="flex-1 py-4 sm:py-12 px-3 sm:px-6 flex items-start sm:items-center justify-center">
                 <SubscriptionPlans />
             </main>
         </div>

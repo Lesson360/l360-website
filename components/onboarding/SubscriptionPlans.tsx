@@ -446,7 +446,7 @@ export default function SubscriptionPlans() {
     const modalTdList = modalTdProducts;
 
     return (
-        <div className="w-full max-w-6xl mx-auto space-y-8 bg-white p-6 sm:p-10 rounded-3xl border border-gray-100 shadow-md relative">
+        <div className="w-full max-w-6xl mx-auto space-y-6 sm:space-y-8 bg-white p-4 sm:p-10 rounded-3xl border border-gray-100 shadow-md relative">
 
             {/* Header matching homepage Pricing title style */}
             <div className="text-center space-y-3 max-w-3xl mx-auto">
@@ -459,11 +459,11 @@ export default function SubscriptionPlans() {
 
                 {/* Cycle Filter Tabs */}
                 <div className="pt-4 flex items-center justify-center">
-                    <div className="bg-gray-100 p-1.5 rounded-2xl flex items-center gap-1 border border-gray-200">
+                    <div className="bg-gray-100 p-1 sm:p-1.5 rounded-2xl flex max-w-full items-center gap-0.5 sm:gap-1 border border-gray-200">
                         <button
                             type="button"
                             onClick={() => setSelectedCycle('all')}
-                            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'all' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                            className={`px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl text-[13px] sm:text-sm whitespace-nowrap font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'all' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             All
@@ -471,7 +471,7 @@ export default function SubscriptionPlans() {
                         <button
                             type="button"
                             onClick={() => setSelectedCycle('monthly')}
-                            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'monthly' ? 'bg-[#FF4800] text-white shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                            className={`px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl text-[13px] sm:text-sm whitespace-nowrap font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'monthly' ? 'bg-[#FF4800] text-white shadow-xs' : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             Monthly
@@ -479,7 +479,7 @@ export default function SubscriptionPlans() {
                         <button
                             type="button"
                             onClick={() => setSelectedCycle('termly')}
-                            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'termly' ? 'bg-[#3F114C] text-white shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                            className={`px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl text-[13px] sm:text-sm whitespace-nowrap font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'termly' ? 'bg-[#3F114C] text-white shadow-xs' : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             Termly
@@ -487,7 +487,7 @@ export default function SubscriptionPlans() {
                         <button
                             type="button"
                             onClick={() => setSelectedCycle('school_year')}
-                            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'school_year' ? 'bg-[#FF4800] text-white shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                            className={`px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl text-[13px] sm:text-sm whitespace-nowrap font-comic font-bold transition-all cursor-pointer ${selectedCycle === 'school_year' ? 'bg-[#FF4800] text-white shadow-xs' : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             School Year
@@ -512,7 +512,7 @@ export default function SubscriptionPlans() {
                     <span>Loading subscription plans...</span>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 items-stretch pt-2">
                     {displayedPlans.map((plan, index) => {
                         const planId = plan.id || plan._id || '';
                         const theme = CARD_THEMES[index % CARD_THEMES.length];
@@ -544,7 +544,7 @@ export default function SubscriptionPlans() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                                className={`${theme.cardBg} rounded-[32px] p-6 sm:p-8 flex flex-col justify-between shadow-lg relative border border-black/5`}
+                                className={`${theme.cardBg} rounded-[28px] sm:rounded-[32px] p-5 sm:p-8 flex flex-col justify-between shadow-lg relative border border-black/5`}
                             >
                                 {/* Top Section */}
                                 <div>
@@ -581,7 +581,7 @@ export default function SubscriptionPlans() {
                                     </div>
 
                                     {/* Subtitle / Description Text */}
-                                    <p className={`text-xs font-light mb-6 min-h-[32px] ${theme.subtitleColor}`}>
+                                    <p className={`text-sm sm:text-xs font-light mb-5 sm:mb-6 sm:min-h-[32px] ${theme.subtitleColor}`}>
                                         {subText || 'Complete access to curriculum & diagnostic testing for one child.'}
                                     </p>
 
@@ -589,14 +589,14 @@ export default function SubscriptionPlans() {
                                     <div className={`w-full border-t ${theme.dividerColor} mb-6`} />
 
                                     {/* Features List */}
-                                    <div className="space-y-4">
+                                    <div className="space-y-3.5 sm:space-y-4">
                                         {features.map((feature, fIdx) => (
-                                            <div key={fIdx} className="flex items-center justify-between text-xs sm:text-sm">
+                                            <div key={fIdx} className="flex items-center justify-between text-sm">
                                                 <div className="flex items-center gap-2.5">
                                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 ${feature.iconBg}`}>
                                                         {feature.icon}
                                                     </div>
-                                                    <span className={`font-comic font-light text-xs sm:text-sm ${theme.textColor}`}>
+                                                    <span className={`font-comic font-light text-sm ${theme.textColor}`}>
                                                         {feature.name}
                                                     </span>
                                                 </div>
@@ -619,7 +619,7 @@ export default function SubscriptionPlans() {
                                 </div>
 
                                 {/* Bottom Subscribe Button */}
-                                <div className="mt-8 pt-4">
+                                <div className="mt-6 sm:mt-8 pt-2 sm:pt-4">
                                     <button
                                         type="button"
                                         onClick={() => handlePlanClick(plan)}
@@ -644,7 +644,7 @@ export default function SubscriptionPlans() {
             )}
 
             {/* Trust Footer */}
-            <div className="border-t border-gray-100 pt-6 flex flex-wrap items-center justify-center gap-6 text-xs text-gray-500 font-comic">
+            <div className="border-t border-gray-100 pt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-500 font-comic">
                 <div className="flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span>Secured by Paystack</span>
@@ -658,7 +658,7 @@ export default function SubscriptionPlans() {
             {/* TestDriller Package Selection Modal / Bottom Drawer */}
             <AnimatePresence>
                 {activeModalPlan && (
-                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6">
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-2 sm:p-6">
 
                         {/* Modal Backdrop overlay click */}
                         <motion.div
@@ -680,7 +680,7 @@ export default function SubscriptionPlans() {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: '100%', opacity: 0 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-100 z-10 space-y-6 overflow-hidden"
+                            className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain bg-white rounded-3xl p-5 sm:p-8 shadow-2xl border border-gray-100 z-10 space-y-5 sm:space-y-6"
                         >
 
                             {/* Close Button */}
@@ -713,7 +713,7 @@ export default function SubscriptionPlans() {
                             </div>
 
                             {/* Product Selection Options List */}
-                            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                            <div className="space-y-3 sm:max-h-64 sm:overflow-y-auto sm:pr-1">
                                 {isLoadingModalTd ? (
                                     <div className="py-8 flex flex-col items-center justify-center gap-2">
                                         <Loader2 className="w-6 h-6 text-brand-orange animate-spin" />
@@ -797,7 +797,7 @@ export default function SubscriptionPlans() {
 
             {/* Email needed before payment */}
             {pendingCheckout && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6">
+                <div className="fixed inset-0 z-50 flex items-start pt-[12dvh] sm:pt-6 sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6">
                     <div className="fixed inset-0" onClick={() => !isSavingEmail && setPendingCheckout(null)} />
                     <form
                         onSubmit={handleSaveEmailAndContinue}
@@ -824,6 +824,9 @@ export default function SubscriptionPlans() {
                             onChange={(e) => setEmailInput(e.target.value)}
                             placeholder="parent@example.com"
                             autoComplete="email"
+                            inputMode="email"
+                            autoCapitalize="none"
+                            enterKeyHint="go"
                             autoFocus
                             className="w-full px-4 py-3.5 rounded-2xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 text-sm font-medium"
                         />

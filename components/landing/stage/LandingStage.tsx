@@ -24,19 +24,35 @@ export function LandingStage({ children }: { children: ReactNode }) {
             mono: jetbrains.style.fontFamily,
         });
 
+        // The 3D devices only run from the md breakpoint up. Phones get static screenshots
+        // (see FeatureSection), so three.js is never downloaded or rendered there.
+        const desktop = window.matchMedia('(min-width: 768px)');
         let destroy: (() => void) | undefined;
-        let cancelled = false;
-        import('./createStage').then(({ createStage }) => {
-            if (cancelled) return;
-            destroy = createStage({
-                root,
-                canvas,
-                bgLayer,
-                reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-                onUnavailable: () => setAvailable(false),
+        let run = 0;
+        let lite = !desktop.matches;
+        const start = () => {
+            const mine = ++run;
+            lite = !desktop.matches;
+            destroy?.();
+            destroy = undefined;
+            import('./createStage').then(({ createStage }) => {
+                if (mine !== run) return;
+                destroy = createStage({
+                    root,
+                    canvas,
+                    bgLayer,
+                    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+                    lite,
+                    onUnavailable: () => setAvailable(false),
+                });
             });
-        });
-        return () => { cancelled = true; destroy?.(); };
+        };
+        start();
+        // Rebuild when a rotation or resize crosses the breakpoint. Checked on resize rather than
+        // the media query's own change event, which some embedded browsers never fire.
+        const onResize = () => { if (lite === desktop.matches) start(); };
+        window.addEventListener('resize', onResize);
+        return () => { run++; window.removeEventListener('resize', onResize); destroy?.(); };
     }, []);
 
     return (

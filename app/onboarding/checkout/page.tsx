@@ -5,7 +5,7 @@ import PaymentCheckout from '@/components/onboarding/PaymentCheckout';
 
 function CheckoutLoadingFallback() {
     return (
-        <div className="w-full max-w-md mx-auto bg-white p-8 sm:p-10 rounded-3xl border border-gray-100 shadow-md text-center space-y-4">
+        <div className="w-full max-w-md mx-auto bg-white p-6 sm:p-10 rounded-3xl border border-gray-100 shadow-md text-center space-y-4">
             <div className="w-16 h-16 rounded-full bg-brand-peach/50 text-brand-orange flex items-center justify-center mx-auto">
                 <Loader2 className="w-8 h-8 animate-spin" />
             </div>
@@ -20,7 +20,7 @@ export default function CheckoutPage() {
         <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
             <OnboardingHeader currentStep={2} totalSteps={3} stepTitle="Payment Verification" />
 
-            <main className="flex-1 py-8 sm:py-12 px-4 sm:px-6 flex items-center justify-center">
+            <main className="flex-1 py-4 sm:py-12 px-3 sm:px-6 flex items-start sm:items-center justify-center">
                 <Suspense fallback={<CheckoutLoadingFallback />}>
                     <PaymentCheckout />
                 </Suspense>

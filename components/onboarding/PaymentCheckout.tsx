@@ -80,7 +80,7 @@ export default function PaymentCheckout() {
     }, [reference, router]);
 
     return (
-        <div className="w-full max-w-md mx-auto bg-white p-8 sm:p-10 rounded-3xl border border-gray-100 shadow-md text-center space-y-6">
+        <div className="w-full max-w-md mx-auto bg-white p-6 sm:p-10 rounded-3xl border border-gray-100 shadow-md text-center space-y-6">
 
             {status === 'verifying' && (
                 <div className="space-y-4 py-8">

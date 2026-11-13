@@ -1,5 +1,61 @@
 import Image from 'next/image';
-import { Eyebrow, Heading, Lede } from './primitives';
+import { BookOpenCheck, Cpu, MessageSquareText, Palette, Rocket, ShieldCheck, type LucideIcon } from 'lucide-react';
+import { Eyebrow, Heading, Lede, ListRow, StartButton } from './primitives';
+
+// Swap for the generated AI-classroom photo once it's in public/landing/ (portrait, about 4:5).
+const AI_PHOTO = { src: '/landing/teens-studying-laptop.webp', alt: 'Students learning together on a laptop' };
+const AI_COURSES_URL = '/dashboard/enrichment-courses';
+
+const AI_TRACKS: { icon: LucideIcon; color: string; title: string; sub: string }[] = [
+    { icon: Cpu, color: '#FF4A00', title: 'AI Fundamentals', sub: 'What artificial intelligence is and how it works.' },
+    { icon: MessageSquareText, color: '#8A63E0', title: 'AI Tools & Prompting', sub: 'Use AI tools well and write clear, effective prompts.' },
+    { icon: BookOpenCheck, color: '#3FB57A', title: 'AI for Learning & Productivity', sub: 'Get help with research, study and everyday tasks.' },
+    { icon: ShieldCheck, color: '#5B7BEA', title: 'Responsible AI Use', sub: 'Ethics, privacy, accuracy and staying safe online.' },
+    { icon: Palette, color: '#EC6FA0', title: 'Creative AI', sub: 'Explore AI for writing, design and content creation.' },
+    { icon: Rocket, color: '#F5B935', title: 'Practical AI Projects', sub: 'Put AI skills to work on real-world tasks.' },
+];
+
+/** AI Literacy Academy. A photo section, so the 3D phones fade out here and return at the library. */
+export function AiAcademySection() {
+    return (
+        <section
+            id="ai-academy"
+            data-section=""
+            data-nodevice=""
+            data-bg="#FFF6EF"
+            className="relative mx-auto grid max-w-[1360px] scroll-mt-4 items-center gap-8 px-[clamp(20px,5vw,72px)] py-14 md:min-h-screen md:gap-14 md:py-[clamp(88px,10vw,120px)] [grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))]"
+        >
+            <div data-reveal="" className="pointer-events-auto relative aspect-[4/3] overflow-hidden rounded-[24px] sm:rounded-[32px] md:aspect-[4/5]">
+                <Image src={AI_PHOTO.src} alt={AI_PHOTO.alt} fill sizes="(max-width: 900px) 92vw, 600px" className="object-cover" />
+                <span className="absolute left-4 top-4 rounded-full bg-cream/90 px-3 py-1.5 font-jetbrains text-[11px] font-bold tracking-[.1em] text-flame backdrop-blur sm:left-5 sm:top-5">
+                    NEW · AI ACADEMY
+                </span>
+            </div>
+
+            <div className="pointer-events-auto flex flex-col gap-6 md:gap-7">
+                <Eyebrow color="#FF4A00">AI LITERACY ACADEMY</Eyebrow>
+                <Heading>Learn AI. <span className="text-flame">Use it wisely.</span></Heading>
+                <Lede className="text-ink-soft">
+                    Understand how artificial intelligence works, use AI tools responsibly and build practical skills for school, work and everyday life.
+                </Lede>
+                <div className="flex flex-col">
+                    {AI_TRACKS.map(({ icon: Icon, color, title, sub }, i) => (
+                        <ListRow
+                            key={title}
+                            lead={<Icon aria-hidden="true" className="h-7 w-7" strokeWidth={2.1} />}
+                            leadColor={color}
+                            title={title}
+                            sub={sub}
+                            delay={160 + i * 50}
+                            last={i === AI_TRACKS.length - 1}
+                            action={<StartButton href={AI_COURSES_URL} label="Explore" />}
+                        />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
 
 const MOSAIC = [
     { src: '/landing/mother-toddler-tablet.webp', alt: 'A mother and her young daughter learning the alphabet together on the Lesson360 app', big: true, pos: 'center' },
@@ -15,7 +71,7 @@ export function FamiliesSection() {
             data-section=""
             data-nodevice=""
             data-bg="#FFFFFF"
-            className="relative mx-auto flex min-h-screen max-w-[1360px] flex-col justify-center gap-8 px-[clamp(20px,5vw,72px)] py-[clamp(88px,10vw,120px)] sm:gap-10"
+            className="relative mx-auto flex max-w-[1360px] flex-col justify-center gap-7 px-[clamp(20px,5vw,72px)] py-14 sm:gap-10 md:min-h-screen md:py-[clamp(88px,10vw,120px)]"
         >
             <div className="pointer-events-auto flex flex-wrap items-end justify-between gap-6">
                 <div className="flex max-w-[680px] flex-col gap-5">
@@ -84,7 +140,7 @@ export function CommunitySection() {
             data-section=""
             data-nodevice=""
             data-bg="#1C1A45"
-            className="relative mx-auto grid min-h-[105vh] max-w-[1360px] items-center gap-14 px-[clamp(20px,5vw,72px)] py-[clamp(88px,10vw,120px)] text-[#F7F2EA] [grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))]"
+            className="relative mx-auto grid max-w-[1360px] items-center gap-10 px-[clamp(20px,5vw,72px)] py-14 text-[#F7F2EA] md:min-h-[105vh] md:gap-14 md:py-[clamp(88px,10vw,120px)] [grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))]"
         >
             <div className="pointer-events-auto flex flex-col gap-6">
                 <Eyebrow color="oklch(0.8 0.12 295)">WHO WE SERVE</Eyebrow>
@@ -95,11 +151,11 @@ export function CommunitySection() {
                 <div className="flex flex-col">
                     {LEARNERS.map((l, i) => (
                         <div key={l.title} data-reveal="" data-delay={160 + i * 60} className="flex items-center gap-4 border-t border-[rgba(247,242,234,.14)] py-3.5">
-                            <div className="grid h-14 w-14 flex-none place-items-center rounded-full bg-white/10 font-grotesk text-lg font-extrabold">
+                            <div className="grid h-11 w-11 flex-none place-items-center rounded-full bg-white/10 font-grotesk text-base font-extrabold sm:h-14 sm:w-14 sm:text-lg">
                                 {String(i + 1).padStart(2, '0')}
                             </div>
                             <div>
-                                <div className="text-lg font-bold">
+                                <div className="text-[17px] font-bold leading-snug sm:text-lg">
                                     {l.title} <span className="text-[#FF8A3D]">({l.range})</span>
                                 </div>
                                 <div className="mt-0.5 text-sm text-[#CFCBE8]">{l.sub}</div>

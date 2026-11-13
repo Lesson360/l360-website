@@ -23,7 +23,7 @@ const COLUMNS: { photos: Photo[]; className: string }[] = [
  */
 export function HeroPhotoColumns() {
     return (
-        <div className="hero-columns relative grid h-[min(62svh,560px)] grid-cols-2 gap-3 overflow-hidden sm:gap-4 min-[760px]:h-[min(86svh,820px)]">
+        <div className="hero-columns relative grid h-[min(44svh,360px)] grid-cols-2 gap-3 overflow-hidden sm:gap-4 min-[760px]:h-[min(86svh,820px)]">
             {COLUMNS.map((col, c) => (
                 <div key={c} className={`hero-column ${col.className}`}>
                     {[0, 1].map(copy => col.photos.map((p, i) => (
