@@ -1,7 +1,7 @@
 // Screen artwork painted onto the 3D devices' canvas textures.
 // Ported from the Lesson360 landing design; coordinates are in texture pixels.
 
-export const PHONE_COLORS = ['#FF4A00', '#5B7BEA', '#3FB57A', '#8A63E0', '#F5B935', '#6FAF2E', '#2FAFAA', '#EC6FA0', '#FF8A3D'];
+export const PHONE_COLORS = ['#FF4A00', '#5B7BEA', '#3FB57A', '#8A63E0', '#F5B935', '#6FAF2E', '#2FAFAA', '#EC6FA0', '#FF8A3D', '#E8613C'];
 export const SW = 600;
 export const SH = 1316;
 
@@ -11,7 +11,7 @@ export const SH = 1316;
 const APP = '/landing/app';
 export const PHONE_SHOTS = [
   `${APP}/home.jpg`,                // the app
-  `${APP}/courses.jpg`,             // pre-school: the child-facing course list
+  `${APP}/take-test.jpg`,           // exam preparation: a CBT question (placeholder until an exam-prep screenshot exists)
   `${APP}/progress.jpg`,            // guardian reviews
   `${APP}/affiliate-dashboard.jpg`, // affiliate
   `${APP}/episode-fractions.jpg`,   // videos (laptop takes over)
@@ -19,6 +19,7 @@ export const PHONE_SHOTS = [
   `${APP}/take-test.jpg`,           // quizzes
   `${APP}/subject-mathematics.jpg`, // exams (laptop takes over)
   `${APP}/executive-course.jpg`,    // executive development program
+  `${APP}/select-level.jpg`,        // learning levels: onboarding's level picker
 ];
 
 // Real screenshots for the laptops, by kind; kinds without one keep their drawn screen.
@@ -254,7 +255,7 @@ export function drawScreen(i: number, ctx: CanvasRenderingContext2D) {
     });
     button('Test your knowledge', 1150, INK, CREAM);
   }
-  if (i === 8) {
+  if (i === 8 || i === 9) {
     // Learning level picker
     ctx.fillStyle = CREAM; ctx.fillRect(0, 0, W, H);
     status(INK);
