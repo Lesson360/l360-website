@@ -2,8 +2,10 @@ import Image from 'next/image';
 import { BookOpenCheck, Cpu, MessageSquareText, Palette, Rocket, ShieldCheck, type LucideIcon } from 'lucide-react';
 import { Eyebrow, Heading, Lede, ListRow, StartButton } from './primitives';
 
-// Swap for the generated AI-classroom photo once it's in public/landing/ (portrait, about 4:5).
-const AI_PHOTO = { src: '/landing/teens-studying-laptop.webp', alt: 'Students learning together on a laptop' };
+const AI_PHOTO = {
+    src: '/landing/ai-literacy.webp',
+    alt: 'Two secondary school students smiling at a laptop, with glowing AI icons rising from the screen',
+};
 const AI_COURSES_URL = '/dashboard/enrichment-courses';
 
 const AI_TRACKS: { icon: LucideIcon; color: string; title: string; sub: string }[] = [
@@ -26,7 +28,7 @@ export function AiAcademySection() {
             className="relative mx-auto grid max-w-[1360px] scroll-mt-4 items-center gap-8 px-[clamp(20px,5vw,72px)] py-14 md:min-h-screen md:gap-14 md:py-[clamp(88px,10vw,120px)] [grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))]"
         >
             <div data-reveal="" className="pointer-events-auto relative aspect-[4/3] overflow-hidden rounded-[24px] sm:rounded-[32px] md:aspect-[4/5]">
-                <Image src={AI_PHOTO.src} alt={AI_PHOTO.alt} fill sizes="(max-width: 900px) 92vw, 600px" className="object-cover" />
+                <Image src={AI_PHOTO.src} alt={AI_PHOTO.alt} fill sizes="(max-width: 900px) 92vw, 600px" className="object-cover object-[center_45%]" />
                 <span className="absolute left-4 top-4 rounded-full bg-cream/90 px-3 py-1.5 font-jetbrains text-[11px] font-bold tracking-[.1em] text-flame backdrop-blur sm:left-5 sm:top-5">
                     NEW · AI ACADEMY
                 </span>
