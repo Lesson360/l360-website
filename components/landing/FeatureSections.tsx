@@ -42,7 +42,7 @@ export function PreschoolSection() {
 }
 
 const REVIEWS = [
-    { quote: 'My daughter asks to do her CBT now. Screen time finally feels like learning time.', name: 'Micheal Adewale', initials: 'MA', bg: 'bg-cream', avatar: 'bg-[#F5B935]', tilt: 'hover:-rotate-1' },
+    { quote: 'My daughter asks to do her CBTs now. Screen time finally feels like learning time.', name: 'Micheal Adewale', initials: 'MA', bg: 'bg-cream', avatar: 'bg-[#F5B935]', tilt: 'hover:-rotate-1' },
     { quote: 'The progress reports show me exactly where my son needs help before his exams.', name: 'Anabelle Joseph', initials: 'AJ', bg: 'bg-[#3FB57A]', avatar: 'bg-cream', tilt: 'hover:rotate-1' },
 ];
 
