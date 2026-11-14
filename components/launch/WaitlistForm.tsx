@@ -67,7 +67,7 @@ export function WaitlistForm() {
                 <p className="m-0 text-[15px] leading-relaxed text-ink-soft">
                     We’ll email you as soon as Lesson360 opens. Keep an eye on your inbox — and tell a friend who’d love it too.
                 </p>
-                <Link href="/coming-soon" className="mt-1 rounded-full border-[1.5px] border-ink px-5 py-3 text-sm font-bold text-ink transition-colors hover:bg-[#FFE1D2]">
+                <Link href="/" className="mt-1 rounded-full border-[1.5px] border-ink px-5 py-3 text-sm font-bold text-ink transition-colors hover:bg-[#FFE1D2]">
                     ← Back to Lesson360
                 </Link>
             </div>

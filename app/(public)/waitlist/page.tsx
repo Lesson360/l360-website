@@ -19,7 +19,7 @@ const FACES = ['/landing/portrait-parent.webp', '/landing/portrait-teacher.webp'
 
 export default function WaitlistPage() {
     return (
-        <LaunchShell action={{ href: '/coming-soon', label: '← Back' }}>
+        <LaunchShell action={{ href: '/', label: '← Home' }}>
             <section className="mx-auto grid w-full max-w-[1360px] flex-1 items-start gap-8 px-[clamp(20px,5vw,72px)] pb-16 pt-[clamp(104px,13vw,140px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:gap-x-16 lg:gap-y-8">
                 <div className="flex max-w-[560px] flex-col gap-6 lg:col-start-1 lg:row-start-1">
                     <div className="self-start rounded-full border border-ink/[.12] bg-cream px-3 py-[7px] font-jetbrains text-[11px] font-bold tracking-[.08em] sm:text-xs">

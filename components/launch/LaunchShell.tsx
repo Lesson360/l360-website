@@ -22,7 +22,7 @@ export function LaunchShell({ children, action }: { children: ReactNode; action:
                 aria-label="Main"
                 className="fixed left-1/2 top-3 z-20 flex w-[min(1180px,calc(100%-24px))] -translate-x-1/2 items-center justify-between gap-3 rounded-full border border-ink/[.08] bg-[rgba(255,248,236,.74)] py-2 pl-4 pr-2 backdrop-blur-[14px] sm:top-4 sm:py-2.5 sm:pl-5 sm:pr-2.5"
             >
-                <Link href="/coming-soon" className="flex flex-none items-center" aria-label="Lesson360">
+                <Link href="/" className="flex flex-none items-center" aria-label="Lesson360 home">
                     <Image src="/landing/logo.png" alt="Lesson360" width={2576} height={509} priority className="block h-[22px] w-auto sm:h-[26px]" />
                 </Link>
                 <Link
